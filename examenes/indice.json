@@ -8,5 +8,15 @@
     "questions": 100,
     "duration": 180,
     "url": "examenes/unica-2026-1/index.html"
+  },
+  {
+    "slug": "unica-2026-2",
+    "title": "Simulacro Oficial UNICA 2026-2",
+    "area": "Área C: Ingeniería",
+    "year": "2026-2",
+    "description": "Segunda versión del simulacro, 100 preguntas nuevas, 180 minutos, con figuras SVG reales.",
+    "questions": 100,
+    "duration": 180,
+    "url": "examenes/unica-2026-2/index.html"
   }
 ]
