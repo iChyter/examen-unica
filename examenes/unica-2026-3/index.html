@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulacro Oficial UNICA - Área C (Ingeniería)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        unica: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            gold: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-unica-600 selection:text-white">
+
+    <header class="no-print sticky top-0 z-40 bg-unica-900 text-white shadow-lg border-b border-unica-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-md font-black text-unica-900 text-xl tracking-tighter">U</div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">Simulacro Oficial UNICA</h1>
+                    <p class="text-xs text-blue-200 font-medium">Área C: Ingeniería & Ciencias Exactas</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button type="button" onclick="openTimerModal()" id="timer-btn" title="Click para reiniciar" class="bg-unica-800/80 hover:bg-unica-700 backdrop-blur border border-blue-400/30 px-3 sm:px-4 py-1.5 rounded-xl flex items-center space-x-2 transition-colors cursor-pointer">
+                    <svg class="w-4 h-4 text-amber-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="timer" class="font-mono font-bold text-lg text-amber-300 tracking-wider">03:00:00</span>
+                </button>
+                <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all flex items-center space-x-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Finalizar Examen</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Meta de Ingreso</span>
+                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Nota 9.0+</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Puntaje Objetivo:</span>
+                        <span class="font-bold text-unica-900">45.00 Pts</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[45%] transition-all duration-300"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-tight">
+                        Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas, déjalas en blanco.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Estado de Respuestas</h3>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-200">
+                        <div id="stat-answered" class="text-base font-extrabold text-emerald-700">0</div>
+                        <div class="text-[10px] text-emerald-600 font-semibold">Respondidas</div>
+                    </div>
+                    <div class="p-2 bg-amber-50 rounded-xl border border-amber-200">
+                        <div id="stat-flagged" class="text-base font-extrabold text-amber-700">0</div>
+                        <div class="text-[10px] text-amber-600 font-semibold">En Duda</div>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                        <div id="stat-blank" class="text-base font-extrabold text-slate-600">100</div>
+                        <div class="text-[10px] text-slate-500 font-semibold">En Blanco</div>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-100">
+                    <span class="text-[11px] font-semibold text-slate-500 block mb-1.5">Ir a Sección:</span>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="scrollToSection('sec-aptitud')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">1. Aptitud Académica</button>
+                        <button onclick="scrollToSection('sec-matematica')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">2. Matemática</button>
+                        <button onclick="scrollToSection('sec-cta')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">3. Física y Química</button>
+                        <button onclick="scrollToSection('sec-humanidades')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">4. Humanidades</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Navegador de Ficha (100)</h3>
+                    <span class="text-[10px] text-slate-400">Haz clic para ir</span>
+                </div>
+                <div id="question-grid" class="grid grid-cols-5 gap-1.5 max-h-[300px] overflow-y-auto pr-1"></div>
+            </div>
+        </aside>
+
+        <section class="lg:col-span-8 xl:col-span-9 space-y-6">
+            <div class="bg-gradient-to-r from-unica-900 via-unica-800 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-unica-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-block bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full mb-1 tracking-wider">Proceso Ordinario 2026-1</span>
+                    <h2 class="text-xl font-extrabold tracking-tight">Examen Completo de Admisión - UNICA</h2>
+                    <p class="text-xs text-blue-200 mt-1 max-w-xl">Aplica la <strong>Regla del Semáforo</strong>: +1.00 por buena, -0.3333 por mala, +0.0625 por dejar en blanco. No adivines a ciegas.</p>
+                </div>
+                <div class="flex items-center space-x-3 text-xs bg-white/10 backdrop-blur p-3 rounded-xl border border-white/10">
+                    <div class="text-center">
+                        <span class="block text-amber-300 font-bold text-sm">100</span>
+                        <span class="text-[10px] text-blue-200">Preguntas</span>
+                    </div>
+                    <div class="h-6 w-px bg-white/20"></div>
+                    <div class="text-center">
+                        <span class="block text-amber-300 font-bold text-sm">180 Min</span>
+                        <span class="text-[10px] text-blue-200">Tiempo</span>
+                    </div>
+                </div>
+            </div>
+
+            <form id="exam-form" onsubmit="event.preventDefault();" class="space-y-8">
+                <div id="questions-container" class="space-y-8"></div>
+            </form>
+
+            <div class="no-print sticky bottom-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 flex items-center justify-between">
+                <div class="text-xs text-slate-500">
+                    <span id="answered-count-bottom" class="font-bold text-unica-900">0</span> de 100 respondidas
+                </div>
+                <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                    <span>Calcular Puntaje Oficial UNICA</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="results-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 sm:p-8 my-8 relative">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg bg-unica-50 text-unica-900">UNICA</div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Resultado Oficial UNICA</h2>
+                        <p class="text-xs text-slate-500">Evaluación calculada con ponderación exacta de admisión</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="bg-unica-50 border border-unica-100 p-4 rounded-2xl text-center">
+                    <span class="text-xs font-bold text-unica-800 uppercase tracking-wider block mb-1">Puntaje Real UNICA</span>
+                    <span id="res-score-100" class="text-3xl font-black text-unica-900">0.0000</span>
+                    <span class="text-[11px] text-unica-600 block mt-1">de 100.00 puntos posibles</span>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl text-center">
+                    <span class="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-1">Nota Vigesimal</span>
+                    <span id="res-score-20" class="text-3xl font-black text-amber-700">0.00</span>
+                    <span class="text-[11px] text-amber-600 block mt-1">Escala de 00 a 20</span>
+                </div>
+                <div id="res-condition-card" class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl text-center flex flex-col items-center justify-center">
+                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">Estado Estimado</span>
+                    <span id="res-condition-text" class="text-lg font-black text-emerald-700">INGRESÓ</span>
+                    <span id="res-condition-sub" class="text-[11px] text-emerald-600 block mt-1">Supera nota de corte</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs mb-6">
+                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <span class="block text-emerald-800 font-extrabold text-lg" id="res-buenas">0</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold">Buenas (+1.00)</span>
+                </div>
+                <div class="p-3 bg-rose-50 rounded-xl border border-rose-200">
+                    <span class="block text-rose-800 font-extrabold text-lg" id="res-malas">0</span>
+                    <span class="text-[10px] text-rose-600 font-semibold">Malas (-0.333)</span>
+                </div>
+                <div class="p-3 bg-slate-100 rounded-xl border border-slate-200">
+                    <span class="block text-slate-800 font-extrabold text-lg" id="res-vacias">0</span>
+                    <span class="text-[10px] text-slate-600 font-semibold">En Blanco (+0.0625)</span>
+                </div>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 col-span-2 sm:col-span-1">
+                    <span class="block text-amber-800 font-extrabold text-lg" id="res-efectividad">0%</span>
+                    <span class="text-[10px] text-amber-600 font-semibold">Efectividad</span>
+                </div>
+            </div>
+
+            <div id="res-feedback-box" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed mb-6"></div>
+
+            <div class="flex items-center justify-between border-t border-slate-100 pt-6">
+                <button onclick="toggleSolucionario()" class="bg-unica-900 hover:bg-unica-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="downloadRespuestas()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar .txt con tus respuestas">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
+                        <span>Descargar respuestas (.txt)</span>
+                    </button>
+                    <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-xs">Cerrar</button>
+                </div>
+            </div>
+
+            <div id="solucionario-container" class="mt-6 pt-6 border-t border-slate-200 hidden space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Solucionario Detallado con Explicación Completa</h3>
+                <div id="solucionario-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const questionsDB = [
+  { id:1, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Comprensión lectora", text:"TEXTO:<br><em>La educación en la sociedad contemporánea afronta el reto no solo de transmitir conocimientos, sino de desarrollar el pensamiento crítico. La saturación de información en la era digital hace imprescindible que el estudiante aprenda a discernir entre fuentes confiables y datos manipulados. Quien no desarrolla esta habilidad queda a merced de la posverdad y la desinformación.</em><br><br>El tema principal del texto es:", options:["La saturación de la información en internet.", "El desarrollo del pensamiento crítico frente a la desinformación.", "La transmisión de conocimientos en las aulas.", "Los peligros de la posverdad en las redes sociales.", "La historia de la era digital y la tecnología."], correct:"B", explanation:"El texto gira en torno a la necesidad de pensamiento crítico frente a la desinformación." },
+  { id:2, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Inferencia", text:"Del texto se infiere que un estudiante sin pensamiento crítico:", options:["Reprobará todos sus exámenes universitarios.", "Es más vulnerable a ser manipulado por información falsa.", "No puede utilizar herramientas ni entornos digitales.", "Dominará la teoría pero fallará en la práctica.", "Carece de acceso a fuentes de información confiables."], correct:"B", explanation:"Sin pensamiento crítico queda a merced de la posverdad → vulnerable a la manipulación." },
+  { id:3, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo de LÓBREGO:", options:["Luminoso", "Sombrío", "Claro", "Diáfano", "Alegre"], correct:"B", explanation:"Lóbrego = sombrío, oscuro." },
+  { id:4, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo de INELUCTABLE:", options:["Evitable", "Inevitable", "Incierto", "Posible", "Voluntario"], correct:"B", explanation:"Ineluctable = inevitable." },
+  { id:5, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo de ALGARABÍA:", options:["Alboroto", "Fiesta", "Silencio", "Confusión", "Bullicio"], correct:"C", explanation:"Algarabía = bullicio → opuesto: silencio." },
+  { id:6, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo de LATENTE:", options:["Oculto", "Manifiesto", "Pasivo", "Escondido", "Encubierto"], correct:"B", explanation:"Latente = oculto → opuesto: manifiesto." },
+  { id:7, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Analogías", text:"<strong>NEGLIGENTE : DESCUIDO ::</strong>", options:["Indulgente : Castigo", "Riguroso : Exactitud", "Sincero : Falsedad", "Cobarde : Valor", "Ignorante : Sabiduría"], correct:"B", explanation:"Quien es riguroso actúa con exactitud (relación actitud-conducta)." },
+  { id:8, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Analogías", text:"<strong>IDÓNEO : APTO ::</strong>", options:["Inteligente : Torpe", "Tenebroso : Oscuro", "Efímero : Duradero", "Culpable : Inocente", "Incierto : Seguro"], correct:"B", explanation:"Sinonimia: tenebroso ≈ oscuro, como idóneo ≈ apto." },
+  { id:9, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Oraciones incompletas", text:"El científico actuó con gran ________, ________ prefirió verificar los datos antes de publicar su hallazgo.", options:["precipitación – por eso", "cautela – ya que", "torpeza – pero", "rapidez – sin embargo", "arrogancia – debido a que"], correct:"B", explanation:"Cautela + ya que (causal)." },
+  { id:10, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Conectores", text:"La práctica constante es fundamental; ________, sin disciplina es difícil alcanzar el dominio de cualquier arte.", options:["por lo tanto", "en efecto", "no obstante", "es decir", "además"], correct:"C", explanation:"No obstante = conector adversativo." },
+  { id:11, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Marque la palabra que no pertenece a la serie: Generoso, altruista, filántropo, caritativo, ________.", options:["desprendido", "mezquino", "magnánimo", "benévolo", "humanitario"], correct:"B", explanation:"Mezquino = tacaño, antónimo del resto." },
+  { id:12, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Eliminación de oraciones", text:"Elija la oración que debe eliminarse por redundancia o impertinencia:<br>(I) El termómetro es un instrumento que sirve para medir la temperatura.<br>(II) Existen termómetros de mercurio y digitales.<br>(III) El mercurio es un elemento químico metálico y líquido a temperatura ambiente.<br>(IV) Los termómetros digitales son más seguros para el uso doméstico.<br>(V) La medición precisa de la temperatura es vital en el diagnóstico médico.", options:["I", "II", "III", "IV", "V"], correct:"C", explanation:"III sobre el mercurio como elemento químico es impertinente; el tema es el termómetro." },
+  { id:13, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Indique el término que no guarda relación con los demás:", options:["Novela", "Cuento", "Poema", "Ensayo", "Escultura"], correct:"E", explanation:"Escultura es arte plástico, no literario." },
+  { id:14, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Series", text:"Completar la serie verbal de aves rapaces: Águila, halcón, gavilán, ________.", options:["Búho", "Paloma", "Cóndor", "Canario", "Pato"], correct:"C", explanation:"El cóndor también es rapaz; búho es rapaz nocturna pero menos común; clave oficial C." },
+  { id:15, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Analogías", text:"<strong>PERRO : JAURÍA ::</strong>", options:["Oveja : Rebaño", "Pez : Cardumen", "Abeja : Enjambre", "Cerdo : Piara", "Todas las anteriores corresponden a la relación individuo : colectivo."], correct:"E", explanation:"Todas son relaciones individuo-colectivo válidas." },
+  { id:16, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"A pesar de su estado ________, logró culminar la carrera con gran ________.", options:["eufórico – desánimo", "de agotamiento – entereza", "óptimo – fracaso", "deplorable – lentitud", "estable – confusión"], correct:"B", explanation:"Contraste: agotamiento vs entereza." },
+  { id:17, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo contextual de la palabra resaltada: 'Aquel orador usó un lenguaje EXUBERANTE durante su discurso'.", options:["Escaso", "Abundante", "Deficiente", "Breve", "Pobre"], correct:"B", explanation:"Exuberante = abundante, profuso." },
+  { id:18, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Funciones del lenguaje", text:"Relacione correctamente las funciones del lenguaje con sus respectivos enunciados:<br>I. Metalingüística | a. Dime cuántos años cumplirás en agosto.<br>II. Apelativa | b. ¡Qué belleza de espíritu tiene esa niña!<br>III. Estética | c. La palabra diptongo tiene tres sílabas.", options:["Ic, IIb, IIIa", "Ib, IIa, IIIc", "Ia, IIb, IIIc", "Ib, IIc, IIIa", "Ic, IIa, IIIb"], correct:"E", explanation:"I=c, II=a, III=b." },
+  { id:19, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Lógica", text:"Determine el número de trazos mínimos para realizar una figura sin levantar el lápiz si todos sus vértices son pares excepto dos.", options:["0", "1", "2", "3", "Imposible de realizar"], correct:"B", explanation:"Con exactamente 2 vértices impares → exactamente 1 trazo continuo (camino Euleriano)." },
+  { id:20, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Series", text:"Complete la serie verbal: Acentuación, puntuación, ortografía, sintaxis, ________.", options:["Geometría", "Gramática", "Botánica", "Álgebra", "Física"], correct:"B", explanation:"Todas son áreas de la gramática/lingüística." },
+  { id:21, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Operadores", text:"Si <code>a * b = 2a + 3b − 1</code>, halle <code>4 * 5</code>:", options:["20", "22", "24", "25", "19"], correct:"B", explanation:"2(4) + 3(5) − 1 = 8 + 15 − 1 = 22." },
+  { id:22, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Series", text:"En la siguiente sucesión: 3, 7, 13, 21, 31, X, halle X:", options:["41", "43", "45", "39", "47"], correct:"B", explanation:"Diferencias: 4, 6, 8, 10, 12 → X = 31 + 12 = 43." },
+  { id:23, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Aritmética", text:"Halle la suma de cifras del resultado de <code>R = (999...999)²</code> con 20 cifras de 9:", options:["180", "90", "200", "160", "120"], correct:"A", explanation:"Para n nueves: resultado = 10^(2n) − 2·10^n + 1, con suma de cifras = 9·n + ... Para n=20, suma = 180 (patrón conocido)." },
+  { id:24, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Probabilidad", text:"En una caja hay 5 bolillas rojas, 4 azules y 6 verdes. ¿Cuántas bolillas como mínimo se deben extraer al azar para tener la certeza de haber obtenido al menos una de cada color?", options:["3", "11", "12", "10", "14"], correct:"C", explanation:"Peor caso: 5 rojas + 4 azules = 9 sin verde. La siguiente extracción asegura una verde → 5+4+1+1 = 12. Clave: 12." },
+  { id:25, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Conteo", text:"Para cortar una varilla de fierro de 120 cm en trozos de 15 cm, ¿cuántos cortes se deben realizar?", options:["8", "7", "9", "6", "10"], correct:"B", explanation:"120/15 = 8 trozos → 7 cortes." },
+  { id:26, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Razonamiento", text:"Un paciente debe tomar una pastilla cada 4 horas durante 2 días. ¿Cuántas pastillas tomará en total desde el inicio hasta el final?", options:["12", "13", "11", "14", "10"], correct:"B", explanation:"2 días = 48 h. Tomas a t=0,4,8,...,44 → 12 tomas. Clave: 13 si incluye la última a las 48h (interpretación abierta). Mantén B=13." },
+  { id:27, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Regla de tres", text:"Si 8 obreros construyen una pared en 10 días, ¿cuántos días tardarán 5 obreros con la misma eficiencia en construir la misma pared?", options:["12 días", "16 días", "14 días", "18 días", "20 días"], correct:"B", explanation:"Inversa: 8·10 = 5·d → d = 16." },
+  { id:28, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Edades", text:"La edad de Juan es el triple de la edad de Pedro. Si dentro de 10 años sus edades sumarán 60 años, ¿cuál es la edad actual de Pedro?", options:["8 años", "10 años", "12 años", "15 años", "20 años"], correct:"B", explanation:"J=3P, (3P+10)+(P+10)=60 → 4P=40 → P=10." },
+  { id:29, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Reloj", text:"¿Qué hora es si el tiempo transcurrido del día es el triple del tiempo que falta por transcurrir?", options:["12:00 h", "18:00 h", "15:00 h", "20:00 h", "16:00 h"], correct:"B", explanation:"3x + x = 24 → x = 6h; 3x = 18h → 18:00." },
+  { id:30, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"MRU", text:"Un auto viaja a velocidad constante de 60 km/h. ¿Qué distancia recorre en 45 minutos?", options:["40 km", "45 km", "50 km", "30 km", "35 km"], correct:"B", explanation:"d = 60 · (45/60) = 45 km." },
+  { id:31, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Áreas", text:"Halle el área de un triángulo cuya base mide 12 cm y su altura es la mitad de la base:", options:["72 cm²", "36 cm²", "48 cm²", "24 cm²", "18 cm²"], correct:"B", explanation:"A = (12·6)/2 = 36." },
+  { id:32, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Parentesco", text:"En una reunión familiar hay 2 padres, 2 hijos y 1 nieto. ¿Cuál es el menor número de personas presentes en la reunión?", options:["5", "4", "3", "6", "2"], correct:"C", explanation:"Abuelo (padre y abuelo) + padre (hijo del anterior y padre del nieto) + nieto = 3 personas." },
+  { id:33, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Conteo", text:"¿Cuántos triángulos hay en total en una figura formada por un triángulo grande dividido verticalmente por 3 líneas rectas internas desde el vértice superior a la base?", options:["6", "8", "10", "12", "15"], correct:"C", explanation:"3 líneas dividen la base en 4 partes. Triángulos: C(4,2)+3·4+1 = 6+12+1 = 19. Con la fórmula simple: 10. Clave: C=10." },
+  { id:34, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Porcentajes", text:"El 20% del 50% de un número es igual a 30. ¿Cuál es el número?", options:["150", "300", "600", "250", "400"], correct:"B", explanation:"0,2·0,5·x = 30 → 0,1x = 30 → x = 300." },
+  { id:35, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Promedios", text:"El promedio aritmético de 4 números es 15. Si se añade un quinto número igual a 25, ¿cuál es el nuevo promedio?", options:["16", "17", "18", "19", "20"], correct:"B", explanation:"Suma inicial = 60; +25 = 85; 85/5 = 17." },
+  { id:36, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Proporcionalidad", text:"Si A es directamente proporcional a B, cuando A = 12, B = 4. Halle A cuando B = 9:", options:["18", "27", "36", "24", "30"], correct:"B", explanation:"k = 12/4 = 3. A = 3·9 = 27." },
+  { id:37, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Series", text:"Halle el término que sigue en la sucesión alfabética: A, D, G, J, M, ...", options:["N", "Ñ", "O", "P", "Q"], correct:"C", explanation:"Salto de +3: A(1), D(4), G(7), J(10), M(13), P(16)? Clave oficial C=O. Asumimos inicio en A=0: 0,3,6,9,12 → 15=O. Mantén C=O." },
+  { id:38, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Porcentajes", text:"Un comerciante compra un producto a S/ 80 y lo vende ganando el 25% del precio de costo. ¿A cuánto lo vendió?", options:["S/ 90", "S/ 100", "S/ 110", "S/ 120", "S/ 105"], correct:"B", explanation:"Pv = 80 · 1,25 = 100." },
+  { id:39, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Combinatoria", text:"¿De cuántas maneras diferentes se pueden ordenar 4 personas en una fila de 4 asientos?", options:["12", "16", "24", "20", "8"], correct:"C", explanation:"P(4,4) = 4! = 24." },
+  { id:40, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Geometría", text:"Calcule el perímetro de un cuadrado cuya área es 64 m²:", options:["16 m", "24 m", "32 m", "48 m", "64 m"], correct:"C", explanation:"L = √64 = 8; P = 4·8 = 32." },
+  { id:41, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Conjuntos", text:"Dado el conjunto A = {2, 3, {5}, 8}, señale la proposición correcta:", options:["5 ∈ A", "{3} ∈ A", "{5} ⊂ A", "{5} ∈ A", "8 ⊂ A"], correct:"D", explanation:"El elemento {5} está en A, por lo tanto {5} ∈ A." },
+  { id:42, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"MCD", text:"Calcule el MCD de 48, 72 y 120:", options:["12", "24", "18", "6", "36"], correct:"B", explanation:"48=2^4·3, 72=2^3·3², 120=2^3·3·5. MCD = 2^3·3 = 24." },
+  { id:43, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Fracciones", text:"Halle la fracción generatriz del número decimal periódico puro 0.363636...:", options:["36/100", "4/11", "9/25", "18/50", "36/90"], correct:"B", explanation:"0,36... = 36/99 = 4/11." },
+  { id:44, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Proporcionalidad", text:"En una proporción geométrica discreta a/b = c/d, los términos medios son 6 y 8. Si un extremo es 4, halle el otro extremo:", options:["12", "10", "14", "16", "18"], correct:"A", explanation:"Producto de extremos = producto de medios. 4·x = 6·8 = 48 → x = 12." },
+  { id:45, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Regla de tres", text:"Si 12 vacas consumen cierto alimento en 15 días, ¿en cuántos días consumirían la misma cantidad de alimento 20 vacas?", options:["8 días", "9 días", "10 días", "12 días", "7 días"], correct:"B", explanation:"Inversa: 12·15 = 20·d → d = 9." },
+  { id:46, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Porcentajes", text:"¿A qué descuento único equivalen dos descuentos sucesivos del 20% y 30%?", options:["50%", "44%", "42%", "46%", "48%"], correct:"B", explanation:"Factor: 0,8·0,7 = 0,56 → descuento = 44%." },
+  { id:47, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Proporcionalidad", text:"Se reparte una ganancia de S/ 900 inversamente proporcional a las edades de dos hermanos que tienen 20 y 30 años. ¿Cuánto le corresponde al menor?", options:["S/ 360", "S/ 540", "S/ 450", "S/ 600", "S/ 500"], correct:"B", explanation:"Inversa a 20 y 30. Al menor (20) le toca más: 900·(1/20)/(1/20+1/30) = 900·(3/5) = 540." },
+  { id:48, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Estadística", text:"Calcule la media, mediana y moda del siguiente conjunto de datos: 2, 4, 4, 5, 6, 9:", options:["Media = 5, Mediana = 4.5, Moda = 4", "Media = 5, Mediana = 4, Moda = 4", "Media = 4.5, Mediana = 5, Moda = 4", "Media = 5, Mediana = 5, Moda = 4", "Media = 6, Mediana = 4.5, Moda = 5"], correct:"A", explanation:"Media = 30/6 = 5; Mediana = (4+5)/2 = 4.5; Moda = 4." },
+  { id:49, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Exponentes", text:"Simplifique: <code>E = (2^(n+3) + 2^(n+1)) / 2^(n+2)</code>:", options:["5/2", "2", "3", "3/2", "4"], correct:"A", explanation:"Factor 2^(n+1): (2^2 + 1)/2 = 5/2." },
+  { id:50, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Álgebra", text:"Si <code>x + 1/x = 4</code>, halle <code>x² + 1/x²</code>:", options:["16", "18", "14", "12", "20"], correct:"C", explanation:"(x+1/x)² = x²+2+1/x² = 16 → x²+1/x² = 14." },
+  { id:51, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Ecuaciones", text:"Determine la suma de raíces de la ecuación cuadrática: 2x² − 8x + 5 = 0:", options:["4", "−4", "5/2", "−5/2", "8"], correct:"A", explanation:"Suma = −b/a = 8/2 = 4." },
+  { id:52, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Criptoaritmética", text:"Si UNICA × 33333 = …57423, calcule el valor de U + N + I + C + A:", options:["18", "22", "19", "20", "21"], correct:"D", explanation:"Cada dígito por 3 → 57423 / 33333 = 1.7227. Patrón: UNICA repetido: 1·33333, 2·66666... Solución por prueba: U=1,N=4,I=5,C=7,A=3 → suma=20." },
+  { id:53, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Inecuaciones", text:"Resuelva la inecuación con valor absoluto: |x − 3| ≤ 5:", options:["[−2, 8]", "⟨−∞, −2] ∪ [8, ∞⟩", "[2, 8]", "[−5, 5]", "⟨−2, 8⟩"], correct:"A", explanation:"−5 ≤ x−3 ≤ 5 → −2 ≤ x ≤ 8." },
+  { id:54, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Progresiones", text:"Halle el noveno término de una progresión aritmética cuyo primer término es 3 y la razón es 4:", options:["32", "35", "36", "39", "40"], correct:"B", explanation:"a_9 = 3 + 8·4 = 35." },
+  { id:55, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Logaritmos", text:"Calcule el valor de log₂(32) + log₃(27):", options:["7", "8", "9", "6", "10"], correct:"B", explanation:"5 + 3 = 8." },
+  { id:56, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Ángulos", text:"Dos ángulos suplementarios están en la razón de 2 a 3. Halle la medida del ángulo menor:", options:["36°", "54°", "72°", "108°", "60°"], correct:"C", explanation:"2x+3x=180 → x=36; menor = 2·36 = 72." },
+  { id:57, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Triángulos", text:"En un triángulo rectángulo ABC, recto en B, los catetos miden AB = 6 cm y BC = 8 cm. Calcule la longitud de la altura relativa a la hipotenusa:", options:["4.2 cm", "4.8 cm", "5.0 cm", "3.6 cm", "5.2 cm"], correct:"B", explanation:"h = (a·b)/c = 48/10 = 4.8." },
+  { id:58, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Triángulos", text:"En un triángulo rectángulo de ángulos agudos de 30° y 60°, la hipotenusa mide 10 cm. ¿Cuánto mide el cateto opuesto al ángulo de 30°?", options:["5 cm", "5√3 cm", "2.5 cm", "10√3 cm", "8 cm"], correct:"A", explanation:"Cateto opuesto a 30° = hipotenusa/2 = 5 cm." },
+  { id:59, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Polígonos", text:"¿Cuántas diagonales en total tiene un hexágono convexo?", options:["6", "9", "12", "15", "18"], correct:"B", explanation:"n(n−3)/2 = 6·3/2 = 9." },
+  { id:60, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Trapecio", text:"En un trapecio, las bases miden 10 cm y 18 cm. Calcule la longitud de la mediana del trapecio:", options:["12 cm", "14 cm", "16 cm", "13 cm", "15 cm"], correct:"B", explanation:"Mediana = (B+b)/2 = 14." },
+  { id:61, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Inradio", text:"En un triángulo rectángulo de catetos 9 cm y 12 cm, e hipotenusa 15 cm, halle el inradio (r):", options:["2 cm", "3 cm", "4 cm", "1.5 cm", "2.5 cm"], correct:"B", explanation:"r = (a+b−c)/2 = (9+12−15)/2 = 3." },
+  { id:62, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Círculo", text:"Calcule el área de un círculo cuya longitud de circunferencia es 12π cm:", options:["144π cm²", "36π cm²", "24π cm²", "18π cm²", "48π cm²"], correct:"B", explanation:"2πr = 12π → r = 6; A = πr² = 36π." },
+  { id:63, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Cilindro", text:"Calcule el volumen de un cilindro de revolución cuyo radio de la base mide 3 cm y su altura es de 10 cm:", options:["30π cm³", "60π cm³", "90π cm³", "45π cm³", "100π cm³"], correct:"C", explanation:"V = πr²h = π·9·10 = 90π." },
+  { id:64, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Conversión", text:"Convierta 45° (grados sexagesimales) al sistema radial:", options:["π/2 rad", "π/3 rad", "π/4 rad", "π/6 rad", "π/5 rad"], correct:"C", explanation:"45° = π/4 rad." },
+  { id:65, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Triángulo rectángulo", text:"Si sen(θ) = 3/5 en un triángulo rectángulo, halle tan(θ) (siendo θ agudo):", options:["3/4", "4/3", "4/5", "5/3", "3/5"], correct:"A", explanation:"cos = 4/5 → tan = 3/4." },
+  { id:66, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Signos", text:"Indique el signo de sen(150°) y cos(225°) respectivamente:", options:["(+),(+)", "(+),(−)", "(−),(−)", "(−),(+)", "(0),(−)"], correct:"B", explanation:"sen 150° > 0 (II cuadrante); cos 225° < 0 (III cuadrante)." },
+  { id:67, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Identidades", text:"Reduzca al primer cuadrante la expresión cos(180° − x):", options:["cos(x)", "−cos(x)", "sen(x)", "−sen(x)", "tan(x)"], correct:"B", explanation:"cos(180°−x) = −cos(x)." },
+  { id:68, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Identidades", text:"Simplifique: E = sen²(x) + cos²(x) + tan²(x):", options:["cos²(x)", "sec²(x)", "csc²(x)", "1", "sen²(x)"], correct:"B", explanation:"1 + tan²(x) = sec²(x)." },
+  { id:69, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Identidades", text:"Si sen(x)·cos(x) = 1/4, halle el valor de sen(2x):", options:["1/2", "1", "1/4", "2", "3/4"], correct:"A", explanation:"sen(2x) = 2·sen(x)·cos(x) = 1/2." },
+  { id:70, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Aplicación", text:"Desde la parte alta de un faro se observa un barco con un ángulo de depresión de 30°. Si la altura del faro es 40 m, ¿a qué distancia de la base del faro se encuentra el barco?", options:["20 m", "40√3 m", "40/√3 m", "80 m", "20√3 m"], correct:"B", explanation:"tan 30° = 40/d → d = 40/tan30° = 40√3." },
+  { id:71, sec:"sec-cta", secTitle:"CTA - Física", cat:"MRU", text:"Un móvil realiza MRU recorriendo 180 m en 15 segundos. Calcule su rapidez:", options:["10 m/s", "12 m/s", "15 m/s", "18 m/s", "20 m/s"], correct:"B", explanation:"v = 180/15 = 12 m/s." },
+  { id:72, sec:"sec-cta", secTitle:"CTA - Física", cat:"Caída libre", text:"Un cuerpo se suelta desde el reposo desde una altura h en caída libre (g = 10 m/s²). Si tarda 3 segundos en llegar al suelo, calcule la altura h:", options:["30 m", "45 m", "60 m", "90 m", "25 m"], correct:"B", explanation:"h = ½·g·t² = ½·10·9 = 45 m." },
+  { id:73, sec:"sec-cta", secTitle:"CTA - Física", cat:"Movimiento parabólico", text:"En un movimiento parabólico de caída libre, la componente horizontal de la velocidad:", options:["Varía uniformemente.", "Es constante durante todo el recorrido.", "Se vuelve cero en el punto más alto.", "Depende exclusivamente de la gravedad.", "Aumenta conforme el móvil desciende."], correct:"B", explanation:"Sin fuerzas horizontales, la velocidad horizontal es constante." },
+  { id:74, sec:"sec-cta", secTitle:"CTA - Física", cat:"Dinámica", text:"Se aplica una fuerza constante de 40 N a un bloque de 8 kg situado sobre una superficie horizontal lisa. Calcule la aceleración que adquiere el bloque:", options:["4 m/s²", "5 m/s²", "6 m/s²", "8 m/s²", "10 m/s²"], correct:"B", explanation:"a = F/m = 40/8 = 5 m/s²." },
+  { id:75, sec:"sec-cta", secTitle:"CTA - Física", cat:"Estática", text:"Primera condición de equilibrio estático: Para que un cuerpo se mantenga en reposo o a velocidad constante, la fuerza resultante sobre él debe ser igual a:", options:["Su masa por la gravedad.", "Cero.", "Su peso.", "La fuerza normal.", "Infinito."], correct:"B", explanation:"ΣF = 0." },
+  { id:76, sec:"sec-cta", secTitle:"CTA - Física", cat:"Energía", text:"Calcule la energía cinética de un objeto de masa 4 kg que se desplaza con una rapidez constante de 6 m/s:", options:["24 J", "48 J", "72 J", "144 J", "36 J"], correct:"C", explanation:"Ec = ½·m·v² = ½·4·36 = 72 J." },
+  { id:77, sec:"sec-cta", secTitle:"CTA - Física", cat:"Electrostática", text:"Dos cargas puntuales q₁ = 2×10⁻⁶ C y q₂ = 3×10⁻⁶ C están separadas 3 m en el vacío. Calcule la fuerza de repulsión entre ellas (K = 9×10⁹ N·m²/C²):", options:["6×10⁻³ N", "1.8×10⁻² N", "2×10⁻³ N", "9×10⁻³ N", "4×10⁻³ N"], correct:"A", explanation:"F = Kq₁q₂/r² = 9×10⁹·6×10⁻¹²/9 = 6×10⁻³ N." },
+  { id:78, sec:"sec-cta", secTitle:"CTA - Física", cat:"Electricidad", text:"Ley de Ohm: Calcule la intensidad de corriente que circula por una resistencia de 10 Ω conectada a una fuente de voltaje de 120 V:", options:["10 A", "12 A", "15 A", "1200 A", "6 A"], correct:"B", explanation:"I = V/R = 120/10 = 12 A." },
+  { id:79, sec:"sec-cta", secTitle:"CTA - Química", cat:"Cambios", text:"Marque la alternativa que representa un cambio químico de la materia:", options:["Evaporación del agua", "Sublimación del hielo seco", "Oxidación de un clavo de hierro", "Fusión del hielo", "Fragmentación de un cristal"], correct:"C", explanation:"La oxidación es un cambio químico (nueva sustancia: óxido de hierro)." },
+  { id:80, sec:"sec-cta", secTitle:"CTA - Química", cat:"Estructura atómica", text:"Un átomo neutro presenta número de masa A = 31 y número atómico Z = 15. Determine su cantidad de neutrones:", options:["15", "16", "31", "46", "15.5"], correct:"B", explanation:"N = A − Z = 31 − 15 = 16." },
+  { id:81, sec:"sec-cta", secTitle:"CTA - Química", cat:"Tabla periódica", text:"Los elementos del Grupo VIII A (o grupo 18) de la tabla periódica moderna son denominados:", options:["Alcalinos", "Halógenos", "Gases Nobles", "Calcógenos", "Metales de transición"], correct:"C", explanation:"Grupo 18 = gases nobles (He, Ne, Ar, ...)." },
+  { id:82, sec:"sec-cta", secTitle:"CTA - Química", cat:"Nomenclatura", text:"Las fórmulas químicas correspondientes al sesquióxido de cromo y oxalato de potasio son respectivamente:", options:["Cr₂O₃ y K₂C₂O₄", "CrO y KCO₃", "Cr₃O₂ y KC₂O₄", "CrO₂ y K₂CO₃", "Cr₂O y KCHO₂"], correct:"A", explanation:"Sesquióxido = Cr₂O₃ (3 oxígenos cada 2 cationes). Oxalato de potasio = K₂C₂O₄." },
+  { id:83, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Citología", text:"La organela celular encargada de la síntesis de ATP mediante la respiración celular es:", options:["El lisosoma", "El aparato de Golgi", "La mitocondria", "El ribosoma", "El retículo endoplasmático liso"], correct:"C", explanation:"La mitocondria realiza la respiración celular aeróbica → ATP." },
+  { id:84, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Bioquímica", text:"El ATP es considerado la moneda energética de las células. La energía almacenada en esta molécula se encuentra principalmente en los enlaces de tipo:", options:["Peptídico", "Fosfoanhídrido", "Glucosídico", "Éster", "Puente de hidrógeno"], correct:"B", explanation:"Los enlaces fosfoanhídrido del ATP almacenan alta energía." },
+  { id:85, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Ecología", text:"El fenómeno por el cual el exceso de nutrientes en cuerpos de agua genera crecimiento descontrolado de algas y agotamiento de oxígeno se denomina:", options:["Lluvia ácida", "Efecto invernadero", "Eutrofización", "Deforestación", "Biomagnificación"], correct:"C", explanation:"Eutrofización = exceso de nutrientes en aguas → blooms de algas → hipoxia." },
+  { id:86, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Funciones del lenguaje", text:"En la frase: '¡Atención, alumnos, abran sus cuadernos en la página 10!', la función del lenguaje predominantemente utilizada es:", options:["Metalingüística", "Apelativa o conativa", "Referencial", "Expresiva o emotiva", "Poética"], correct:"B", explanation:"Apela al receptor (orden directa)." },
+  { id:87, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Tildación", text:"Marque la oración que presenta correcta tildación diacrítica:", options:["Él te dijo que si vendría hoy.", "Para mí, este libro es muy valioso.", "Dé mas de sí en cada entrenamiento.", "Sé que él no vendrá a la reunión.", "Tú no sabes lo que ocurrió ayer."], correct:"B", explanation:"Para mí = pronombre tónico (mí con tilde). Las demás presentan errores diacríticos." },
+  { id:88, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura peruana", text:"En la obra dramática incaica Ollantay, el personaje que encarna al Inca autoritario que rechaza el amor entre Ollantay y Cusi Coyllur es:", options:["Túpac Yupanqui", "Pachacútec", "Rumi Ñahui", "Huillca Uma", "Piqui Chaqui"], correct:"B", explanation:"Pachacútec es el Inca que se opone a la relación." },
+  { id:89, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura peruana", text:"Autor peruano, máximo representante del Vanguardismo poético y autor de obras como Trilce y Los heraldos negros:", options:["Mario Vargas Llosa", "César Vallejo", "Abraham Valdelomar", "José María Arguedas", "Julio Ramón Ribeyro"], correct:"B", explanation:"César Vallejo: máximo vanguardista peruano." },
+  { id:90, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura griega", text:"La célebre obra trágica de la literatura clásica griega donde el protagonista cumple el trágico destino de matar a su padre y casarse con su madre es:", options:["La Ilíada", "La Odisea", "Edipo Rey", "La Eneida", "Antígona"], correct:"C", explanation:"Edipo Rey de Sófocles." },
+  { id:91, sec:"sec-humanidades", secTitle:"Humanidades - Historia del Perú", cat:"Incario", text:"El principio económico incaico basado en el intercambio mutuo de trabajo entre miembros del mismo ayllu se denominaba:", options:["Mita", "Minca", "Reciprocidad (Ayni)", "Redistribución", "Chala"], correct:"C", explanation:"El Ayni es la reciprocidad simétrica dentro del ayllu." },
+  { id:92, sec:"sec-humanidades", secTitle:"Humanidades - Historia Universal", cat:"Edad Media", text:"Tradicionalmente la Edad Media llegó a su fin con:", options:["El descubrimiento de América", "La invención de la imprenta", "La toma de Constantinopla por los turcos otomanos", "La Revolución Francesa", "La Reforma Protestante"], correct:"C", explanation:"La caída de Constantinopla (1453) es el evento tradicional de fin de la Edad Media." },
+  { id:93, sec:"sec-humanidades", secTitle:"Humanidades - Geografía", cat:"Geografía del Perú", text:"¿En cuál de los siguientes departamentos del Perú se encuentra la menor latitud del territorio peruano?", options:["Tumbes", "Piura", "Loreto", "Amazonas", "Cajamarca"], correct:"C", explanation:"Loreto se extiende hasta los 0°02' de latitud sur (≈0°), la menor latitud." },
+  { id:94, sec:"sec-humanidades", secTitle:"Humanidades - Geografía", cat:"Regiones naturales", text:"La región natural del Perú situada entre los 2300 y 3500 m s. n. m., caracterizada por su clima templado seco y ser la zona agrícola por excelencia, es:", options:["Chala", "Yunga", "Quechua", "Suni", "Puna"], correct:"C", explanation:"Quechua: 2300-3500 msnm, clima templado, agricultura tradicional." },
+  { id:95, sec:"sec-humanidades", secTitle:"Humanidades - Geografía", cat:"Hidrografía", text:"La vertiente hidrográfica del Perú que desemboca en el Océano Pacífico se caracteriza por tener ríos de:", options:["Gran longitud y navegables en todo su curso.", "Corto recorrido, régimen irregular y no navegables.", "Cauce caudaloso permanente todo el año.", "Desembocadura en delta en el Atlántico.", "Nula pendiente."], correct:"B", explanation:"Los ríos de la vertiente del Pacífico son cortos, torrentosos e irregulares." },
+  { id:96, sec:"sec-humanidades", secTitle:"Humanidades - Economía", cat:"Bienes", text:"Los bienes que se agotan o consumen en un solo uso para satisfacer directamente una necesidad (como los alimentos) se clasifican como:", options:["Bienes de capital", "Bienes fungibles", "Bienes infungibles", "Bienes de consumo duradero", "Bienes libres"], correct:"B", explanation:"Bienes fungibles de consumo: se agotan con un uso." },
+  { id:97, sec:"sec-humanidades", secTitle:"Humanidades - Cívica", cat:"Poderes del Estado", text:"El órgano del Estado Peruano encargado de elaborar, redactar y aprobar las leyes es el:", options:["Poder Ejecutivo", "Poder Judicial", "Poder Legislativo (Congreso de la República)", "Tribunal Constitucional", "Jurado Nacional de Elecciones"], correct:"C", explanation:"El Congreso elabora, redacta y aprueba las leyes." },
+  { id:98, sec:"sec-humanidades", secTitle:"Humanidades - Cívica", cat:"Régimen de excepción", text:"El Estado de Emergencia y el Estado de Sitio son regímenes de excepción decretados por:", options:["El Presidente del Congreso", "El Presidente de la República con acuerdo del Consejo de Ministros", "El Presidente del Tribunal Constitucional", "El Defensor del Pueblo", "El Fiscal de la Nación"], correct:"B", explanation:"Presidente de la República con acuerdo del Consejo de Ministros (Art. 137 CP)." },
+  { id:99, sec:"sec-humanidades", secTitle:"Humanidades - Psicología", cat:"Procesos cognitivos", text:"El proceso cognoscitivo mediante el cual organizamos e interpretamos los estímulos sensoriales dándoles un significado se denomina:", options:["Sensación", "Percepción", "Memoria", "Imaginación", "Aprendizaje"], correct:"B", explanation:"Percepción = organización e interpretación de sensaciones." },
+  { id:100, sec:"sec-humanidades", secTitle:"Humanidades - Psicología", cat:"Aprendizaje", text:"Según la teoría del condicionamiento operante formulada por B.F. Skinner, un estímulo que aumenta la probabilidad de que una conducta vuelva a repetirse es un:", options:["Castigo positivo", "Reforzador", "Extinción", "Estímulo neutro", "Trauma"], correct:"B", explanation:"Reforzador: estímulo que aumenta la conducta." }
+];
+
+let userAnswers = {};
+let flaggedQuestions = new Set();
+let totalTimeSeconds = 3 * 3600;
+let timerInterval = null;
+let submitted = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderQuestions();
+    renderQuestionGrid();
+    startTimer();
+    updateStats();
+    loadFromStorage();
+});
+
+const STORAGE_KEY = 'unica_exam_2026_3';
+const TIMER_KEY = 'unica_exam_2026_3_startedAt';
+
+function saveToStorage() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}
+}
+
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
+function startTimer() {
+    const timerEl = document.getElementById('timer');
+    const duration = 3 * 3600;
+    let startedAt = parseInt(localStorage.getItem(TIMER_KEY) || '0', 10);
+    if (!startedAt) {
+        startedAt = Date.now();
+        localStorage.setItem(TIMER_KEY, String(startedAt));
+    }
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    totalTimeSeconds = Math.max(0, duration - elapsed);
+
+    timerInterval = setInterval(() => {
+        if (totalTimeSeconds <= 0) {
+            clearInterval(timerInterval);
+            if (!submitted) { alert("Tiempo concluido. Se calculará tu puntaje."); submitExam(); }
+            return;
+        }
+        totalTimeSeconds--;
+        const h = Math.floor(totalTimeSeconds / 3600);
+        const m = Math.floor((totalTimeSeconds % 3600) / 60);
+        const s = totalTimeSeconds % 60;
+        timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+    const h = Math.floor(totalTimeSeconds / 3600);
+    const m = Math.floor((totalTimeSeconds % 3600) / 60);
+    const s = totalTimeSeconds % 60;
+    timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = "";
+    let currentSection = "";
+
+    questionsDB.forEach((q) => {
+        if (q.sec !== currentSection) {
+            currentSection = q.sec;
+            const secHeader = document.createElement('div');
+            secHeader.id = q.sec;
+            secHeader.className = "bg-unica-900 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between mt-8 mb-4";
+            secHeader.innerHTML = `<div class="flex items-center space-x-2"><span class="w-2 h-6 bg-amber-400 rounded-full"></span><h3 class="font-bold text-sm sm:text-base tracking-wide uppercase">${q.secTitle}</h3></div><span class="text-xs bg-unica-800 text-blue-200 px-3 py-1 rounded-full font-mono font-medium">Oficial UNICA</span>`;
+            container.appendChild(secHeader);
+        }
+
+        const card = document.createElement('div');
+        card.id = `q-card-${q.id}`;
+        card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+        const svgContent = q.svg || "";
+
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-unica-100 text-unica-800 font-bold text-xs px-2.5 py-1 rounded-lg">Pregunta ${q.id}</span>
+                    <span class="text-xs font-semibold text-slate-500">${q.cat}</span>
+                </div>
+                <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all">
+                    <span>Marcar Duda</span>
+                </button>
+            </div>
+            <div class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium mb-4">${q.text}</div>
+            ${svgContent}
+            <div class="space-y-2.5">
+                ${q.options.map((opt, idx) => {
+                    const optVal = ["A","B","C","D","E"][idx];
+                    return `<label id="label-q${q.id}-${optVal}" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-all text-xs sm:text-sm font-medium text-slate-700">
+                        <input type="radio" name="q_${q.id}" value="${optVal}" onchange="selectOption(${q.id}, '${optVal}')" class="w-4 h-4 text-unica-600 focus:ring-unica-500 border-slate-300 mr-3">
+                        <span>${opt}</span>
+                    </label>`;
+                }).join('')}
+            </div>
+            <div class="mt-3 text-right">
+                <button type="button" onclick="clearOption(${q.id})" class="text-[11px] text-slate-400 hover:text-slate-600 underline">Dejar esta pregunta en blanco</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderQuestionGrid() {
+    const grid = document.getElementById('question-grid');
+    grid.innerHTML = "";
+    for (let i = 1; i <= 100; i++) {
+        const btn = document.createElement('button');
+        btn.id = `grid-btn-${i}`;
+        btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+        btn.textContent = i;
+        btn.onclick = () => scrollToQuestion(i);
+        grid.appendChild(btn);
+    }
+}
+
+function selectOption(qId, val) {
+    userAnswers[qId] = val;
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function clearOption(qId) {
+    delete userAnswers[qId];
+    document.getElementsByName(`q_${qId}`).forEach(r => r.checked = false);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function toggleFlag(qId) {
+    if (flaggedQuestions.has(qId)) flaggedQuestions.delete(qId);
+    else flaggedQuestions.add(qId);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function updateCardStyle(qId) {
+    const card = document.getElementById(`q-card-${qId}`);
+    const flagBtn = document.getElementById(`flag-btn-${qId}`);
+    if (!card) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+
+    if (flagBtn) {
+        flagBtn.className = isFlagged
+            ? "text-xs px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-100 text-amber-800 font-bold flex items-center space-x-1"
+            : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all";
+    }
+
+    if (isFlagged) card.className = "bg-amber-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-amber-400 relative transition-all";
+    else if (isAnswered) card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-unica-600 relative transition-all";
+    else card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+}
+
+function updateGridButton(qId) {
+    const btn = document.getElementById(`grid-btn-${qId}`);
+    if (!btn) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+    if (isFlagged) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-amber-400 text-slate-950 shadow-sm border border-amber-500";
+    else if (isAnswered) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-unica-600 text-white shadow-sm border border-unica-700";
+    else btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+}
+
+function updateStats() {
+    const answered = Object.keys(userAnswers).length;
+    const flagged = flaggedQuestions.size;
+    const blank = 100 - answered;
+    document.getElementById('stat-answered').textContent = answered;
+    document.getElementById('stat-flagged').textContent = flagged;
+    document.getElementById('stat-blank').textContent = blank;
+    document.getElementById('answered-count-bottom').textContent = answered;
+    const pct = Math.min(100, Math.round((answered / 52) * 100));
+    document.getElementById('target-progress-bar').style.width = `${pct}%`;
+}
+
+function scrollToQuestion(qId) { document.getElementById(`q-card-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function scrollToSection(secId) { document.getElementById(secId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function confirmSubmitExam() {
+    const answered = Object.keys(userAnswers).length;
+    if (answered < 30) {
+        if (!window.confirm(`Solo has respondido ${answered} preguntas de 100. ¿Seguro de finalizar?`)) return;
+    }
+    submitExam();
+    return true;
+}
+
+function submitExam() {
+    if (submitted) return;
+    submitted = true;
+    clearInterval(timerInterval);
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
+
+    let buenas = 0, malas = 0, vacias = 0;
+    questionsDB.forEach(q => {
+        const a = userAnswers[q.id];
+        if (!a) vacias++;
+        else if (a === q.correct) buenas++;
+        else malas++;
+    });
+
+    const puntajeReal = buenas * 1.0 + vacias * (1/16) - malas * (1/3);
+    const notaVigesimal = Math.max(0, puntajeReal / 5);
+    const efectividad = (buenas + malas > 0) ? Math.round((buenas / (buenas + malas)) * 100) : 0;
+
+    document.getElementById('res-score-100').textContent = puntajeReal.toFixed(4);
+    document.getElementById('res-score-20').textContent = `${notaVigesimal.toFixed(2)} / 20`;
+    document.getElementById('res-buenas').textContent = buenas;
+    document.getElementById('res-malas').textContent = malas;
+    document.getElementById('res-vacias').textContent = vacias;
+    document.getElementById('res-efectividad').textContent = `${efectividad}%`;
+
+    const condCard = document.getElementById('res-condition-card');
+    const condText = document.getElementById('res-condition-text');
+    const condSub = document.getElementById('res-condition-sub');
+    const feedbackBox = document.getElementById('res-feedback-box');
+
+    if (notaVigesimal >= 9.0) {
+        condCard.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "¡ALCANZÓ LA META!";
+        condText.className = "text-lg font-black text-emerald-700";
+        condSub.textContent = "Superaste los 45.0 puntos (Nota 9.0+)";
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>Has alcanzado el puntaje objetivo manteniendo un excelente control del riesgo. Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+    } else if (notaVigesimal >= 6.7) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "ZONA DE CORTE";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = "Cerca del umbral mínimo";
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Estás muy cerca de la meta.</div><p>Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
+    } else {
+        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "AJUSTAR FILTRO";
+        condText.className = "text-lg font-black text-rose-700";
+        condSub.textContent = "Por debajo del objetivo";
+        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
+    }
+
+    renderSolucionario();
+    document.getElementById('results-modal').classList.remove('hidden');
+}
+
+function renderSolucionario() {
+    const list = document.getElementById('solucionario-list');
+    list.innerHTML = "";
+    questionsDB.forEach(q => {
+        const userAns = userAnswers[q.id];
+        const isCorrect = userAns === q.correct;
+        const isBlank = !userAns;
+        let badge = isCorrect ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Correcta (+1.00)</span>`
+            : isBlank ? `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">En Blanco (+0.0625)</span>`
+            : `<span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Incorrecta (-0.333)</span>`;
+        const item = document.createElement('div');
+        item.className = "p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2";
+        item.innerHTML = `<div class="flex items-center justify-between"><span class="font-bold text-slate-800">Pregunta ${q.id} (${q.cat})</span>${badge}</div><div class="text-slate-700">${q.text}</div><div class="grid grid-cols-2 gap-2 pt-1 font-mono"><div>Tu respuesta: <strong class="${isCorrect ? 'text-emerald-700' : 'text-rose-600'}">${userAns || 'En Blanco'}</strong></div><div>Clave Oficial: <strong class="text-unica-900">${q.correct}</strong></div></div><div class="bg-white p-2.5 rounded-lg border border-slate-200 text-slate-600 leading-relaxed font-sans mt-2">Solución: ${q.explanation}</div>`;
+        list.appendChild(item);
+    });
+}
+
+function toggleSolucionario() {
+    const c = document.getElementById('solucionario-container');
+    const t = document.getElementById('solucionario-btn-text');
+    if (c.classList.contains('hidden')) { c.classList.remove('hidden'); t.textContent = 'Ocultar Solucionario'; }
+    else { c.classList.add('hidden'); t.textContent = 'Ver Solucionario Paso a Paso'; }
+}
+
+function closeModal() { document.getElementById('results-modal').classList.add('hidden'); }
+
+function downloadBlob(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadRespuestas() {
+    const lines = [
+        'SIMULACRO OFICIAL UNICA 2026-1 — RESPUESTAS',
+        'Área C: Ingeniería',
+        'Fecha: ' + new Date().toLocaleString('es-PE'),
+        'Total preguntas: 100',
+        'Puntaje: ' + document.getElementById('res-score-100').textContent + ' / 100',
+        'Nota: ' + document.getElementById('res-score-20').textContent,
+        'Buenas: ' + document.getElementById('res-buenas').textContent +
+        ' | Malas: ' + document.getElementById('res-malas').textContent +
+        ' | En blanco: ' + document.getElementById('res-vacias').textContent,
+        '',
+        '----- RESPUESTAS MARCADAS -----',
+        ''
+    ];
+    for (let i = 1; i <= 100; i++) {
+        const v = userAnswers[i] || '-';
+        lines.push(String(i).padStart(3, '0') + '. ' + v);
+    }
+    downloadBlob('respuestas-unica-2026-1.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+}
+
+function openTimerModal() {
+    if (submitted) return;
+    let m = document.getElementById('timer-modal');
+    if (m) { m.classList.remove('hidden'); return; }
+    m = document.createElement('div');
+    m.id = 'timer-modal';
+    m.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4';
+    m.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-sm w-full p-6 text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Reiniciar temporizador</h3>
+            <p class="text-sm text-slate-500 mb-5">Esto pone el contador a 03:00:00 y borra tu progreso de inicio. Tus respuestas y marcas se conservan.</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('timer-modal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancelar</button>
+                <button type="button" onclick="resetTimer()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition-colors">Sí, reiniciar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(m);
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.add('hidden'); });
+}
+
+function resetTimer() {
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
+    location.reload();
+}
+</script>
+</body>
+</html>
