@@ -69,6 +69,19 @@
         </section>
 
         <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-900 mb-1">Calculadora: ¿qué necesito para pasar a mi carrera?</h2>
+            <p class="text-xs text-slate-500 mb-4">Elige tu carrera y te diremos cuántos puntos brutos (de 100) necesitas según la fórmula UNICA. Usamos la nota mínima histórica + 1 punto de margen.</p>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <select id="careerSelect" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-unica-600">
+                    <option value="">-- Selecciona carrera --</option>
+                </select>
+                <button onclick="showCareerTarget()" class="bg-unica-600 hover:bg-unica-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">Calcular meta</button>
+            </div>
+            <div id="careerResult" class="mt-4 hidden"></div>
+            <p class="text-[10px] text-slate-400 mt-3">Notas mínimas oficiales: histórico publicado por la UNICA. La meta añade +1 punto de margen por si el examen real sube. La fórmula: <code class="bg-slate-100 px-1 rounded">P = B + V/16 − M/3</code>, con 0 errores la nota = B + (100−B)/16.</p>
+        </section>
+
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
             <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Sobre este sitio</h3>
             <ul class="text-sm text-slate-700 space-y-2 leading-relaxed">
                 <li>• Cada examen vive en su propia carpeta bajo <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">examenes/&lt;slug&gt;/</code>.</li>
@@ -173,6 +186,103 @@ async function downloadExam(examUrl, slug) {
 }
 
 loadExams();
+loadCareers();
+
+const CAREERS = [
+  { name: 'Medicina Humana',                       min: 15.5959, max: 17.8667 },
+  { name: 'Enfermería',                            min: 10.9792, max: 17.6001 },
+  { name: 'Obstetricia',                           min: 4.0876,  max: 17.8667 },
+  { name: 'Psicología',                            min: 4.8293,  max: 16.6126 },
+  { name: 'Odontología',                           min: 5.3334,  max: 16.7709 },
+  { name: 'Farmacia y Bioquímica',                 min: 2.4709,  max: 17.1459 },
+  { name: 'Biología',                              min: 3.0918,  max: 17.1459 },
+  { name: 'Medicina Veterinaria y Zootecnia',      min: 2.0875,  max: 14.4251 },
+  { name: 'Ingeniería de Sistemas',                min: 6.2417,  max: 12.6459 },
+  { name: 'Ingeniería Civil',                      min: 4.4459,  max: 10.6626 },
+  { name: 'Agronomía',                             min: 3.2209,  max: 10.0501 },
+  { name: 'Ingeniería de Minas',                   min: 2.9667,  max: 9.7043 },
+  { name: 'Enfermería (ya incluida)',              min: 10.9792, max: 17.6001 },
+  { name: 'Ingeniería Ambiental y Sanitaria',      min: 1.8085,  max: 8.7959 },
+  { name: 'Ingeniería Mecánica Eléctrica',         min: 4.3959,  max: 8.8251 },
+  { name: 'Ingeniería Metalúrgica',                min: 1.6418,  max: 8.3461 },
+  { name: 'Contabilidad',                          min: 0.2669,  max: 7.0501 },
+  { name: 'Administración',                        min: 1.8209,  max: 6.6959 },
+  { name: 'Ingeniería Electrónica',                min: 1.7417,  max: 6.3501 },
+  { name: 'Arquitectura',                          min: 4.0044,  max: 6.6667 },
+  { name: 'Ingeniería de Alimentos',               min: 0.0294,  max: 5.0168 },
+  { name: 'Ingeniería Química',                    min: 0.0797,  max: 4.1836 },
+  { name: 'Ingeniería Pesquera',                   min: 0.9501,  max: 3.2001 },
+  { name: 'Derecho',                               min: 4.6045,  max: 11.6500 },
+  { name: 'Negocios Internacionales',              min: 1.3338,  max: 6.0042 },
+  { name: 'Economía',                              min: 0.0005,  max: 5.5709 },
+  { name: 'Ciencias de la Comunicación',           min: 0.1377,  max: 5.8251 },
+  { name: 'Turismo',                               min: 0.1545,  max: 4.1876 },
+  { name: 'Arqueología',                           min: 0.2544,  max: 3.8210 },
+  { name: 'Ciencias de la Educación Inicial',      min: 2.4004,  max: 8.6500 },
+  { name: 'Ciencias de la Educación Física',       min: 1.2751,  max: 6.6670 },
+  { name: 'Ciencias de la Educación Primaria',     min: 1.4586,  max: 4.7709 },
+  { name: 'Ciencias de la Educación Lengua y Literatura', min: 1.0417, max: 4.9876 },
+  { name: 'Ciencias de la Educación Historia y Geografía', min: 0.1545, max: 4.9668 },
+  { name: 'Ciencias de la Educación Matemática e Informática', min: 0.8005, max: 3.8834 },
+  { name: 'Ciencias de la Educación Filosofía, Psicología y CC.SS.', min: 0.2672, max: 4.3167 },
+  { name: 'Ciencias de la Educación Arte',         min: 0.0753,  max: 3.4376 },
+  { name: 'Ciencias de la Educación Biología y Química', min: 0.8086, max: 3.2917 },
+  { name: 'Matemática e Informática',              min: 0.8005,  max: 3.0750 },
+  { name: 'Estadística',                           min: 0.2672,  max: 6.5084 },
+  { name: 'Física',                                min: 0.3376,  max: 2.3710 }
+];
+
+function loadCareers() {
+    const uniq = {};
+    CAREERS.forEach(c => { if (!uniq[c.name]) uniq[c.name] = c; });
+    const sel = document.getElementById('careerSelect');
+    Object.values(uniq).sort((a, b) => b.min - a.min).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name + '  (mín: ' + c.min.toFixed(2) + ')';
+        sel.appendChild(opt);
+    });
+    sel._data = Object.values(uniq);
+}
+
+function showCareerTarget() {
+    const sel = document.getElementById('careerSelect');
+    const c = sel._data.find(x => x.name === sel.value);
+    if (!c) { alert('Selecciona una carrera'); return; }
+    const meta = c.min + 1.0;
+    const metaSobre100 = meta * 5;
+    const bSinErrores = (metaSobre100 * 16 - (100 - metaSobre100)) / (16 + 1);
+    const bien = Math.max(0, Math.ceil(bSinErrores));
+    const vacias = 100 - bien;
+    const res = document.getElementById('careerResult');
+    res.classList.remove('hidden');
+    res.innerHTML =
+        '<div class="p-4 rounded-xl bg-unica-50 border border-unica-100">' +
+        '  <h3 class="text-sm font-bold text-unica-900 mb-1">' + c.name + '</h3>' +
+        '  <div class="grid grid-cols-3 gap-2 text-xs my-3">' +
+        '    <div class="bg-white rounded-lg p-2 text-center border border-slate-200">' +
+        '      <div class="text-[10px] text-slate-500">Nota mín. histórica</div>' +
+        '      <div class="text-base font-black text-slate-800">' + c.min.toFixed(2) + '</div>' +
+        '    </div>' +
+        '    <div class="bg-white rounded-lg p-2 text-center border border-slate-200">' +
+        '      <div class="text-[10px] text-slate-500">Máx. histórica</div>' +
+        '      <div class="text-base font-black text-slate-800">' + c.max.toFixed(2) + '</div>' +
+        '    </div>' +
+        '    <div class="bg-amber-50 rounded-lg p-2 text-center border border-amber-200">' +
+        '      <div class="text-[10px] text-amber-700">Meta (mín + 1)</div>' +
+        '      <div class="text-base font-black text-amber-700">' + meta.toFixed(2) + '</div>' +
+        '    </div>' +
+        '  </div>' +
+        '  <p class="text-xs text-slate-700 leading-relaxed">' +
+        '    Para asegurar ' + meta.toFixed(2) + '/20 con <strong>0 errores</strong> y dejando el resto en blanco:<br>' +
+        '    necesitas marcar <strong>' + bien + ' preguntas seguras</strong> de 100 y dejar <strong>' + vacias + ' en blanco</strong>.' +
+        '  </p>' +
+        '  <p class="text-[10px] text-slate-500 mt-2">Cálculo: P = ' + bien + ' + ' + vacias + '/16 = ' + (bien + vacias/16).toFixed(2) + ' / 100 = ' + meta.toFixed(2) + '/20.</p>' +
+        '</div>' +
+        '<div class="p-3 mt-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800">' +
+        '  <strong>Con 5 errores</strong> (no dejas en blanco ninguna adicional): meta sube a ' + ((meta * 5 + 5/3) / 1).toFixed(2) + ' puntos brutos. Cada error cuesta ≈0.33 y baja tu nota en ≈0.07/20.' +
+        '</div>';
+}
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

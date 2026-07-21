@@ -1,4 +1,4 @@
-const CACHE = 'unica-v10';
+const CACHE = 'unica-v11';
 const ASSETS = [
   './',
   './index.html',
