@@ -223,7 +223,7 @@
                 <div class="flex gap-2">
                     <button onclick="downloadRespuestas()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar .txt con tus respuestas">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
-                        <span>Descargar respuestas (.txt)</span>
+                        <span>Descargar análisis (.txt)</span>
                     </button>
                     <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-xs">Cerrar</button>
                 </div>
@@ -571,14 +571,33 @@ function submitExam() {
     submitted = true;
     clearInterval(timerInterval);
     try { localStorage.removeItem(TIMER_KEY); } catch {}
-
     let buenas = 0, malas = 0, vacias = 0;
+    const bySec = {};
+    const wrongsBySec = {};
+    const wrongsList = [];
     questionsDB.forEach(q => {
         const a = userAnswers[q.id];
-        if (!a) vacias++;
-        else if (a === q.correct) buenas++;
-        else malas++;
+        const sec = q.secTitle;
+        if (!bySec[sec]) bySec[sec] = { total: 0, buenas: 0, malas: 0, vacias: 0, puntaje: 0 };
+        bySec[sec].total++;
+        if (!a) {
+            vacias++;
+            bySec[sec].vacias++;
+            bySec[sec].puntaje += 1/16;
+        } else if (a === q.correct) {
+            buenas++;
+            bySec[sec].buenas++;
+            bySec[sec].puntaje += 1.0;
+        } else {
+            malas++;
+            bySec[sec].malas++;
+            bySec[sec].puntaje -= 1/3;
+            if (!wrongsBySec[sec]) wrongsBySec[sec] = [];
+            wrongsBySec[sec].push(q.id);
+            wrongsList.push({ n: q.id, sec, cat: q.cat, text: q.text, ans: a, correct: q.correct, explanation: q.explanation });
+        }
     });
+    state.analysis = { bySec, wrongsBySec, wrongsList };
 
     const puntajeReal = buenas * 1.0 + vacias * (1/16) - malas * (1/3);
     const notaVigesimal = Math.max(0, puntajeReal / 5);
@@ -617,6 +636,7 @@ function submitExam() {
     }
 
     renderSolucionario();
+    renderBySection();
     document.getElementById('results-modal').classList.remove('hidden');
 }
 
@@ -649,31 +669,93 @@ function closeModal() { document.getElementById('results-modal').classList.add('
 function downloadBlob(filename, content, mime) {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
+    const a = document.createElement('a'); a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+function renderBySection() {
+    const a = state.analysis;
+    if (!a) return;
+    const secList = Object.entries(a.bySec).sort((x, y) => y[1].puntaje - x[1].puntaje);
+    const max = Math.max(...secList.map(s => s[1].puntaje), 1);
+    const html = secList.map(([sec, s]) => {
+        const pct = Math.max(0, (s.puntaje / max) * 100);
+        const barColor = s.puntaje >= 0 ? 'bg-emerald-500' : 'bg-rose-500';
+        return `
+        <div class="border border-slate-200 rounded-xl p-3 bg-white">
+            <div class="flex items-start justify-between mb-1.5">
+                <div class="flex-1 pr-2">
+                    <h4 class="text-xs font-bold text-slate-900">${sec}</h4>
+                    <p class="text-[10px] text-slate-500 mt-0.5">${s.buenas} bien · ${s.malas} mal · ${s.vacias} vacío · de ${s.total}</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <span class="text-sm font-black ${s.puntaje >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${s.puntaje.toFixed(2)}</span>
+                    <span class="block text-[10px] text-slate-500">puntos</span>
+                </div>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div class="${barColor} h-full transition-all duration-500" style="width:${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+    document.getElementById('res-by-section-list').innerHTML = html;
+}
+
 function downloadRespuestas() {
+    const a = state.analysis;
     const lines = [
-        'SIMULACRO OFICIAL UNICA 2026-1 — RESPUESTAS',
+        'SIMULACRO OFICIAL UNICA 2025-II / 2026-I — ANÁLISIS DE RENDIMIENTO',
         'Área C: Ingeniería',
         'Fecha: ' + new Date().toLocaleString('es-PE'),
-        'Total preguntas: 100',
+        '',
+        '========= RESUMEN =========',
         'Puntaje: ' + document.getElementById('res-score-100').textContent + ' / 100',
-        'Nota: ' + document.getElementById('res-score-20').textContent,
+        'Nota vigesimal: ' + document.getElementById('res-score-20').textContent,
         'Buenas: ' + document.getElementById('res-buenas').textContent +
         ' | Malas: ' + document.getElementById('res-malas').textContent +
-        ' | En blanco: ' + document.getElementById('res-vacias').textContent,
+        ' | Vacías: ' + document.getElementById('res-vacias').textContent,
         '',
-        '----- RESPUESTAS MARCADAS -----',
-        ''
+        '========= RENDIMIENTO POR SECCIÓN ========='
     ];
+    if (a) {
+        const secList = Object.entries(a.bySec).sort((x, y) => y[1].puntaje - x[1].puntaje);
+        for (const [sec, s] of secList) {
+            const sig = s.malas > s.buenas * 0.5 ? ' [CRÍTICA: adivinaste más de la mitad de las correctas]' : '';
+            const vaciasPct = ((s.vacias / s.total) * 100).toFixed(0);
+            lines.push('');
+            lines.push('▸ ' + sec);
+            lines.push('   Preguntas: ' + s.total);
+            lines.push('   Buenas: ' + s.buenas + ' | Malas: ' + s.malas + ' | Vacías: ' + s.vacias + ' (' + vaciasPct + '%)');
+            lines.push('   Puntaje parcial: ' + s.puntaje.toFixed(3) + ' / ' + s.total.toFixed(1) + ' posibles' + sig);
+        }
+    }
+    lines.push('');
+    lines.push('========= PREGUNTAS FALLADAS =========');
+    lines.push('(Para que la IA explique cada error: pega esta sección junto a tu lista de respuestas)');
+    if (a) {
+        for (const w of a.wrongsList) {
+            lines.push('');
+            lines.push('--- P' + w.n + ' [' + w.sec + '] ' + w.cat + ' ---');
+            lines.push('Pregunta: ' + w.text.replace(/<[^>]+>/g, ''));
+            lines.push('Tu respuesta: ' + w.ans + ' | Correcta: ' + w.correct);
+            lines.push('Explicación: ' + w.explanation);
+        }
+    }
+    lines.push('');
+    lines.push('========= LISTA DE RESPUESTAS (para graficar) =========');
     for (let i = 1; i <= 100; i++) {
         const v = userAnswers[i] || '-';
         lines.push(String(i).padStart(3, '0') + '. ' + v);
     }
+    lines.push('');
+    lines.push('========= INSTRUCCIONES PARA LA IA =========');
+    lines.push('Soy postulante a Ing. de Sistemas en la UNICA. Rendimiento: ' + document.getElementById('res-score-20').textContent);
+    lines.push('Pido: 1) Identifica las 3 secciones donde más pierdo puntos.');
+    lines.push('2) Para cada pregunta fallada arriba, explica el razonamiento correcto paso a paso.');
+    lines.push('3) Sugiere un plan de estudio de 3 días focalizado en las secciones débiles.');
+    downloadBlob('analisis-unica.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+}
     downloadBlob('respuestas-unica-2026-1.txt', lines.join('\n'), 'text/plain;charset=utf-8');
 }
 
