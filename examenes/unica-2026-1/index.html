@@ -349,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const STORAGE_KEY = 'unica_exam_100';
+const TIMER_KEY = 'unica_exam_100_startedAt';
 
 function saveToStorage() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}
@@ -372,8 +373,35 @@ function loadFromStorage() {
     } catch {}
 }
 
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
 function startTimer() {
     const timerEl = document.getElementById('timer');
+    const duration = 3 * 3600;
+    let startedAt = parseInt(localStorage.getItem(TIMER_KEY) || '0', 10);
+    if (!startedAt) {
+        startedAt = Date.now();
+        localStorage.setItem(TIMER_KEY, String(startedAt));
+    }
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    totalTimeSeconds = Math.max(0, duration - elapsed);
+
     timerInterval = setInterval(() => {
         if (totalTimeSeconds <= 0) {
             clearInterval(timerInterval);
@@ -386,6 +414,10 @@ function startTimer() {
         const s = totalTimeSeconds % 60;
         timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }, 1000);
+    const h = Math.floor(totalTimeSeconds / 3600);
+    const m = Math.floor((totalTimeSeconds % 3600) / 60);
+    const s = totalTimeSeconds % 60;
+    timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 function renderQuestions() {
@@ -532,6 +564,7 @@ function submitExam() {
     if (submitted) return;
     submitted = true;
     clearInterval(timerInterval);
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
 
     let buenas = 0, malas = 0, vacias = 0;
     questionsDB.forEach(q => {
