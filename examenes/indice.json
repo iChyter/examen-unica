@@ -1,0 +1,12 @@
+[
+  {
+    "slug": "unica-2026-1",
+    "title": "Simulacro Oficial UNICA 2026-1",
+    "area": "Área C: Ingeniería",
+    "year": "2026-1",
+    "description": "Examen completo de 100 preguntas, 180 minutos, fórmula oficial UNICA (B +1.00 / M -0.333 / V +0.0625).",
+    "questions": 100,
+    "duration": 180,
+    "url": "examenes/unica-2026-1/index.html"
+  }
+]

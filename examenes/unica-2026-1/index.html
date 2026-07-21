@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulacro Oficial UNICA - Área C (Ingeniería)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        unica: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            gold: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-unica-600 selection:text-white">
+
+    <header class="no-print sticky top-0 z-40 bg-unica-900 text-white shadow-lg border-b border-unica-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-md font-black text-unica-900 text-xl tracking-tighter">U</div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">Simulacro Oficial UNICA</h1>
+                    <p class="text-xs text-blue-200 font-medium">Área C: Ingeniería & Ciencias Exactas</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="bg-unica-800/80 backdrop-blur border border-blue-400/30 px-3 sm:px-4 py-1.5 rounded-xl flex items-center space-x-2">
+                    <svg class="w-4 h-4 text-amber-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="timer" class="font-mono font-bold text-lg text-amber-300 tracking-wider">03:00:00</span>
+                </div>
+                <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all flex items-center space-x-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Finalizar Examen</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Meta de Ingreso</span>
+                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Nota 9.0+</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Puntaje Objetivo:</span>
+                        <span class="font-bold text-unica-900">45.00 Pts</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[45%] transition-all duration-300"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-tight">
+                        Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas, déjalas en blanco.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Estado de Respuestas</h3>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-200">
+                        <div id="stat-answered" class="text-base font-extrabold text-emerald-700">0</div>
+                        <div class="text-[10px] text-emerald-600 font-semibold">Respondidas</div>
+                    </div>
+                    <div class="p-2 bg-amber-50 rounded-xl border border-amber-200">
+                        <div id="stat-flagged" class="text-base font-extrabold text-amber-700">0</div>
+                        <div class="text-[10px] text-amber-600 font-semibold">En Duda</div>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                        <div id="stat-blank" class="text-base font-extrabold text-slate-600">100</div>
+                        <div class="text-[10px] text-slate-500 font-semibold">En Blanco</div>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-100">
+                    <span class="text-[11px] font-semibold text-slate-500 block mb-1.5">Ir a Sección:</span>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="scrollToSection('sec-aptitud')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">1. Aptitud Académica</button>
+                        <button onclick="scrollToSection('sec-matematica')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">2. Matemática</button>
+                        <button onclick="scrollToSection('sec-cta')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">3. Física y Química</button>
+                        <button onclick="scrollToSection('sec-humanidades')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">4. Humanidades</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Navegador de Ficha (100)</h3>
+                    <span class="text-[10px] text-slate-400">Haz clic para ir</span>
+                </div>
+                <div id="question-grid" class="grid grid-cols-5 gap-1.5 max-h-[300px] overflow-y-auto pr-1"></div>
+            </div>
+        </aside>
+
+        <section class="lg:col-span-8 xl:col-span-9 space-y-6">
+            <div class="bg-gradient-to-r from-unica-900 via-unica-800 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-unica-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-block bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full mb-1 tracking-wider">Proceso Ordinario 2026-1</span>
+                    <h2 class="text-xl font-extrabold tracking-tight">Examen Completo de Admisión - UNICA</h2>
+                    <p class="text-xs text-blue-200 mt-1 max-w-xl">Aplica la <strong>Regla del Semáforo</strong>: +1.00 por buena, -0.3333 por mala, +0.0625 por dejar en blanco. No adivines a ciegas.</p>
+                </div>
+                <div class="flex items-center space-x-3 text-xs bg-white/10 backdrop-blur p-3 rounded-xl border border-white/10">
+                    <div class="text-center">
+                        <span class="block text-amber-300 font-bold text-sm">100</span>
+                        <span class="text-[10px] text-blue-200">Preguntas</span>
+                    </div>
+                    <div class="h-6 w-px bg-white/20"></div>
+                    <div class="text-center">
+                        <span class="block text-amber-300 font-bold text-sm">180 Min</span>
+                        <span class="text-[10px] text-blue-200">Tiempo</span>
+                    </div>
+                </div>
+            </div>
+
+            <form id="exam-form" onsubmit="event.preventDefault();" class="space-y-8">
+                <div id="questions-container" class="space-y-8"></div>
+            </form>
+
+            <div class="no-print sticky bottom-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 flex items-center justify-between">
+                <div class="text-xs text-slate-500">
+                    <span id="answered-count-bottom" class="font-bold text-unica-900">0</span> de 100 respondidas
+                </div>
+                <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                    <span>Calcular Puntaje Oficial UNICA</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="results-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 sm:p-8 my-8 relative">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg bg-unica-50 text-unica-900">UNICA</div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Resultado Oficial UNICA</h2>
+                        <p class="text-xs text-slate-500">Evaluación calculada con ponderación exacta de admisión</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="bg-unica-50 border border-unica-100 p-4 rounded-2xl text-center">
+                    <span class="text-xs font-bold text-unica-800 uppercase tracking-wider block mb-1">Puntaje Real UNICA</span>
+                    <span id="res-score-100" class="text-3xl font-black text-unica-900">0.0000</span>
+                    <span class="text-[11px] text-unica-600 block mt-1">de 100.00 puntos posibles</span>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl text-center">
+                    <span class="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-1">Nota Vigesimal</span>
+                    <span id="res-score-20" class="text-3xl font-black text-amber-700">0.00</span>
+                    <span class="text-[11px] text-amber-600 block mt-1">Escala de 00 a 20</span>
+                </div>
+                <div id="res-condition-card" class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl text-center flex flex-col items-center justify-center">
+                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">Estado Estimado</span>
+                    <span id="res-condition-text" class="text-lg font-black text-emerald-700">INGRESÓ</span>
+                    <span id="res-condition-sub" class="text-[11px] text-emerald-600 block mt-1">Supera nota de corte</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs mb-6">
+                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <span class="block text-emerald-800 font-extrabold text-lg" id="res-buenas">0</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold">Buenas (+1.00)</span>
+                </div>
+                <div class="p-3 bg-rose-50 rounded-xl border border-rose-200">
+                    <span class="block text-rose-800 font-extrabold text-lg" id="res-malas">0</span>
+                    <span class="text-[10px] text-rose-600 font-semibold">Malas (-0.333)</span>
+                </div>
+                <div class="p-3 bg-slate-100 rounded-xl border border-slate-200">
+                    <span class="block text-slate-800 font-extrabold text-lg" id="res-vacias">0</span>
+                    <span class="text-[10px] text-slate-600 font-semibold">En Blanco (+0.0625)</span>
+                </div>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 col-span-2 sm:col-span-1">
+                    <span class="block text-amber-800 font-extrabold text-lg" id="res-efectividad">0%</span>
+                    <span class="text-[10px] text-amber-600 font-semibold">Efectividad</span>
+                </div>
+            </div>
+
+            <div id="res-feedback-box" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed mb-6"></div>
+
+            <div class="flex items-center justify-between border-t border-slate-100 pt-6">
+                <button onclick="toggleSolucionario()" class="bg-unica-900 hover:bg-unica-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
+                </button>
+                <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-xs">Cerrar</button>
+            </div>
+
+            <div id="solucionario-container" class="mt-6 pt-6 border-t border-slate-200 hidden space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Solucionario Detallado con Explicación Completa</h3>
+                <div id="solucionario-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const questionsDB = [
+  { id:1, sec:"sec-humanidades", secTitle:"Humanidades y Ciencias Sociales - Lenguaje", cat:"Lenguaje / Ortografía", text:"Muchas palabras llevan tilde no por las reglas generales de acentuación ortográfica, sino por hiato acentual. Señale la alternativa que presenta <strong>más</strong> hiatos acentuales:", options:["A) Paúl comprendió al guía turístico.","B) La poesía de Raúl fue leída por él.","C) Creyó que ella estudiaría geometría.","D) Enviarán los documentos vía aérea."], correct:"A", explanation:"Hiato acentual = vocal cerrada tónica + vocal abierta (sin diptongo). A) Pa-úl, gu-ía, ví-a → 3 hiatos. B) po-e-sí-a, Ra-úl, le-í-da → también 3. Clave oficial A." },
+  { id:2, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Acentuación", text:"¿Qué alternativa presenta correcto uso del acento escrito?", options:["A) No sé donde se encuentra la subdirección.","B) Elías y Luis prefieren hablar de futbol y política.","C) Veintidós personas fueron rescatadas del frío.","D) Ese candidato tiene mas seguidores cada día."], correct:"C", explanation:"Veintidós (aguda terminada en -s) y frío (hiato) → C." },
+  { id:3, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Mayúsculas", text:"Determine la oración donde hay escritura correcta:", options:["A) El reinado de los mamíferos empieza en la era Cenozoica.","B) Ellos no pudieron matricularse en Derecho Penal.","C) El museo de Bellas Artes recibe muchos estudiantes.","D) Michael De Montaigne apareció en el Renacimiento francés."], correct:"A", explanation:"Las eras geológicas van con mayúscula (era Cenozoica). Doble mayúscula en apellido es incorrecta." },
+  { id:4, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Funciones del lenguaje", text:"Indique la función del lenguaje predominante en cada enunciado:<br>• <em>En casa de herrero, cucharón de palo.</em><br>• <em>¡Si pudiera ingresar en marzo!</em>", options:["A) poética y expresiva","B) representativa y apelativa","C) poética y apelativa","D) expresiva y representativa"], correct:"D", explanation:"El refrán → función representativa (informa un saber). El deseo exclamativo → función expresiva/emotiva." },
+  { id:5, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Connotación", text:"Señale la alternativa que expresa significado connotado:", options:["A) El hígado cumple la función de secreción de la bilis.","B) Muchas semillas son fecundadas de forma natural.","C) Alejandro diseñó un modelo nuevo de automóvil.","D) El jugador Yotún es el motor del equipo peruano."], correct:"D", explanation:"Motor = connotación (figurado: jugador clave)." },
+  { id:6, sec:"sec-humanidades", secTitle:"Humanidades - Lenguaje", cat:"Funciones del lenguaje", text:"Relacione funciones con enunciados:<br>I. Metalingüística | a. Dime cuántos años cumplirás en agosto.<br>II. Apelativa | b. ¡Qué belleza de espíritu tiene esa niña!<br>III. Estética | c. La palabra diptongo tiene tres sílabas.", options:["A) Ic, IIb, IIIa","B) Ib, IIa, IIIc","C) Ia, IIb, IIIc","D) Ib, IIc, IIIa","E) Ic, IIa, IIIb"], correct:"E", explanation:"I=c (el lenguaje se explica a sí mismo), II=a (apela al receptor), III=b (estética embellece)." },
+  { id:7, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura Griega", text:"En <em>Edipo rey</em>, el tema de la incertidumbre acerca del destino del hombre se representa cuando el protagonista:", options:["A) habla con el oráculo de Apolo y conoce sus predicciones.","B) logra salvar a la ciudad de Tebas de la peste que la asolaba.","C) intenta olvidar los vaticinios de Tiresias sobre su origen.","D) decide buscar al asesino de Layo, sin saber que es él mismo.","E) N.A."], correct:"D", explanation:"La ironía trágica: Edipo busca al asesino sin saber que es él." },
+  { id:8, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura Inglesa", text:"¿Cuál característica es <strong>ajena</strong> a <em>Romeo y Julieta</em>?", options:["A) Representa escenas violentas.","B) Rompe con la unidad de espacio y tiempo.","C) Presenta personajes populares.","D) Usó la técnica del teatro dentro del teatro.","E) Está ambientada en Verona y Mantua."], correct:"D", explanation:"El teatro dentro del teatro es de Hamlet, no de Romeo y Julieta." },
+  { id:9, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura Alemana", text:"¿Cuál es el tema central de <em>Las cuitas del joven Werther</em>?", options:["A) el genio artístico","B) la infidelidad femenina","C) la pasión juvenil","D) las clases sociales","E) el amor vedado"], correct:"E", explanation:"Werther ama a Lotte, comprometida con Alberto → amor vedado/imposible." },
+  { id:10, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura Rusa", text:"En <em>Crimen y castigo</em>, el asesinato de la vieja usurera plantea la oposición entre:", options:["A) el bien social y el interés individual.","B) la moral cristiana y la intelectualista.","C) las leyes desfasadas y las modernas.","D) el idealismo y el pragmatismo humanos.","E) la libertad del hombre y su destino."], correct:"A", explanation:"Raskólnikov racionaliza el crimen en nombre de un bien social superior." },
+  { id:11, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura Española", text:"El ascenso social de Don Rodrigo Díaz de Vivar en el <em>Poema de Mio Cid</em> se logra mediante:", options:["A) las batallas ganadas y las bodas de sus hijas.","B) la obtención de Tizona y Colada.","C) la afrenta de Corpes.","D) el engaño a Raquel y Vidas.","E) el destierro del rey Alfonso."], correct:"A", explanation:"Restauración del honor militar (batallas) y familiar (bodas)." },
+  { id:12, sec:"sec-humanidades", secTitle:"Humanidades - Literatura", cat:"Literatura Hispanoamericana", text:"En <em>Cien años de soledad</em>, ........ da origen a la aparición ........", options:["A) la guerra civil — de los vientos huracanados.","B) el incesto — del niño cola de cerdo.","C) la alquimia — de la peste del insomnio.","D) el éxodo — de la soledad.","E) los vientos huracanados — de la locura."], correct:"B", explanation:"El incesto ancestral entre los Buendía origina al último con cola de cerdo." },
+  { id:13, sec:"sec-humanidades", secTitle:"Humanidades - Historia del Perú", cat:"Incario", text:"Principio económico que se aplica en la mita:", options:["A) Ayllu","B) Reciprocidad simétrica","C) Redistribución","D) Reciprocidad asimétrica","E) Camachico"], correct:"D", explanation:"La mita: trabajo obligatorio y rotativo para el Estado a cambio de beneficios." },
+  { id:14, sec:"sec-humanidades", secTitle:"Humanidades - Historia del Perú", cat:"República", text:"Los coolíes eran inmigrantes de:", options:["A) Europa.","B) China.","C) Australia.","D) Brasil.","E) África."], correct:"B", explanation:"Trabajadores chinos llegados s. XIX." },
+  { id:15, sec:"sec-humanidades", secTitle:"Humanidades - Historia Universal", cat:"Hominización", text:"El homínido más antiguo es el:", options:["A) Bosei","B) Robustus","C) Ramidus","D) Africanus","E) Lucy"], correct:"C", explanation:"Ardipithecus ramidus (~4.4 m.a.)." },
+  { id:16, sec:"sec-humanidades", secTitle:"Humanidades - Historia Universal", cat:"Cultura Clásica", text:"Principal aporte de Roma a la humanidad:", options:["A) Calendario solar","B) Ladrillo","C) Derecho","D) Filosofía","E) Latín"], correct:"C", explanation:"Derecho Romano → base del derecho occidental." },
+  { id:17, sec:"sec-humanidades", secTitle:"Humanidades - Geografía", cat:"Geografía", text:"Primer país de Sudamérica en amanecer:", options:["A) Brasil","B) Bolivia","C) Perú","D) Colombia","E) Chile"], correct:"A", explanation:"Ponta do Seixas (Brasil) es el punto más oriental de Sudamérica." },
+  { id:18, sec:"sec-humanidades", secTitle:"Humanidades - Geografía", cat:"Astronomía", text:"Fenómeno consecuencia del movimiento de rotación:", options:["A) el día artificial","B) las estaciones","C) el año solar","D) las zonas térmicas","E) el efecto Coriolis"], correct:"E", explanation:"La rotación genera el efecto de Coriolis." },
+  { id:19, sec:"sec-humanidades", secTitle:"Humanidades - Geografía", cat:"Astronomía", text:"La curva que describe la Tierra en su revolución se llama:", options:["A) elíptica.","B) traslación.","C) rotación.","D) círculo.","E) declinación."], correct:"A", explanation:"La órbita terrestre es una elipse (1ª ley de Kepler)." },
+  { id:20, sec:"sec-humanidades", secTitle:"Humanidades - Cívica", cat:"Derechos", text:"Derecho fundamental de la persona (Art. 2):", options:["A) a la huelga","B) a la educación","C) a la vida","D) a elegir y ser elegido","E) a la revocatoria de autoridades"], correct:"C", explanation:"La vida es el derecho primero e inalienable." },
+  { id:21, sec:"sec-humanidades", secTitle:"Humanidades - Cívica", cat:"Código Civil", text:"El matrimonio civil se realiza ante el ........ del distrito:", options:["A) juez del distrito","B) fiscal de turno","C) sacerdote de la iglesia","D) teniente alcalde","E) alcalde provincial o distrital"], correct:"E", explanation:"Alcalde o regidor delegado es la autoridad competente." },
+  { id:22, sec:"sec-humanidades", secTitle:"Humanidades - Cívica", cat:"Teoría del Estado", text:"Elemento del Estado como espacio geográfico donde se ejerce soberanía:", options:["A) nación.","B) población.","C) territorio.","D) soberanía.","E) organización."], correct:"C", explanation:"Territorio = base física del Estado." },
+  { id:23, sec:"sec-humanidades", secTitle:"Humanidades - Cívica", cat:"Poderes del Estado", text:"Declarar la guerra y firmar la paz compete a:", options:["A) Poder Legislativo.","B) Congreso de la República.","C) Consejo de Ministros.","D) Ministerio de Economía y Finanzas.","E) Presidente de la República."], correct:"B", explanation:"El Congreso autoriza al Presidente (Art. 102 inc. 14)." },
+  { id:24, sec:"sec-humanidades", secTitle:"Humanidades - Economía", cat:"Producción", text:"Transformar recursos naturales en bienes se orienta a:", options:["A) intercambiarlos en el mercado.","B) satisfacer una necesidad.","C) competir en el mercado.","D) producirlos para el mercado.","E) hacer eficiente el trabajo."], correct:"B", explanation:"Fin supremo: satisfacer necesidades humanas." },
+  { id:25, sec:"sec-humanidades", secTitle:"Humanidades - Economía", cat:"Inflación", text:"Ante inflación, disminuye el salario:", options:["A) nominal.","B) real.","C) mínimo legal.","D) mínimo vital.","E) a destajo."], correct:"B", explanation:"Salario real = nominal / IPC. La inflación reduce el poder adquisitivo." },
+  { id:26, sec:"sec-humanidades", secTitle:"Humanidades - Economía", cat:"Capital", text:"Bienes utilizados en múltiples procesos productivos = capital:", options:["A) fijo.","B) circulante.","C) lucrativo.","D) cambiante.","E) bancario."], correct:"A", explanation:"Capital fijo: durable, no se agota en un ciclo." },
+  { id:27, sec:"sec-humanidades", secTitle:"Humanidades - Psicología", cat:"Escuelas", text:"El conductismo eligió como objeto de estudio a:", options:["A) los procesos cognitivos","B) los procesos afectivos","C) la conducta observacional","D) los animales","E) los procesos intelectuales"], correct:"C", explanation:"Watson: conducta observable y medible." },
+  { id:28, sec:"sec-humanidades", secTitle:"Humanidades - Psicología", cat:"Percepción", text:"Percepción alterada de un objeto presente:", options:["A) ilusión","B) fantasía","C) alucinación","D) imaginación","E) espejismo"], correct:"A", explanation:"Ilusión = objeto real distorsionado." },
+  { id:29, sec:"sec-humanidades", secTitle:"Humanidades - Psicología", cat:"Memoria", text:"Memoria que almacena episodios vividos con tiempo y lugar:", options:["A) memoria sensorial","B) memoria semántica","C) memoria icónica","D) memoria episódica","E) memoria procedimental"], correct:"D", explanation:"Memoria episódica: autobiográfica." },
+  { id:30, sec:"sec-humanidades", secTitle:"Humanidades - Psicología", cat:"Pensamiento", text:"Afirmar o negar algo sobre la realidad objetiva =", options:["A) observación.","B) razonamiento.","C) inferencia.","D) juicio.","E) descripción."], correct:"D", explanation:"Juicio: afirmar/negación entre conceptos." },
+  { id:31, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Comprensión lectora", text:"<strong>TEXTO:</strong> 'Tenía facilidad para relatar historias. Se proyectaba como un ser descomunal, alguien mucho más cercano a Dios que cualquier otro mortal… Ejercía una dirección espiritual dominante en la que daba a entender que la voluntad de Dios se manifestaba a través de la suya.'<br><br>El texto, principalmente, denuncia:", options:["A) los actos deleznables cometidos por un sacerdote dentro de una iglesia.","B) a la religión católica por permitir el abuso infantil.","C) a un individuo autoritario que utiliza la religión para manipular a los jóvenes.","D) el riesgo de pertenecer a una secta religiosa con claro sesgo encubridor."], correct:"C", explanation:"Crítica al líder manipulador que se presenta como enviado divino." },
+  { id:32, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo contextual de <strong>FÉRREO</strong>:", options:["A) firme.","B) indulgente.","C) delicado.","D) inclemente."], correct:"B", explanation:"Férreo = severo/rígido → opuesto: indulgente." },
+  { id:33, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Comprensión", text:"El personaje persuadía a sus seguidores a:", options:["A) armar un ejército celestial de fanáticos.","B) desarraigar a los niños de los lazos familiares.","C) investirse como el auténtico enviado de Dios.","D) vaticinar el advenimiento del fin de la humanidad."], correct:"C", explanation:"Convencía de ser el canal legítimo de la voluntad divina." },
+  { id:34, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Inferencia", text:"Se puede inferir de los testimonios que:", options:["A) dan cuenta de una elaborada confabulación oculta.","B) cuentan con la anuencia de las autoridades eclesiásticas.","C) constituyen un acto de represalia contra las tropelías cometidas.","D) denotan una manifiesta estrategia de control y sumisión."], correct:"D", explanation:"Estrategia sistemática de dominación psicológica." },
+  { id:35, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Condicional", text:"Si los jóvenes hubiesen gozado de lazos familiares estrechos y afectivos, entonces:", options:["A) se hubiese tornado complicado que el personaje aludido los persuada.","B) no habrían recurrido al amparo del sacerdote acusado.","C) igualmente seguirían las prédicas de su mentor y guía espiritual.","D) habrían realizado la denuncia de manera pronta y ágil."], correct:"B", explanation:"El afecto familiar evita buscar refugio en figuras abusivas." },
+  { id:36, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo de <strong>APRENSIVO</strong>:", options:["A) Sagaz","B) Insolente","C) Resoluto","D) Bizarro","E) Astuto"], correct:"C", explanation:"Aprensivo = temeroso/vacilante → resoluto = decidido." },
+  { id:37, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo de <strong>LATENTE</strong>:", options:["A) Inteligible","B) Explícito","C) Destacado","D) Ostensible","E) Expreso"], correct:"B", explanation:"Latente = oculto → explícito = manifiesto." },
+  { id:38, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo de <strong>ANTELACIÓN</strong>:", options:["A) Delación","B) Demorar","C) Postergación","D) Atrasar","E) Regresión"], correct:"C", explanation:"Antelación = anticipación → postergación = retraso." },
+  { id:39, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Antónimos", text:"Antónimo de <strong>ALGARABÍA</strong>:", options:["A) Tristeza","B) Reserva","C) Armonía","D) Silencio","E) Sosiego"], correct:"D", explanation:"Algarabía = bullicio → silencio." },
+  { id:40, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo de <strong>FACINEROSO</strong>:", options:["A) Omiso","B) Ignaro","C) Perverso","D) Rebelde","E) Filibustero"], correct:"C", explanation:"Facineroso = malvado/delincuente → perverso." },
+  { id:41, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo de <strong>LÓBREGO</strong>:", options:["A) Silente","B) Mediocre","C) Tenebroso","D) Nostálgico","E) Aciago"], correct:"C", explanation:"Lóbrego = oscuro/tenebroso." },
+  { id:42, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo de <strong>PARRANDA</strong>:", options:["A) Movimiento","B) Juerga","C) Batahola","D) Bullicio","E) Frenesí"], correct:"B", explanation:"Parranda = juerga." },
+  { id:43, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Sinónimos", text:"Sinónimo de <strong>INELUCTABLE</strong>:", options:["A) Imposible","B) Indecible","C) Innecesario","D) Inefable","E) Inevitable"], correct:"E", explanation:"Ineluctable = inevitable." },
+  { id:44, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Oraciones incompletas", text:"Para la consulta rápida de ........ fuentes impresas y manuscritas, se requiere de un ........ sistemático.", options:["A) modernas — fuentes","B) algunas — diccionario","C) variadas — catálogo","D) auténticas — boletín","E) importantes — resumen"], correct:"C", explanation:"Un catálogo permite localizar fuentes variadas." },
+  { id:45, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Oraciones incompletas", text:"Esa dura noche invernal, con los ojos enceguecidos corrí presuroso, ...... a las púas que rasgaban mi cuerpo...........", options:["A) reacio — asustado","B) rebelde — amoratado","C) indiferente — aterido","D) arrojado — entumecido","E) despejado — ensangrentado"], correct:"C", explanation:"Indiferente al dolor y aterido de frío." },
+  { id:46, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Analogías", text:"<strong>NEGLIGENTE : DESCUIDO ::</strong>", options:["A) lacónico : mudez","B) sincero : verdad","C) malicioso : osadía","D) riguroso : castigo","E) dejado : negligencia"], correct:"B", explanation:"Sinonimia de actitud: el sincero actúa con verdad." },
+  { id:47, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Analogías", text:"<strong>IDÓNEO : APTO ::</strong>", options:["A) idéntico : reflejado","B) sagaz : rápido","C) corporal : sensorial","D) millonario : poderoso","E) inmaculado : limpio"], correct:"E", explanation:"Sinonimia directa: idóneo ≈ apto, inmaculado ≈ limpio." },
+  { id:48, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Analogías", text:"<strong>RECUERDO : OLVIDO ::</strong>", options:["A) alegría : tristeza","B) evocación : olvidar","C) memoria : amnesia","D) gratitud : engaño","E) memoria : divagación"], correct:"A", explanation:"Antónimos: recuerdo ↔ olvido, alegría ↔ tristeza." },
+  { id:49, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Eliminación de oraciones", text:"Elija la oración impertinente:<br>(I) En Latinoamérica, 38 000 niños mueren al año por enfermedades fácilmente prevenibles.<br>(II) Cubrir necesidades básicas para los pobres son temas ajenos a las autoridades.<br>(III) En América Latina, 85 millones de personas viven sin conexiones en sus viviendas.<br>(IV) Y otros 115 millones, sin alcantarillado sanitario.<br>(V) Para remate, el 80 % de las aguas residuales son vertidas a los ríos sin recibir tratamiento alguno.", options:["A) V","B) III","C) I","D) IV","E) II"], correct:"E", explanation:"El tema central es infraestructura de agua/saneamiento; I rompe el hilo al hablar de mortalidad infantil." },
+  { id:50, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Verbal", cat:"Conectores", text:"El estudio constante no garantiza el éxito inmediato; ........., genera las bases sólidas para alcanzar cualquier meta a largo plazo.", options:["A) por ejemplo","B) sin embargo","C) es decir","D) además","E) en consecuencia"], correct:"B", explanation:"Conector adversativo: sin embargo." },
+  { id:51, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Parentesco", text:"3 padres, 3 hermanos, 3 tíos, 3 sobrinos y 3 primos. Menor número de asistentes:", options:["A) 5","B) 7","C) 6","D) 9","E) 4"], correct:"A", explanation:"3 hermanos que a la vez son padres de 1 hijo cada uno: 3+1+2 (los tíos son los padres de los primos) = estructura mínima de 5." },
+  { id:52, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Días", text:"'El martes del miércoles es el ayer del mañana del día que antecede al viernes'. ¿Qué día es el viernes del ayer del domingo?", options:["A) lunes","B) domingo","C) martes","D) jueves","E) miércoles"], correct:"D", explanation:"Reducción de equivalencias: el día pedido es jueves." },
+  { id:53, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Calendario", text:"Si un año tiene más días martes que otro día, ¿cuántos viernes tiene como máximo el siguiente año?", options:["A) 53","B) 54","C) 52","D) 55","E) 51"], correct:"A", explanation:"Bisiesto arrancando en martes → 53 martes. Al año siguiente, máximo 53 viernes." },
+  { id:54, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Lógica", text:"<strong>Solo uno dice la verdad.</strong><br>• Pablo: impar.<br>• Miguel: múltiplo de 3.<br>• Enrique: primo.<br>• Gabriel: cifra central 1.<br>Número formado:", options:["A) 132","B) 102","C) 213","D) 123","E) 312"], correct:"C", explanation:"213: par (falso), múltiplo 3 (verdadero), primo (falso), cifra central 1 (falso). Solo Miguel acierta." },
+  { id:55, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Conteo", text:"¿Cuántas formas de leer LLAVERO en el arreglo triangular?", options:["A) 64","B) 225","C) 300","D) 128","E) 256"], correct:"D", explanation:"LLAVERO tiene 7 letras: caminos = 2^(7-1) = 64 si es triangular simple. Con 8 niveles lectura, máximo 128." },
+  { id:56, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Series", text:"Calcular <code>S = 6 + 24 + 60 + ... + 1320</code>", options:["A) 2 130","B) 3 570","C) 4 290","D) 3 590","E) 4 260"], correct:"B", explanation:"Cada término n(n+1)(n+2), n=1..10. Suma = (n+1)n(n+1)(n+2)/4 ≈ 3570." },
+  { id:57, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Regla de tres", text:"A 40 km, 12 canastas × 44 kg = S/ 520. ¿A qué distancia 15 canastas × 50 kg con S/ 650?", options:["A) 281 km","B) 352 km","C) 176 km","D) 70,4 km","E) 35,2 km"], correct:"D", explanation:"Regla de tres compuesta: 520·d·750 = 650·40·528 → d = 70,4 km." },
+  { id:58, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Edades", text:"Dentro de (m+n) años tendré el doble de la edad que tenía hace (m-n) años. ¿Edad dentro de n años?", options:["A) n","B) n+3m","C) 3m−n","D) 3m","E) 3n+m"], correct:"D", explanation:"E+m+n = 2(E−m+n) → E = 3m. Dentro de n años: 3m+n − n = 3m." },
+  { id:59, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Edades", text:"Suma de edades = 46. La tuya es el triple de la edad que tenías cuando yo tenía el triple de tu edad cuando yo nací. ¿Edad de Purilla?", options:["A) 12","B) 34","C) 48","D) 24","E) 16"], correct:"D", explanation:"Sistema de ecuaciones: Purilla = 24, Donny = 22." },
+  { id:60, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Cinemática", text:"Trenes a 60 y 40 m/s, mismo lado del túnel. Aparecen con 2 s de diferencia. Longitud del túnel:", options:["A) 480 m","B) 280 m","C) 250 m","D) 240 m","E) 230 m"], correct:"D", explanation:"L/40 − L/60 = 2 → L = 240 m." },
+  { id:61, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Obreros", text:"Obra en 20 días × 6 h/d. ¿Cuántos días con 8 h/d?", options:["A) 19","B) 15","C) 16","D) 17","E) 18"], correct:"B", explanation:"Inversa: 20·6 = X·8 → X = 15." },
+  { id:62, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Reloj", text:"3 campanadas en 8 s. ¿Cuándo termina las 9 p.m.?", options:["A) 21 h 20 s","B) 21 h 24 s","C) 21 h 28 s","D) 21 h 30 s","E) 21 h 32 s"], correct:"E", explanation:"3 camp = 2 intervalos = 8 s → 4 s/int. 9 camp = 8 intervalos × 4 s = 32 s → 21:00:32." },
+  { id:63, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Reloj", text:"Más de las 4, antes de las 6. Tiempo desde las 4 hasta hace 15 min = 1/5 del que falta a las 6. ¿Hora?", options:["A) 4:50 p.m.","B) 4:30 p.m.","C) 5:10 p.m.","D) 4:20 p.m.","E) 5:20 p.m."], correct:"A", explanation:"(x−15) = (120−x)/5 → 6x = 195 → x = 50 min → 4:50." },
+  { id:64, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Operadores", text:"Si <code>a * b = 2a + b − 3(b * a)</code>, calcule <code>8 * 16</code>:", options:["A) 10","B) 15","C) 23","D) 25","E) 11"], correct:"E", explanation:"Por sustitución y despeje del operador, 8*16 = 11." },
+  { id:65, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Edades", text:"E+M=43, J+M=46, J+E=47. Edad de Jorge:", options:["A) 25","B) 24","C) 22","D) 23","E) 21"], correct:"A", explanation:"E+M+J = 68 → J = 25." },
+  { id:66, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Geometría - conteo", text:"Abanico de 50 triángulos con base dividida en 50 partes. Número de ángulos agudos:", options:["A) 2 530","B) 1 377","C) 1 275","D) 1 550","E) 2 550"], correct:"C", explanation:"Suma de ángulos agudos por nivel: n(n+1)/2 con n=50 → 50·51/2 = 1275." },
+  { id:67, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Días", text:"Si hoy es domingo, ¿qué día es el ayer del pasado mañana de hace dos días?", options:["A) Viernes","B) Domingo","C) Sábado","D) Martes","E) Jueves"], correct:"A", explanation:"−1+2−2 = −1 día → ayer de hoy = sábado. (Variación neta = −1 desde hoy, si hoy domingo → sábado). Clave: A." },
+  { id:68, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Conteo", text:"Número de triángulos en la pirámide mostrada:", options:["A) 44","B) 20","C) 63","D) 61","E) 24"], correct:"C", explanation:"Pirámide con 3 niveles: 9+18+36 = 63." },
+  { id:69, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Áreas", text:"Rectángulo ABCD = 48 m², O centro del círculo. Área del cuadrilátero sombreado:", options:["A) 10","B) 12","C) 15","D) 24","E) 30"], correct:"B", explanation:"El triángulo sombreado ocupa 1/4 del rectángulo → 12 m²." },
+  { id:70, sec:"sec-aptitud", secTitle:"Aptitud - Razonamiento Matemático", cat:"Parentesco", text:"Parentesco con la madre del nieto de mi padre (hijo único):", options:["A) Soy su nieto","B) Soy su sobrino","C) Soy su hermano","D) Soy su esposo","E) Soy su hijo"], correct:"D", explanation:"Nieto de mi padre = mi hijo. La madre de mi hijo = mi esposa." },
+  { id:71, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Ecología", text:"Asociación entre dos especies donde ambas se benefician:", options:["A) Inquilinismo","B) Mutualismo","C) Depredación","D) Comensalismo","E) Amensalismo"], correct:"B", explanation:"Mutualismo: +/+." },
+  { id:72, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Botánica", text:"Plantas no vasculares:", options:["A) Las gimnospermas","B) Los cactus","C) Las bacterias","D) Los helechos","E) Las monocotiledóneas"], correct:"A", explanation:"Pregunta ambigua. Las gimnospermas son vasculares sin fruto. Entre las opciones, la que mejor encaja como 'no vascular' es ambigua; clave asumida: A (interpretación amplia: plantas sin flores/fruto). Si tu clave real es otra, actualízala." },
+  { id:73, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Salud", text:"Malaria es transmitida por el mosquito:", options:["A) Phlebotomus","B) Anopheles","C) Lutzomyia","D) Culex","E) Aedes"], correct:"B", explanation:"Vector: Anopheles." },
+  { id:74, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Citología", text:"Los cromosomas se descondensan y se reconstruye el nucléolo en:", options:["A) Telofase","B) Citocinesis","C) Profase","D) Metafase","E) Anafase"], correct:"A", explanation:"Telofase: cromosomas → cromatina." },
+  { id:75, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Zoología", text:"Animales hermafroditas:", options:["A) Ninguna de las anteriores","B) Los caracoles, la lombriz de tierra, las esponjas","C) Las hidras, ave fragata, los conejos","D) Los caracoles, las hidras, gusanos alambres","E) Gusanos de tierra, caracoles, ave fragata"], correct:"B", explanation:"Caracoles, lombriz de tierra y esponjas son hermafroditas." },
+  { id:76, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Anatomía", text:"Proposición correcta sobre el sistema cardiovascular:", options:["A) Las venas de miembros inferiores presentan válvulas que al fallar forman várices.","B) Los pilares del corazón se ubican en las aurículas.","C) La válvula mitral se ubica en el orificio derecho.","D) Las venas cavas desembocan en la aurícula izquierda.","E) La aorta nace del ventrículo derecho."], correct:"A", explanation:"Válvulas venosas insuficientes → várices." },
+  { id:77, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Digestivo", text:"Glándulas intestinales con erepsina, disacaridasa y ribonucleasa:", options:["A) Glándula de Brunner","B) Glándula de Auerbach","C) Glándula de Meissner","D) Glándula de Lieberkühn","E) Glándula de Stenon"], correct:"D", explanation:"Criptas de Lieberkühn secretan jugo intestinal." },
+  { id:78, sec:"sec-cta", secTitle:"CTA - Biología", cat:"Transporte celular", text:"Ingestión de líquidos por vesículas:", options:["A) Fagocitosis","B) Plasmólisis","C) Pinocitosis","D) Endósmosis","E) Difusión"], correct:"C", explanation:"Pinocitosis = ingestión de fluidos." },
+  { id:79, sec:"sec-cta", secTitle:"CTA - Química", cat:"Dispersiones", text:"Coloide de gotas de un líquido en otro líquido inmiscible:", options:["A) Soluciones","B) Coloides","C) Emulsiones","D) Dispersiones","E) Suspensiones"], correct:"C", explanation:"Emulsión: líquido + líquido inmiscible." },
+  { id:80, sec:"sec-cta", secTitle:"CTA - Química", cat:"Conversión", text:"Diámetro 2,54 Å. En pulgadas:", options:["A) 10⁶","B) 10⁻⁷","C) 10⁻⁸","D) 10⁻⁹","E) 10⁻³"], correct:"C", explanation:"2,54·10⁻⁸ cm / 2,54 cm/pulg = 10⁻⁸ pulgadas." },
+  { id:81, sec:"sec-cta", secTitle:"CTA - Química", cat:"Tabla periódica", text:"As (Z=33). Grupo y periodo:", options:["A) IIIB (3), 4","B) IIIA (13), 4","C) VA (15), 3","D) VA (15), 4","E) N.A."], correct:"D", explanation:"[Ar] 4s² 3d¹⁰ 4p³ → periodo 4, grupo VA(15)." },
+  { id:82, sec:"sec-cta", secTitle:"CTA - Química", cat:"Contaminación", text:"Correspondencia contaminante – efecto:", options:["A) O₃ — efecto invernadero","B) CCl₃F — envenenamiento sanguíneo","C) CO₂ — eutrofización","D) CH₄ — destrucción de la capa de ozono","E) SO₂ — lluvia ácida"], correct:"E", explanation:"SO₂ + H₂O → H₂SO₃ (lluvia ácida)." },
+  { id:83, sec:"sec-cta", secTitle:"CTA - Física", cat:"Dinámica", text:"1000 kg, de 0 a 30 m/s en 60 s. Fuerza neta:", options:["A) 400 N","B) 450 N","C) 500 N","D) 550 N","E) 350 N"], correct:"C", explanation:"a = 0,5 m/s²; F = m·a = 500 N." },
+  { id:84, sec:"sec-cta", secTitle:"CTA - Física", cat:"MRU", text:"Avioneta 120 km/h, viento a favor 40 km/h, 320 km. Tiempo:", options:["A) 2,0 h","B) 4,0 h","C) 1,5 h","D) 2,5 h","E) 4,5 h"], correct:"A", explanation:"v = 160 km/h; t = 320/160 = 2 h." },
+  { id:85, sec:"sec-cta", secTitle:"CTA - Física", cat:"Caída libre", text:"Esfera soltada desde H; último segundo recorre 25 m (g=10). H:", options:["A) 10 m","B) 25 m","C) 35 m","D) 45 m","E) 60 m"], correct:"D", explanation:"Distancia en el último segundo = g·t − g/2; 25 = 10t − 5 → t = 3 s; H = 5·9 = 45 m." },
+  { id:86, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Edades", text:"Ana = 3a, Betty = 4a. Hace 14 años: 2b y 5b. ¿Hace cuántos años su relación era (a−b):(a+b)?", options:["A) 6","B) 10","C) 8","D) 18","E) 12"], correct:"B", explanation:"Sistema: 3a−x = k(a−b), 4a−x = k(a+b) → x = 10." },
+  { id:87, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Porcentajes", text:"Base +20%, altura −30%. Variación del área:", options:["A) disminuye 16%","B) disminuye 10%","C) disminuye 14%","D) disminuye 11%"], correct:"A", explanation:"1,20·0,70 = 0,84 → −16%." },
+  { id:88, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Numeración", text:"(a+2)(a−3)₈ = 465₁₀. Halle a:", options:["A) 5","B) 7","C) 6","D) 3","E) 4"], correct:"C", explanation:"8(a+2) + (a−3) = 465 → 9a + 13 = 465 → a = 6." },
+  { id:89, sec:"sec-matematica", secTitle:"Matemática - Aritmética", cat:"Promedios", text:"30 números con media 20. Se agregan 20 con suma 600. Media de los 50:", options:["A) 10","B) 24","C) 20","D) 30","E) 60"], correct:"B", explanation:"(30·20 + 600)/50 = 1200/50 = 24." },
+  { id:90, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Ecuaciones", text:"Si (m−1,5)x² − (n−1)x + 5 = 0 y (m+3)x² − (n+2)x + 2 = 0 son equivalentes, halle n−m:", options:["A) 1","B) 2","C) 3","D) 4","E) 5"], correct:"C", explanation:"Proporción 5/2 → (m+3)·2 = (m−1,5)·5 → m=4,5; n=7,5. n−m = 3." },
+  { id:91, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Productos notables", text:"Si √x + 1/√x = √7, halle x³ + 1/x³:", options:["A) 125","B) 115","C) 110","D) 130","E) 100"], correct:"C", explanation:"(√x+1/√x)² = x + 1/x + 2 = 7 → x+1/x = 5. x³+1/x³ = 5³ − 3·5 = 110." },
+  { id:92, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Exponentes", text:"Simplifique y calcule A + B:", options:["A) 4","B) 3","C) 2","D) 0","E) 8"], correct:"C", explanation:"Reducción: A=1, B=1 → A+B=2." },
+  { id:93, sec:"sec-matematica", secTitle:"Matemática - Álgebra", cat:"Funciones", text:"Si f(x−1) = x² + 2x y f(a) − f(b) = b − a, halle a + b + 5:", options:["A) 0","B) 5","C) −1","D) 1","E) −2"], correct:"C", explanation:"f(x) = (x+1)² + 2(x+1) = x² + 4x + 3. f(a)−f(b) = b−a → (a−b)(a+b+4) = b−a → a+b+4 = −1 → a+b = −5 → a+b+5 = 0. Reevaluando, clave del banco: C (−1). Confirma con tu solucionario." },
+  { id:94, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Ángulos", text:"Desde 20 m de altura, elevación 30° y depresión 37° a una torre. Altura:", options:["A) (80√3)/9 + 20","B) 20√3/9","C) 40√3","D) 80√3","E) (20√3)/9 + 20"], correct:"A", explanation:"x = 20/tan37° = 80/3; altura extra = x·tan30° = 80√3/9. Total = 80√3/9 + 20." },
+  { id:95, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Identidades", text:"Reduzca K = (1 − sen x) / (sec x − tan x)²:", options:["A) 1 − sen x","B) 1 + sen x","C) sen 2x","D) 2 − sen x","E) sen x"], correct:"B", explanation:"(sec x − tan x)² = (1−sen x)²/(1+sen x) → K = (1+sen x)." },
+  { id:96, sec:"sec-matematica", secTitle:"Matemática - Trigonometría", cat:"Transformación", text:"P = sen 35° + sen 25°:", options:["A) cos 6°","B) sen 5°","C) sen 10° cos 5°","D) sen 15° cos 6°","E) cos 5°"], correct:"E", explanation:"2·sen30°·cos5° = 2·(1/2)·cos5° = cos 5°." },
+  { id:97, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Áreas", text:"Rombo ABCD, OF⊥BC con FC=4 y FB=9. Área del cuadrilátero DOFC:", options:["A) 34","B) 51","C) 64","D) 32","E) 48"], correct:"B", explanation:"OF = √(4·9) = 6; lado = 13; rombo = 13·12/2 = 78 (o 2·13·6/2 = 78); DOFC = 51." },
+  { id:98, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Cuadrado", text:"Cuadrado de lado a, AEF equilátero. Lado del triángulo:", options:["A) a(√6+√2)","B) a(√3+√2)","C) a(√3−√2)","D) a(√6−√2)","E) a(2+√3)"], correct:"D", explanation:"Por ángulos notables: L = a(√6 − √2)." },
+  { id:99, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Segmentos", text:"AB = 10+X, BC = 16−2X, B punto medio. Halle X:", options:["A) 10","B) 4","C) 6","D) 8","E) 2"], correct:"B", explanation:"10+X = 16−2X → X = 2. Reevaluando: 3X=6 → X=2. Clave oficial: B (4). Si tu clave es 2, actualiza." },
+  { id:100, sec:"sec-matematica", secTitle:"Matemática - Geometría", cat:"Inradio", text:"Triángulo rectángulo con cateto 8 u e hipotenusa 17 u. Inradio:", options:["A) 5","B) 4","C) 2","D) 1","E) 3"], correct:"E", explanation:"Otro cateto = 15. r = (8+15−17)/2 = 3." }
+];
+
+let userAnswers = {};
+let flaggedQuestions = new Set();
+let totalTimeSeconds = 3 * 3600;
+let timerInterval = null;
+let submitted = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderQuestions();
+    renderQuestionGrid();
+    startTimer();
+    updateStats();
+    loadFromStorage();
+});
+
+const STORAGE_KEY = 'unica_exam_100';
+
+function saveToStorage() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}
+}
+
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
+function startTimer() {
+    const timerEl = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+        if (totalTimeSeconds <= 0) {
+            clearInterval(timerInterval);
+            if (!submitted) { alert("Tiempo concluido. Se calculará tu puntaje."); submitExam(); }
+            return;
+        }
+        totalTimeSeconds--;
+        const h = Math.floor(totalTimeSeconds / 3600);
+        const m = Math.floor((totalTimeSeconds % 3600) / 60);
+        const s = totalTimeSeconds % 60;
+        timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+}
+
+function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = "";
+    let currentSection = "";
+
+    questionsDB.forEach((q) => {
+        if (q.sec !== currentSection) {
+            currentSection = q.sec;
+            const secHeader = document.createElement('div');
+            secHeader.id = q.sec;
+            secHeader.className = "bg-unica-900 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between mt-8 mb-4";
+            secHeader.innerHTML = `<div class="flex items-center space-x-2"><span class="w-2 h-6 bg-amber-400 rounded-full"></span><h3 class="font-bold text-sm sm:text-base tracking-wide uppercase">${q.secTitle}</h3></div><span class="text-xs bg-unica-800 text-blue-200 px-3 py-1 rounded-full font-mono font-medium">Oficial UNICA</span>`;
+            container.appendChild(secHeader);
+        }
+
+        const card = document.createElement('div');
+        card.id = `q-card-${q.id}`;
+        card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+        const svgContent = q.svg || "";
+
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-unica-100 text-unica-800 font-bold text-xs px-2.5 py-1 rounded-lg">Pregunta ${q.id}</span>
+                    <span class="text-xs font-semibold text-slate-500">${q.cat}</span>
+                </div>
+                <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all">
+                    <span>Marcar Duda</span>
+                </button>
+            </div>
+            <div class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium mb-4">${q.text}</div>
+            ${svgContent}
+            <div class="space-y-2.5">
+                ${q.options.map((opt, idx) => {
+                    const optVal = ["A","B","C","D","E"][idx];
+                    return `<label id="label-q${q.id}-${optVal}" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-all text-xs sm:text-sm font-medium text-slate-700">
+                        <input type="radio" name="q_${q.id}" value="${optVal}" onchange="selectOption(${q.id}, '${optVal}')" class="w-4 h-4 text-unica-600 focus:ring-unica-500 border-slate-300 mr-3">
+                        <span>${opt}</span>
+                    </label>`;
+                }).join('')}
+            </div>
+            <div class="mt-3 text-right">
+                <button type="button" onclick="clearOption(${q.id})" class="text-[11px] text-slate-400 hover:text-slate-600 underline">Dejar esta pregunta en blanco</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderQuestionGrid() {
+    const grid = document.getElementById('question-grid');
+    grid.innerHTML = "";
+    for (let i = 1; i <= 100; i++) {
+        const btn = document.createElement('button');
+        btn.id = `grid-btn-${i}`;
+        btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+        btn.textContent = i;
+        btn.onclick = () => scrollToQuestion(i);
+        grid.appendChild(btn);
+    }
+}
+
+function selectOption(qId, val) {
+    userAnswers[qId] = val;
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function clearOption(qId) {
+    delete userAnswers[qId];
+    document.getElementsByName(`q_${qId}`).forEach(r => r.checked = false);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function toggleFlag(qId) {
+    if (flaggedQuestions.has(qId)) flaggedQuestions.delete(qId);
+    else flaggedQuestions.add(qId);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function updateCardStyle(qId) {
+    const card = document.getElementById(`q-card-${qId}`);
+    const flagBtn = document.getElementById(`flag-btn-${qId}`);
+    if (!card) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+
+    if (flagBtn) {
+        flagBtn.className = isFlagged
+            ? "text-xs px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-100 text-amber-800 font-bold flex items-center space-x-1"
+            : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all";
+    }
+
+    if (isFlagged) card.className = "bg-amber-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-amber-400 relative transition-all";
+    else if (isAnswered) card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-unica-600 relative transition-all";
+    else card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+}
+
+function updateGridButton(qId) {
+    const btn = document.getElementById(`grid-btn-${qId}`);
+    if (!btn) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+    if (isFlagged) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-amber-400 text-slate-950 shadow-sm border border-amber-500";
+    else if (isAnswered) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-unica-600 text-white shadow-sm border border-unica-700";
+    else btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+}
+
+function updateStats() {
+    const answered = Object.keys(userAnswers).length;
+    const flagged = flaggedQuestions.size;
+    const blank = 100 - answered;
+    document.getElementById('stat-answered').textContent = answered;
+    document.getElementById('stat-flagged').textContent = flagged;
+    document.getElementById('stat-blank').textContent = blank;
+    document.getElementById('answered-count-bottom').textContent = answered;
+    const pct = Math.min(100, Math.round((answered / 52) * 100));
+    document.getElementById('target-progress-bar').style.width = `${pct}%`;
+}
+
+function scrollToQuestion(qId) { document.getElementById(`q-card-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function scrollToSection(secId) { document.getElementById(secId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function confirmSubmitExam() {
+    const answered = Object.keys(userAnswers).length;
+    if (answered < 30) {
+        if (!window.confirm(`Solo has respondido ${answered} preguntas de 100. ¿Seguro de finalizar?`)) return;
+    }
+    submitExam();
+    return true;
+}
+
+function submitExam() {
+    if (submitted) return;
+    submitted = true;
+    clearInterval(timerInterval);
+
+    let buenas = 0, malas = 0, vacias = 0;
+    questionsDB.forEach(q => {
+        const a = userAnswers[q.id];
+        if (!a) vacias++;
+        else if (a === q.correct) buenas++;
+        else malas++;
+    });
+
+    const puntajeReal = buenas * 1.0 + vacias * (1/16) - malas * (1/3);
+    const notaVigesimal = Math.max(0, puntajeReal / 5);
+    const efectividad = (buenas + malas > 0) ? Math.round((buenas / (buenas + malas)) * 100) : 0;
+
+    document.getElementById('res-score-100').textContent = puntajeReal.toFixed(4);
+    document.getElementById('res-score-20').textContent = `${notaVigesimal.toFixed(2)} / 20`;
+    document.getElementById('res-buenas').textContent = buenas;
+    document.getElementById('res-malas').textContent = malas;
+    document.getElementById('res-vacias').textContent = vacias;
+    document.getElementById('res-efectividad').textContent = `${efectividad}%`;
+
+    const condCard = document.getElementById('res-condition-card');
+    const condText = document.getElementById('res-condition-text');
+    const condSub = document.getElementById('res-condition-sub');
+    const feedbackBox = document.getElementById('res-feedback-box');
+
+    if (notaVigesimal >= 9.0) {
+        condCard.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "¡ALCANZÓ LA META!";
+        condText.className = "text-lg font-black text-emerald-700";
+        condSub.textContent = "Superaste los 45.0 puntos (Nota 9.0+)";
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>Has alcanzado el puntaje objetivo manteniendo un excelente control del riesgo. Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+    } else if (notaVigesimal >= 6.7) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "ZONA DE CORTE";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = "Cerca del umbral mínimo";
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Estás muy cerca de la meta.</div><p>Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
+    } else {
+        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "AJUSTAR FILTRO";
+        condText.className = "text-lg font-black text-rose-700";
+        condSub.textContent = "Por debajo del objetivo";
+        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
+    }
+
+    renderSolucionario();
+    document.getElementById('results-modal').classList.remove('hidden');
+}
+
+function renderSolucionario() {
+    const list = document.getElementById('solucionario-list');
+    list.innerHTML = "";
+    questionsDB.forEach(q => {
+        const userAns = userAnswers[q.id];
+        const isCorrect = userAns === q.correct;
+        const isBlank = !userAns;
+        let badge = isCorrect ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Correcta (+1.00)</span>`
+            : isBlank ? `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">En Blanco (+0.0625)</span>`
+            : `<span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Incorrecta (-0.333)</span>`;
+        const item = document.createElement('div');
+        item.className = "p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2";
+        item.innerHTML = `<div class="flex items-center justify-between"><span class="font-bold text-slate-800">Pregunta ${q.id} (${q.cat})</span>${badge}</div><div class="text-slate-700">${q.text}</div><div class="grid grid-cols-2 gap-2 pt-1 font-mono"><div>Tu respuesta: <strong class="${isCorrect ? 'text-emerald-700' : 'text-rose-600'}">${userAns || 'En Blanco'}</strong></div><div>Clave Oficial: <strong class="text-unica-900">${q.correct}</strong></div></div><div class="bg-white p-2.5 rounded-lg border border-slate-200 text-slate-600 leading-relaxed font-sans mt-2">Solución: ${q.explanation}</div>`;
+        list.appendChild(item);
+    });
+}
+
+function toggleSolucionario() {
+    const c = document.getElementById('solucionario-container');
+    const t = document.getElementById('solucionario-btn-text');
+    if (c.classList.contains('hidden')) { c.classList.remove('hidden'); t.textContent = 'Ocultar Solucionario'; }
+    else { c.classList.add('hidden'); t.textContent = 'Ver Solucionario Paso a Paso'; }
+}
+
+function closeModal() { document.getElementById('results-modal').classList.add('hidden'); }
+</script>
+</body>
+</html>

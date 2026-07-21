@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Exámenes | Simulacros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        unica: { 50:'#eff6ff', 100:'#dbeafe', 600:'#2563eb', 800:'#1e40af', 900:'#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="h-full text-slate-800 antialiased">
+
+    <header class="bg-unica-900 text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-6 py-8">
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-unica-900 text-2xl tracking-tighter">U</div>
+                <h1 class="text-3xl font-extrabold tracking-tight">Mis Simulacros</h1>
+            </div>
+            <p class="text-blue-200 text-sm ml-15">Exámenes de admisión · Repositorio personal</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-10">
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-slate-900">Simulacros disponibles</h2>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-200 px-3 py-1 rounded-full" id="counter">0 exámenes</span>
+            </div>
+
+            <div id="exam-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </section>
+
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Sobre este sitio</h3>
+            <ul class="text-sm text-slate-700 space-y-2 leading-relaxed">
+                <li>• Cada examen vive en su propia carpeta bajo <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">examenes/&lt;slug&gt;/</code>.</li>
+                <li>• La lista se carga desde <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">examenes/indice.json</code>; agregás un examen y aparece solo.</li>
+                <li>• Para ejecutar localmente: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">python -m http.server</code> en la raíz.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="text-center text-xs text-slate-400 py-6">
+        Hecho con fines de práctica · Sin afiliación oficial
+    </footer>
+
+<script>
+async function loadExams() {
+    let exams = [];
+    try {
+        const r = await fetch('examenes/indice.json', { cache: 'no-store' });
+        if (r.ok) exams = await r.json();
+    } catch (e) {
+        document.getElementById('exam-grid').innerHTML =
+            '<div class="col-span-full bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">No se pudo cargar <code>examenes/indice.json</code>. Serví el sitio con un servidor local (<code>python -m http.server</code>) para que <code>fetch</code> funcione.</div>';
+        return;
+    }
+    const grid = document.getElementById('exam-grid');
+    document.getElementById('counter').textContent = `${exams.length} examen${exams.length===1?'':'es'}`;
+    if (exams.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10">Aún no hay exámenes cargados.</div>';
+        return;
+    }
+    grid.innerHTML = exams.map(e => `
+        <a href="${e.url}" class="group block bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:border-unica-600 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between mb-3">
+                <span class="text-[10px] font-bold uppercase tracking-wider bg-unica-100 text-unica-800 px-2 py-0.5 rounded-full">${e.area || 'General'}</span>
+                <span class="text-[10px] text-slate-400 font-mono">${e.year || ''}</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1 group-hover:text-unica-600 transition-colors">${e.title}</h3>
+            <p class="text-xs text-slate-500 mb-4 line-clamp-2">${e.description || ''}</p>
+            <div class="flex items-center justify-between text-xs">
+                <div class="flex space-x-3 text-slate-600">
+                    <span><strong class="text-slate-900">${e.questions || '?'}</strong> preguntas</span>
+                    <span><strong class="text-slate-900">${e.duration || '?'}</strong> min</span>
+                </div>
+                <span class="text-unica-600 font-bold group-hover:translate-x-1 transition-transform">Iniciar →</span>
+            </div>
+        </a>
+    `).join('');
+}
+
+loadExams();
+</script>
+</body>
+</html>
