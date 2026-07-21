@@ -19,4 +19,5 @@ Simulacro tipo examen de admisión UNICA 2026-1, Área C (Ingeniería).
 ## Stack
 - Tailwind (CDN) + Inter/JetBrains Mono.
 - LocalStorage: respuestas y flags persisten entre refreshes.
+- **PWA instalable** (manifest + service worker + íconos).
 - Sin build step. Abrir con `python -m http.server 8000` → `http://localhost:8000`.
