@@ -11,10 +11,10 @@
   },
   {
     "slug": "unica-2026-2",
-    "title": "Simulacro Oficial UNICA 2026-2",
+    "title": "Examen Oficial UNICA 2025-II / 2026-I",
     "area": "Área C: Ingeniería",
-    "year": "2026-2",
-    "description": "Segunda versión del simulacro, 100 preguntas nuevas, 180 minutos, con figuras SVG reales.",
+    "year": "2025-II / 2026-I",
+    "description": "Examen real de la última admisión UNICA, 100 preguntas, 180 minutos, con clave oficial y solucionario.",
     "questions": 100,
     "duration": 180,
     "url": "examenes/unica-2026-2/index.html"
