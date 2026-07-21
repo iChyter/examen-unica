@@ -55,10 +55,10 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <div class="bg-unica-800/80 backdrop-blur border border-blue-400/30 px-3 sm:px-4 py-1.5 rounded-xl flex items-center space-x-2">
+                <button type="button" onclick="openTimerModal()" id="timer-btn" title="Click para reiniciar" class="bg-unica-800/80 hover:bg-unica-700 backdrop-blur border border-blue-400/30 px-3 sm:px-4 py-1.5 rounded-xl flex items-center space-x-2 transition-colors cursor-pointer">
                     <svg class="w-4 h-4 text-amber-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span id="timer" class="font-mono font-bold text-lg text-amber-300 tracking-wider">03:00:00</span>
-                </div>
+                </button>
                 <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all flex items-center space-x-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>Finalizar Examen</span>
@@ -639,6 +639,35 @@ function toggleSolucionario() {
 }
 
 function closeModal() { document.getElementById('results-modal').classList.add('hidden'); }
+
+function openTimerModal() {
+    if (submitted) return;
+    let m = document.getElementById('timer-modal');
+    if (m) { m.classList.remove('hidden'); return; }
+    m = document.createElement('div');
+    m.id = 'timer-modal';
+    m.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4';
+    m.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-sm w-full p-6 text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Reiniciar temporizador</h3>
+            <p class="text-sm text-slate-500 mb-5">Esto pone el contador a 03:00:00 y borra tu progreso de inicio. Tus respuestas y marcas se conservan.</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('timer-modal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancelar</button>
+                <button type="button" onclick="resetTimer()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition-colors">Sí, reiniciar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(m);
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.add('hidden'); });
+}
+
+function resetTimer() {
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
+    location.reload();
+}
 </script>
 </body>
 </html>
