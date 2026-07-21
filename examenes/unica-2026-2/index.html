@@ -69,12 +69,72 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
+<aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Meta de Ingreso</span>
-                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Nota 9.0+</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mi carrera objetivo</span>
+                    <span id="career-meta-badge" class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Sin selección</span>
                 </div>
+                <div class="space-y-2">
+                    <select id="careerSelectExam" onchange="onCareerChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-unica-600">
+                        <option value="">-- Elige tu carrera --</option>
+                        <option value="Medicina Humana">Medicina Humana</option>
+                        <option value="Enfermería">Enfermería</option>
+                        <option value="Obstetricia">Obstetricia</option>
+                        <option value="Psicología">Psicología</option>
+                        <option value="Odontología">Odontología</option>
+                        <option value="Farmacia y Bioquímica">Farmacia y Bioquímica</option>
+                        <option value="Biología">Biología</option>
+                        <option value="Medicina Veterinaria y Zootecnia">Medicina Veterinaria y Zootecnia</option>
+                        <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+                        <option value="Ingeniería Civil">Ingeniería Civil</option>
+                        <option value="Agronomía">Agronomía</option>
+                        <option value="Ingeniería de Minas">Ingeniería de Minas</option>
+                        <option value="Ingeniería Ambiental y Sanitaria">Ingeniería Ambiental y Sanitaria</option>
+                        <option value="Ingeniería Mecánica Eléctrica">Ingeniería Mecánica Eléctrica</option>
+                        <option value="Ingeniería Metalúrgica">Ingeniería Metalúrgica</option>
+                        <option value="Contabilidad">Contabilidad</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Ingeniería Electrónica">Ingeniería Electrónica</option>
+                        <option value="Arquitectura">Arquitectura</option>
+                        <option value="Ingeniería de Alimentos">Ingeniería de Alimentos</option>
+                        <option value="Ingeniería Química">Ingeniería Química</option>
+                        <option value="Ingeniería Pesquera">Ingeniería Pesquera</option>
+                        <option value="Derecho">Derecho</option>
+                        <option value="Negocios Internacionales">Negocios Internacionales</option>
+                        <option value="Economía">Economía</option>
+                        <option value="Ciencias de la Comunicación">Ciencias de la Comunicación</option>
+                        <option value="Turismo">Turismo</option>
+                        <option value="Arqueología">Arqueología</option>
+                        <option value="Ciencias de la Educación Inicial">CC.EE. Inicial</option>
+                        <option value="Ciencias de la Educación Física">CC.EE. Física</option>
+                        <option value="Ciencias de la Educación Primaria">CC.EE. Primaria</option>
+                        <option value="Ciencias de la Educación Lengua y Literatura">CC.EE. Lengua</option>
+                        <option value="Ciencias de la Educación Historia y Geografía">CC.EE. Historia</option>
+                        <option value="Ciencias de la Educación Matemática e Informática">CC.EE. Matemática</option>
+                        <option value="Ciencias de la Educación Filosofía, Psicología y CC.SS.">CC.EE. Filosofía</option>
+                        <option value="Ciencias de la Educación Arte">CC.EE. Arte</option>
+                        <option value="Ciencias de la Educación Biología y Química">CC.EE. Biología</option>
+                        <option value="Matemática e Informática">Matemática e Informática</option>
+                        <option value="Estadística">Estadística</option>
+                        <option value="Física">Física</option>
+                    </select>
+                    <div id="career-target-info" class="hidden">
+                        <div class="flex justify-between text-xs text-slate-600">
+                            <span>Nota mín. histórica:</span>
+                            <span class="font-bold text-slate-800" id="career-min">-</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-600">
+                            <span>Meta (mín + 1):</span>
+                            <span class="font-bold text-amber-700" id="career-meta">-</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-1.5">
+                            <div id="target-progress-bar" class="bg-amber-500 h-full w-[45%] transition-all duration-300"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-tight mt-2" id="career-tip">Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas déjalas en blanco.</p>
+                    </div>
+                </div>
+            </div>
                 <div class="space-y-2">
                     <div class="flex justify-between text-xs text-slate-600">
                         <span>Puntaje Objetivo:</span>
@@ -83,6 +143,11 @@
                     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                         <div id="target-progress-bar" class="bg-amber-500 h-full w-[45%] transition-all duration-300"></div>
                     </div>
+                    <p class="text-[11px] text-slate-500 leading-tight">
+                        Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas, déjalas en blanco.
+                    </p>
+                </div>
+            </div>
                     <p class="text-[11px] text-slate-500 leading-tight">Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas déjalas en blanco.</p>
                 </div>
             </div>
@@ -404,6 +469,19 @@ document.addEventListener('DOMContentLoaded', () => {
     startTimer();
     updateStats();
     loadFromStorage();
+    try {
+        const qs = new URLSearchParams(location.search).get('c');
+        if (qs) {
+            const sel = document.getElementById('careerSelectExam');
+            if (sel && CAREERS_DB[qs]) { sel.value = qs; onCareerChange(); }
+        } else {
+            const saved = localStorage.getItem(STORAGE_KEY + '_career');
+            if (saved && CAREERS_DB[saved]) {
+                const sel = document.getElementById('careerSelectExam');
+                sel.value = saved; onCareerChange();
+            }
+        }
+    } catch {}
 });
 
 function saveToStorage() {
@@ -611,12 +689,34 @@ function submitExam() {
     const condSub = document.getElementById('res-condition-sub');
     const feedbackBox = document.getElementById('res-feedback-box');
 
-    if (notaVigesimal >= 9.0) {
+const meta = state.meta;
+    const career = state.career;
+    const minCorte = career ? CAREERS_DB[career] : null;
+
+    if (meta != null && notaVigesimal >= meta) {
         condCard.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "¡ALCANZÓ LA META!";
+        condText.textContent = "¡META ALCANZADA!";
         condText.className = "text-lg font-black text-emerald-700";
-        condSub.textContent = "Superaste los 45.0 puntos (Nota 9.0+)";
-        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>Has alcanzado el puntaje objetivo manteniendo un excelente control del riesgo. Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+        condSub.textContent = career ? `Superaste ${meta.toFixed(2)}/20 en ${career}` : `Superaste los ${meta.toFixed(2)} puntos (Nota ${meta.toFixed(1)}+)`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución.</div><p>Pasarías la nota de corte de <strong>${career}</strong> (mín histórico ${minCorte.toFixed(2)} + 1 de margen). Tus <strong>${vacias} en blanco</strong> aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong>.</p>`;
+    } else if (meta != null && minCorte != null && notaVigesimal >= minCorte) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "EN CORTE (sin margen)";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = `Meta ${career}: ${meta.toFixed(2)}/20 — te falta ${(meta - notaVigesimal).toFixed(2)}`;
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Pasas la nota mínima, pero no el margen.</div><p><strong>${puntajeReal.toFixed(2)} puntos</strong>. ${malas} malas te quitaron <strong>-${(malas/3).toFixed(2)}</strong>. Si hubieras dejado en blanco las dudosas, llegas a la meta.</p>`;
+    } else if (notaVigesimal >= 6.7) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = career ? "POR DEBAJO DE META" : "ZONA DE CORTE";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Cerca del umbral mínimo";
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Cerca de la meta.</div><p>${malas} malas restaron <strong>-${(malas/3).toFixed(2)}</strong>. Aplica Filtro Semáforo: 0 errores cambia la historia.</p>`;
+    } else {
+        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "AJUSTAR FILTRO";
+        condText.className = "text-lg font-black text-rose-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Por debajo del objetivo";
+        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p><strong>${malas} errores</strong> restaron <strong>${(malas/3).toFixed(2)}</strong> puntos. Si dudas, blanco.</p>`;
     } else if (notaVigesimal >= 6.7) {
         condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
         condText.textContent = "ZONA DE CORTE";

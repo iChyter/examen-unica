@@ -74,6 +74,46 @@
             <div class="flex flex-col sm:flex-row gap-2">
                 <select id="careerSelect" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-unica-600">
                     <option value="">-- Selecciona carrera --</option>
+                    <option value="Medicina Humana">Medicina Humana (mín 15.60)</option>
+                    <option value="Enfermería">Enfermería (mín 10.98)</option>
+                    <option value="Obstetricia">Obstetricia (mín 4.09)</option>
+                    <option value="Psicología">Psicología (mín 4.83)</option>
+                    <option value="Odontología">Odontología (mín 5.33)</option>
+                    <option value="Farmacia y Bioquímica">Farmacia y Bioquímica (mín 2.47)</option>
+                    <option value="Biología">Biología (mín 3.09)</option>
+                    <option value="Medicina Veterinaria y Zootecnia">Medicina Veterinaria y Zootecnia (mín 2.09)</option>
+                    <option value="Ingeniería de Sistemas">Ingeniería de Sistemas (mín 6.24)</option>
+                    <option value="Ingeniería Civil">Ingeniería Civil (mín 4.45)</option>
+                    <option value="Agronomía">Agronomía (mín 3.22)</option>
+                    <option value="Ingeniería de Minas">Ingeniería de Minas (mín 2.97)</option>
+                    <option value="Ingeniería Ambiental y Sanitaria">Ingeniería Ambiental y Sanitaria (mín 1.81)</option>
+                    <option value="Ingeniería Mecánica Eléctrica">Ingeniería Mecánica Eléctrica (mín 4.40)</option>
+                    <option value="Ingeniería Metalúrgica">Ingeniería Metalúrgica (mín 1.64)</option>
+                    <option value="Contabilidad">Contabilidad (mín 0.27)</option>
+                    <option value="Administración">Administración (mín 1.82)</option>
+                    <option value="Ingeniería Electrónica">Ingeniería Electrónica (mín 1.74)</option>
+                    <option value="Arquitectura">Arquitectura (mín 4.00)</option>
+                    <option value="Ingeniería de Alimentos">Ingeniería de Alimentos (mín 0.03)</option>
+                    <option value="Ingeniería Química">Ingeniería Química (mín 0.08)</option>
+                    <option value="Ingeniería Pesquera">Ingeniería Pesquera (mín 0.95)</option>
+                    <option value="Derecho">Derecho (mín 4.60)</option>
+                    <option value="Negocios Internacionales">Negocios Internacionales (mín 1.33)</option>
+                    <option value="Economía">Economía (mín 0.00)</option>
+                    <option value="Ciencias de la Comunicación">Ciencias de la Comunicación (mín 0.14)</option>
+                    <option value="Turismo">Turismo (mín 0.15)</option>
+                    <option value="Arqueología">Arqueología (mín 0.25)</option>
+                    <option value="Ciencias de la Educación Inicial">Ciencias de la Educación Inicial (mín 2.40)</option>
+                    <option value="Ciencias de la Educación Física">Ciencias de la Educación Física (mín 1.28)</option>
+                    <option value="Ciencias de la Educación Primaria">Ciencias de la Educación Primaria (mín 1.46)</option>
+                    <option value="Ciencias de la Educación Lengua y Literatura">Ciencias de la Educación Lengua y Literatura (mín 1.04)</option>
+                    <option value="Ciencias de la Educación Historia y Geografía">Ciencias de la Educación Historia y Geografía (mín 0.15)</option>
+                    <option value="Ciencias de la Educación Matemática e Informática">Ciencias de la Educación Matemática e Informática (mín 0.80)</option>
+                    <option value="Ciencias de la Educación Filosofía, Psicología y CC.SS.">Ciencias de la Educación Filosofía, Psicología y CC.SS. (mín 0.27)</option>
+                    <option value="Ciencias de la Educación Arte">Ciencias de la Educación Arte (mín 0.08)</option>
+                    <option value="Ciencias de la Educación Biología y Química">Ciencias de la Educación Biología y Química (mín 0.81)</option>
+                    <option value="Matemática e Informática">Matemática e Informática (mín 0.80)</option>
+                    <option value="Estadística">Estadística (mín 0.27)</option>
+                    <option value="Física">Física (mín 0.34)</option>
                 </select>
                 <button onclick="showCareerTarget()" class="bg-unica-600 hover:bg-unica-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">Calcular meta</button>
             </div>
@@ -233,15 +273,9 @@ const CAREERS = [
 ];
 
 function loadCareers() {
+    const sel = document.getElementById('careerSelect');
     const uniq = {};
     CAREERS.forEach(c => { if (!uniq[c.name]) uniq[c.name] = c; });
-    const sel = document.getElementById('careerSelect');
-    Object.values(uniq).sort((a, b) => b.min - a.min).forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.name;
-        opt.textContent = c.name + '  (mín: ' + c.min.toFixed(2) + ')';
-        sel.appendChild(opt);
-    });
     sel._data = Object.values(uniq);
 }
 
