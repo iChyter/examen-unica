@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vocacional | UNICA - Área C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        unica: { 50:'#eff6ff', 100:'#dbeafe', 600:'#2563eb', 800:'#1e40af', 900:'#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .opt-label { transition: all 0.15s; cursor: pointer; }
+        .opt-label:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .opt-label input:checked + span { color: #1e3a8a; font-weight: 700; }
+        .opt-label:has(input:checked) { background: #eff6ff; border-color: #2563eb; }
+    </style>
+</head>
+<body class="min-h-full text-slate-800 antialiased">
+
+    <header class="bg-unica-900 text-white shadow-lg">
+        <div class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+            <a href="./index.html" class="flex items-center space-x-2 text-blue-200 hover:text-white text-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Volver al menú</span>
+            </a>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-unica-900">U</div>
+                <h1 class="font-bold tracking-tight">Test Vocacional</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-8">
+
+        <section id="intro" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 mb-6">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full">UNICA - Área C: Ingeniería</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3 mb-2">¿Qué carrera de Ingeniería es para ti?</h2>
+            <p class="text-sm text-slate-600 leading-relaxed mb-4">Test de orientación basado en el perfil de egreso y contenidos curriculares reales de las carreras de Ingeniería de la UNICA (Ica). Responde 24 preguntas; al final te mostraremos el ranking de carreras más afines a tus intereses.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-5">
+                <div class="p-3 bg-unica-50 rounded-xl border border-unica-100">
+                    <span class="block font-bold text-unica-800">24 preguntas</span>
+                    <span class="text-unica-600">≈ 6 minutos</span>
+                </div>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-100">
+                    <span class="block font-bold text-amber-800">8 carreras</span>
+                    <span class="text-amber-600">Área C - UNICA</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <span class="block font-bold text-slate-800">Sin respuestas correctas</span>
+                    <span class="text-slate-500">No hay respuestas buenas o malas</span>
+                </div>
+            </div>
+            <button id="startBtn" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                <span>Comenzar test</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+        </section>
+
+        <section id="quiz" class="hidden">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mb-4 sticky top-4 z-10">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Progreso</span>
+                    <span id="progressText" class="text-xs font-mono font-bold text-unica-800">0 / 24</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="progressFill" class="bg-unica-600 h-full transition-all duration-200" style="width:0%"></div>
+                </div>
+            </div>
+            <div id="qContainer" class="space-y-4"></div>
+            <div class="flex justify-between items-center mt-6">
+                <button id="prevBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">← Anterior</button>
+                <button id="nextBtn" class="bg-unica-600 hover:bg-unica-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">Siguiente →</button>
+            </div>
+        </section>
+
+        <section id="result" class="hidden">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 mb-4">
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Tu perfil vocacional</h2>
+                <p class="text-sm text-slate-500 mb-6">Ranking de carreras de Ingeniería UNICA según tus respuestas.</p>
+                <div id="results" class="space-y-3"></div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button id="restartBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">Volver a hacer el test</button>
+                <a href="./index.html" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-colors text-center">Ir a los exámenes</a>
+            </div>
+        </section>
+
+    </main>
+
+<script>
+const CAREERS = {
+    sistemas: { name: "Ingeniería de Sistemas", desc: "Software, redes, bases de datos, IA, desarrollo web/móvil. Mucha lógica y programación.", color: "bg-blue-500" },
+    civil:    { name: "Ingeniería Civil", desc: "Diseño y construcción de obras civiles: puentes, carreteras, edificios, hidráulica.", color: "bg-amber-600" },
+    minas:    { name: "Ingeniería de Minas y Metalúrgica", desc: "Exploración y explotación de yacimientos minerales, procesamiento de metales.", color: "bg-stone-600" },
+    fime:     { name: "Ing. Mecánica-Eléctrica y Electrónica (FIME)", desc: "Máquinas, motores, instalaciones eléctricas, automatización y electrónica.", color: "bg-yellow-600" },
+    quimica:  { name: "Ingeniería Química y Petroquímica", desc: "Procesos químicos industriales, petroquímica, control de calidad.", color: "bg-emerald-600" },
+    fipa:     { name: "Ing. Pesquera y de Alimentos", desc: "Procesamiento de productos marinos y alimenticios, control de calidad bromatológica.", color: "bg-cyan-600" },
+    ambiental:{ name: "Ingeniería Ambiental y Sanitaria", desc: "Tratamiento de aguas, gestión de residuos, impacto ambiental, salud pública.", color: "bg-green-600" },
+    arquitectura: { name: "Arquitectura", desc: "Diseño arquitectónico, urbanismo, dibujo técnico, historia de la arquitectura.", color: "bg-rose-600" }
+};
+
+const QUESTIONS = [
+  { text: "¿Qué actividad te atrae más en tu tiempo libre?", opts: [
+    { t: "Armar y programar robots, computadoras o gadgets", c: { sistemas: 3, fime: 1 } },
+    { t: "Construir maquetas o diseñar estructuras con bloques", c: { civil: 3, arquitectura: 2 } },
+    { t: "Investigar sobre minerales, fósiles o/yacimientos", c: { minas: 3, ambiental: 1 } },
+    { t: "Hacer experimentos de cocina o/y reacciones químicas", c: { quimica: 3, fipa: 2 } }
+  ]},
+  { text: "En el colegio, ¿cuál es tu materia favorita?", opts: [
+    { t: "Matemática y Razonamiento Matemático", c: { sistemas: 3, civil: 2, minas: 2 } },
+    { t: "Física", c: { fime: 3, civil: 2, minas: 2 } },
+    { t: "Química y Biología", c: { quimica: 3, fipa: 2, ambiental: 2 } },
+    { t: "Educación para el Trabajo (cómputo, dibujo técnico, electrónica)", c: { sistemas: 2, fime: 2, civil: 2 } }
+  ]},
+  { text: "Si tuvieras que liderar un proyecto, ¿cuál elegirías?", opts: [
+    { t: "Crear una app o página web para un problema real", c: { sistemas: 3 } },
+    { t: "Diseñar y construir un puente o un edificio", c: { civil: 3, arquitectura: 2 } },
+    { t: "Organizar la operación de una mina subterránea", c: { minas: 3 } },
+    { t: "Montar una planta de tratamiento de agua para una comunidad", c: { ambiental: 3, fipa: 1 } }
+  ]},
+  { text: "¿Qué tipo de problemas disfrutas resolver?", opts: [
+    { t: "Lógicos y algorítmicos (puzzles, sudokus, acertijos)", c: { sistemas: 3 } },
+    { t: "Geométricos y de cálculo estructural", c: { civil: 3, arquitectura: 1, minas: 1 } },
+    { t: "De circuitos, máquinas y energía", c: { fime: 3 } },
+    { t: "Químicos, fórmulas y reacciones", c: { quimica: 3, fipa: 2 } }
+  ]},
+  { text: "¿Cómo te ves trabajando en 10 años?", opts: [
+    { t: "En una empresa de tecnología, quizá la mía propia", c: { sistemas: 3 } },
+    { t: "En una obra o supervisando construcción", c: { civil: 3, minas: 1 } },
+    { t: "En una planta industrial automatizada", c: { fime: 3, quimica: 2 } },
+    { t: "En un laboratorio o planta de procesos", c: { quimica: 3, fipa: 2, ambiental: 1 } }
+  ]},
+  { text: "¿Qué tan cómodo te sientes con la programación?", opts: [
+    { t: "Ya programo o me encantaría aprender pronto", c: { sistemas: 3 } },
+    { t: "Me da curiosidad pero no he probado", c: { sistemas: 2, fime: 1, civil: 1 } },
+    { t: "Prefiero trabajar con mis manos, no con pantallas", c: { civil: 2, minas: 2, fime: 2, fipa: 1 } },
+    { t: "No me atrae nada", c: { ambiental: 1, fipa: 1, quimica: 1 } }
+  ]},
+  { text: "Sobre el impacto ambiental, ¿qué postura te identifica más?", opts: [
+    { t: "Quiero dedicar mi carrera a cuidar el ambiente", c: { ambiental: 3, fipa: 1 } },
+    { t: "Me importa, pero prefiero ingenierías más clásicas", c: { minas: 2, civil: 2, quimica: 1, fime: 1 } },
+    { t: "No es un tema prioritario para mí", c: { sistemas: 1, fime: 1 } },
+    { t: "Me importa indirectamente, vía la eficiencia de procesos", c: { quimica: 2, fime: 1, sistemas: 1 } }
+  ]},
+  { text: "En un trabajo en grupo, ¿cuál suele ser tu rol?", opts: [
+    { t: "El que diseña la solución (lógica, sistema, código)", c: { sistemas: 3, fime: 2 } },
+    { t: "El que arma la presentación o el plan visual", c: { arquitectura: 3, civil: 1 } },
+    { t: "El que hace cálculos y resuelve la parte numérica", c: { civil: 3, minas: 2, fime: 2 } },
+    { t: "El que organiza al equipo y supervisa plazos", c: { civil: 2, minas: 2, fime: 1 } }
+  ]},
+  { text: "Elige una herramienta o instrumento:", opts: [
+    { t: "Computadora con varios monitores y licencia de software", c: { sistemas: 3 } },
+    { t: "Nivel topográfico y teodolito", c: { civil: 3, minas: 2, arquitectura: 1 } },
+    { t: "Multímetro, osciloscopio y componentes electrónicos", c: { fime: 3 } },
+    { t: "Bata, probetas y balanza de precisión", c: { quimica: 3, fipa: 2, ambiental: 1 } }
+  ]},
+  { text: "¿Cuál de estas actividades extracurriculares te gusta más?", opts: [
+    { t: "Hackatones, clubes de robótica, programación", c: { sistemas: 3, fime: 1 } },
+    { t: "Dibujo técnico, urbanismo, fotografía arquitectónica", c: { arquitectura: 3, civil: 1 } },
+    { t: "Excursiones, geología, espeleología, campamentos", c: { minas: 3, ambiental: 2 } },
+    { t: "Voluntariado ambiental, reciclaje, jornadas de limpieza", c: { ambiental: 3, fipa: 1 } }
+  ]},
+  { text: "Sobre las matemáticas en la universidad:", opts: [
+    { t: "Cálculo I, II, III, álgebra lineal, ecuaciones diferenciales: me motivan", c: { sistemas: 2, civil: 3, minas: 2, fime: 3 } },
+    { t: "Las uso solo como herramienta, prefiero la aplicación", c: { quimica: 2, fipa: 2, ambiental: 2 } },
+    { t: "Me interesan para estadística, muestreo y diseño", c: { ambiental: 2, fipa: 2 } },
+    { t: "Las veré en geometría descriptiva, dibujo y composición", c: { arquitectura: 3 } }
+  ]},
+  { text: "¿Qué película/documental te atraparía más?", opts: [
+    { t: "The Social Network / AlphaGo (tech, IA, redes sociales)", c: { sistemas: 3 } },
+    { t: "Cómo se hizo… (canal de Discovery, mega-construcciones)", c: { civil: 3, minas: 2 } },
+    { t: "Cosmos / Planetario (cosmos, astrofísica, física)", c: { fime: 2, minas: 1, sistemas: 1 } },
+    { t: "Antes de que se extingan / Our Planet (naturaleza, ambiente)", c: { ambiental: 3, fipa: 2 } }
+  ]},
+  { text: "Si pudieras visitar una industria, ¿cuál te llama más?", opts: [
+    { t: "Una planta de ensamblaje de chips o robots industriales", c: { fime: 3, sistemas: 1 } },
+    { t: "Una refinería o planta petroquímica", c: { quimica: 3 } },
+    { t: "Una mina a tajo abierto con camiones gigantes", c: { minas: 3 } },
+    { t: "Una planta de tratamiento de aguas residuales", c: { ambiental: 3, fipa: 1 } }
+  ]},
+  { text: "¿Qué tipo de dibujo se te da mejor?", opts: [
+    { t: "Diagramas de flujo, esquemas, redes", c: { sistemas: 3 } },
+    { t: "Perspectiva, planos arquitectónicos, maquetas 3D", c: { arquitectura: 3, civil: 2 } },
+    { t: "Mapas topográficos, cortes geológicos", c: { minas: 3, civil: 1 } },
+    { t: "No me atrae especialmente dibujar", c: { quimica: 1, fipa: 1, ambiental: 1, fime: 1 } }
+  ]},
+  { text: "Energía, motores y electricidad:", opts: [
+    { t: "Me fascinan: motores, generadores, paneles solares, baterías", c: { fime: 3 } },
+    { t: "Me interesan como aplicación de la física", c: { civil: 1, minas: 1, sistemas: 1 } },
+    { t: "Las uso como insumos en procesos químicos", c: { quimica: 2, fipa: 1 } },
+    { t: "Me interesan por su impacto en el ambiente", c: { ambiental: 2 } }
+  ]},
+  { text: "¿Cómo prefieres aprender cosas nuevas?", opts: [
+    { t: "Leyendo documentación técnica y experimentando", c: { sistemas: 3, fime: 2 } },
+    { t: "Viendo planos, modelos 3D o/y videos", c: { arquitectura: 3, civil: 2, fime: 1 } },
+    { t: "Tocando, desarmando y volviendo a armar cosas", c: { fime: 3, minas: 1 } },
+    { t: "Haciendo prácticas de laboratorio", c: { quimica: 3, fipa: 2, ambiental: 2 } }
+  ]},
+  { text: "¿Qué te importa más de un trabajo futuro?", opts: [
+    { t: "Buen sueldo y demanda laboral alta", c: { sistemas: 3, minas: 2, civil: 2 } },
+    { t: "Poder crear cosas tangibles (edificios, obras)", c: { civil: 3, arquitectura: 3, minas: 2 } },
+    { t: "Estabilidad en una gran empresa industrial", c: { fime: 3, quimica: 3 } },
+    { t: "Tener un impacto positivo en la sociedad/ambiente", c: { ambiental: 3, fipa: 1 } }
+  ]},
+  { text: "Sobre estadísticas y probabilidades:", opts: [
+    { t: "Me interesan para ML, análisis de datos y simulaciones", c: { sistemas: 3 } },
+    { t: "Las uso en cálculos de resistencia y cargas", c: { civil: 2, fime: 2, minas: 2 } },
+    { t: "Sirven para control de calidad y muestreo", c: { quimica: 2, fipa: 2, ambiental: 3 } },
+    { t: "No me atraen especialmente", c: { arquitectura: 1 } }
+  ]},
+  { text: "La UNICA está en Ica, una zona con muchas minas y agroindustria. ¿Te atrae este contexto?", opts: [
+    { t: "Me apasiona la industria minera del sur peruano", c: { minas: 3, civil: 1 } },
+    { t: "Me gusta que haya agroindustria, plantas pesqueras y vitivinícolas", c: { fipa: 3, ambiental: 2, quimica: 2 } },
+    { t: "Veo oportunidades de software para esas industrias", c: { sistemas: 3, fime: 1 } },
+    { t: "Prefiero que mi carrera sea aplicable a cualquier región", c: { civil: 2, arquitectura: 2, ambiental: 2 } }
+  ]},
+  { text: "Si tuvieras que elegir un proyecto de tesis ideal:", opts: [
+    { t: "Una app de salud con IA", c: { sistemas: 3 } },
+    { t: "Diseño sismorresistente de un edificio de 8 pisos", c: { civil: 3, arquitectura: 2 } },
+    { t: "Optimización del proceso de lixiviación en una planta", c: { minas: 3, quimica: 2 } },
+    { t: "Monitoreo de la calidad del agua del río Ica con sensores IoT", c: { ambiental: 3, sistemas: 1, fime: 1 } }
+  ]},
+  { text: "¿Qué materia de la malla de ingeniería te suena más interesante?", opts: [
+    { t: "Algoritmos, Estructura de Datos, Bases de Datos, IA", c: { sistemas: 3 } },
+    { t: "Estática, Resistencia de Materiales, Concreto Armado", c: { civil: 3, minas: 1, arquitectura: 1 } },
+    { t: "Termodinámica, Máquinas Eléctricas, Control Automático", c: { fime: 3 } },
+    { t: "Química Orgánica, Fenómenos de Transporte, Operaciones Unitarias", c: { quimica: 3, fipa: 3 } }
+  ]},
+  { text: "¿Cómo imaginas tu oficina o lugar de trabajo?", opts: [
+    { t: "En una startup, con pizarras blancas y café", c: { sistemas: 3 } },
+    { t: "En un estudio de diseño, con mesas de dibujo y renders", c: { arquitectura: 3, civil: 1 } },
+    { t: "En un campamento minero, con casco y camioneta 4x4", c: { minas: 3, civil: 1 } },
+    { t: "En una planta industrial con casco, EPP y calderas", c: { quimica: 3, fipa: 3, ambiental: 2 } }
+  ]},
+  { text: "Última: ¿qué habilidad propia sientes más desarrollada?", opts: [
+    { t: "Pensamiento lógico y abstracto", c: { sistemas: 3, civil: 1, fime: 1 } },
+    { t: "Visión espacial y dibujo", c: { arquitectura: 3, civil: 2, minas: 1 } },
+    { t: "Destreza manual y mecánica", c: { fime: 3, minas: 2, civil: 2 } },
+    { t: "Curiosidad científica y meticulosidad experimental", c: { quimica: 3, fipa: 2, ambiental: 2 } }
+  ]}
+];
+
+const state = { current: 0, answers: new Array(QUESTIONS.length).fill(null) };
+const $ = (id) => document.getElementById(id);
+
+function renderQuestion() {
+    const q = QUESTIONS[state.current];
+    const saved = state.answers[state.current];
+    const cont = $('qContainer');
+    cont.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <div class="text-xs font-bold text-unica-800 uppercase tracking-wider mb-1">Pregunta ${state.current + 1} de ${QUESTIONS.length}</div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-4">${q.text}</h3>
+            <div class="space-y-2.5">
+                ${q.opts.map((o, i) => `
+                    <label class="opt-label flex items-start p-3 rounded-xl border border-slate-200">
+                        <input type="radio" name="opt" value="${i}" class="mt-1 mr-3 accent-unica-600" ${saved === i ? 'checked' : ''}>
+                        <span class="text-sm text-slate-700">${o.t}</span>
+                    </label>
+                `).join('')}
+            </div>
+        </div>`;
+    cont.querySelectorAll('input[name="opt"]').forEach(r => {
+        r.addEventListener('change', (e) => {
+            state.answers[state.current] = parseInt(e.target.value, 10);
+            $('progressText').textContent = `${state.answers.filter(a => a !== null).length} / ${QUESTIONS.length}`;
+            $('progressFill').style.width = `${(state.answers.filter(a => a !== null).length / QUESTIONS.length) * 100}%`;
+            setTimeout(() => { if (state.current < QUESTIONS.length - 1) next(); }, 250);
+        });
+    });
+    $('prevBtn').disabled = state.current === 0;
+    $('prevBtn').classList.toggle('opacity-50', state.current === 0);
+    $('nextBtn').textContent = state.current === QUESTIONS.length - 1 ? 'Ver resultados →' : 'Siguiente →';
+}
+
+function next() {
+    if (state.answers[state.current] === null) {
+        alert('Por favor elige una opción antes de continuar.');
+        return;
+    }
+    if (state.current < QUESTIONS.length - 1) { state.current++; renderQuestion(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else showResults();
+}
+
+function prev() { if (state.current > 0) { state.current--; renderQuestion(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+
+function showResults() {
+    const scores = {};
+    Object.keys(CAREERS).forEach(k => scores[k] = 0);
+    state.answers.forEach((ans, qi) => {
+        if (ans == null) return;
+        const opt = QUESTIONS[qi].opts[ans];
+        for (const c in opt.c) scores[c] = (scores[c] || 0) + opt.c[c];
+    });
+    const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const max = ranked[0][1] || 1;
+    $('results').innerHTML = ranked.map(([k, s], i) => `
+        <div class="border border-slate-200 rounded-xl p-4 ${i === 0 ? 'bg-amber-50 border-amber-200' : 'bg-white'}">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <span class="text-xs font-bold text-slate-500">#${i + 1}</span>
+                    <h4 class="text-base font-bold text-slate-900">${CAREERS[k].name}</h4>
+                </div>
+                <div class="text-right">
+                    <span class="text-lg font-black ${i === 0 ? 'text-amber-700' : 'text-unica-800'}">${s}</span>
+                    <span class="block text-[10px] text-slate-500">puntos</span>
+                </div>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
+                <div class="${CAREERS[k].color} h-full transition-all duration-300" style="width:${(s / max) * 100}%"></div>
+            </div>
+            <p class="text-xs text-slate-600">${CAREERS[k].desc}</p>
+        </div>
+    `).join('');
+    $('quiz').classList.add('hidden');
+    $('result').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restart() {
+    state.current = 0; state.answers = new Array(QUESTIONS.length).fill(null);
+    $('result').classList.add('hidden');
+    $('quiz').classList.remove('hidden');
+    $('progressText').textContent = `0 / ${QUESTIONS.length}`;
+    $('progressFill').style.width = '0%';
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$('startBtn').addEventListener('click', () => {
+    $('intro').classList.add('hidden');
+    $('quiz').classList.remove('hidden');
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+$('nextBtn').addEventListener('click', next);
+$('prevBtn').addEventListener('click', prev);
+$('restartBtn').addEventListener('click', restart);
+</script>
+</body>
+</html>

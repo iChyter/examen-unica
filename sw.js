@@ -1,7 +1,8 @@
-const CACHE = 'unica-v7';
+const CACHE = 'unica-v8';
 const ASSETS = [
   './',
   './index.html',
+  './test-vocacional.html',
   './manifest.json',
   './examenes/indice.json',
   './examenes/unica-2026-1/index.html',
