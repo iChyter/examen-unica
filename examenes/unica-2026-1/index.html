@@ -220,7 +220,13 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
                 </button>
-                <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-xs">Cerrar</button>
+                <div class="flex gap-2">
+                    <button onclick="downloadRespuestas()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar .txt con tus respuestas">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
+                        <span>Descargar respuestas (.txt)</span>
+                    </button>
+                    <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-xs">Cerrar</button>
+                </div>
             </div>
 
             <div id="solucionario-container" class="mt-6 pt-6 border-t border-slate-200 hidden space-y-4">
@@ -639,6 +645,37 @@ function toggleSolucionario() {
 }
 
 function closeModal() { document.getElementById('results-modal').classList.add('hidden'); }
+
+function downloadBlob(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadRespuestas() {
+    const lines = [
+        'SIMULACRO OFICIAL UNICA 2026-1 — RESPUESTAS',
+        'Área C: Ingeniería',
+        'Fecha: ' + new Date().toLocaleString('es-PE'),
+        'Total preguntas: 100',
+        'Puntaje: ' + document.getElementById('res-score-100').textContent + ' / 100',
+        'Nota: ' + document.getElementById('res-score-20').textContent,
+        'Buenas: ' + document.getElementById('res-buenas').textContent +
+        ' | Malas: ' + document.getElementById('res-malas').textContent +
+        ' | En blanco: ' + document.getElementById('res-vacias').textContent,
+        '',
+        '----- RESPUESTAS MARCADAS -----',
+        ''
+    ];
+    for (let i = 1; i <= 100; i++) {
+        const v = userAnswers[i] || '-';
+        lines.push(String(i).padStart(3, '0') + '. ' + v);
+    }
+    downloadBlob('respuestas-unica-2026-1.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+}
 
 function openTimerModal() {
     if (submitted) return;

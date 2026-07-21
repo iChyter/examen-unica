@@ -84,22 +84,76 @@ async function loadExams() {
         return;
     }
     grid.innerHTML = exams.map(e => `
-        <a href="${e.url}" class="group block bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:border-unica-600 hover:shadow-md transition-all">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:border-unica-600 hover:shadow-md transition-all">
             <div class="flex items-start justify-between mb-3">
                 <span class="text-[10px] font-bold uppercase tracking-wider bg-unica-100 text-unica-800 px-2 py-0.5 rounded-full">${e.area || 'General'}</span>
                 <span class="text-[10px] text-slate-400 font-mono">${e.year || ''}</span>
             </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1 group-hover:text-unica-600 transition-colors">${e.title}</h3>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">${e.title}</h3>
             <p class="text-xs text-slate-500 mb-4 line-clamp-2">${e.description || ''}</p>
-            <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center justify-between text-xs mb-4">
                 <div class="flex space-x-3 text-slate-600">
                     <span><strong class="text-slate-900">${e.questions || '?'}</strong> preguntas</span>
                     <span><strong class="text-slate-900">${e.duration || '?'}</strong> min</span>
                 </div>
-                <span class="text-unica-600 font-bold group-hover:translate-x-1 transition-transform">Iniciar →</span>
             </div>
-        </a>
+            <div class="flex gap-2">
+                <a href="${e.url}" class="flex-1 text-center bg-unica-600 hover:bg-unica-800 text-white font-bold py-2 rounded-xl text-xs transition-colors">Iniciar</a>
+                <button type="button" onclick="downloadExam('${e.url}', '${(e.slug || e.title).replace(/[^a-z0-9-]/gi,'-').toLowerCase()}')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs transition-colors">Descargar (.html)</button>
+            </div>
+        </div>
     `).join('');
+}
+
+async function downloadExam(examUrl, slug) {
+    let html;
+    try {
+        const r = await fetch(examUrl);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        html = await r.text();
+    } catch (e) {
+        alert('No se pudo descargar el examen. Serví el sitio con un servidor local (python -m http.server) y reintentá.');
+        return;
+    }
+    const m = html.match(/const questionsDB\s*=\s*\[([\s\S]*?)\];/);
+    if (!m) { alert('No se encontró el banco de preguntas.'); return; }
+    let questions;
+    try {
+        const fn = new Function('return [' + m[1] + ']');
+        questions = fn();
+    } catch (e) {
+        alert('Error parseando el banco: ' + e.message);
+        return;
+    }
+
+    const sections = {};
+    questions.forEach(q => { (sections[q.secTitle] ||= []).push(q); });
+
+    const out = [];
+    out.push('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Examen UNICA 2026-1 — Versión imprimible</title>');
+    out.push('<style>body{font-family:Georgia,serif;max-width:780px;margin:24px auto;padding:0 16px;color:#111;line-height:1.55}h1{font-size:1.4em;border-bottom:2px solid #333;padding-bottom:6px}h2{font-size:1.1em;background:#eee;padding:6px 10px;margin-top:28px;border-left:4px solid #003366}.q{margin:14px 0;padding:8px 0;border-bottom:1px dashed #ccc}.q b{color:#003366}ol{margin:6px 0 0 0;padding-left:22px}li{margin:3px 0}svg{max-width:240px;display:block;margin:8px auto}.ans{color:#16a34a;font-weight:bold}</style></head><body>');
+    out.push('<h1>Simulacro Oficial UNICA 2026-1 — Área C (Ingeniería)</h1>');
+    out.push('<p><em>Versión imprimible · 100 preguntas · Solo lectura · Generado ' + new Date().toLocaleString('es-PE') + '</em></p>');
+    for (const [sec, qs] of Object.entries(sections)) {
+        out.push('<h2>' + sec + '</h2>');
+        qs.forEach(q => {
+            out.push('<div class="q">');
+            out.push('<b>Pregunta ' + q.id + '.</b> ' + q.text);
+            if (q.svg) out.push(q.svg);
+            out.push('<ol type="A">');
+            q.options.forEach(o => out.push('<li>' + o.replace(/^[A-E]\)\s*/, '') + '</li>'));
+            out.push('</ol>');
+            out.push('<p class="ans">Clave: ' + q.correct + '</p>');
+            out.push('</div>');
+        });
+    }
+    out.push('</body></html>');
+    const blob = new Blob([out.join('\n')], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'examen-' + slug + '.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 loadExams();
