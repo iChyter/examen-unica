@@ -476,24 +476,6 @@ function loadFromStorage() {
     } catch {}
 }
 
-function loadFromStorage() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        userAnswers = data.answers || {};
-        flaggedQuestions = new Set(data.flagged || []);
-        for (const id in userAnswers) {
-            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
-            if (r) r.checked = true;
-        }
-        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
-        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
-        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
-        updateStats();
-    } catch {}
-}
-
 function startTimer() {
     const timerEl = document.getElementById('timer');
     const duration = 3 * 3600;
@@ -643,12 +625,11 @@ function updateStats() {
     const answered = Object.keys(userAnswers).length;
     const flagged = flaggedQuestions.size;
     const blank = 100 - answered;
-    document.getElementById('stat-answered').textContent = answered;
-    document.getElementById('stat-flagged').textContent = flagged;
-    document.getElementById('stat-blank').textContent = blank;
-    document.getElementById('answered-count-bottom').textContent = answered;
-    const pct = Math.min(100, Math.round((answered / 52) * 100));
-    document.getElementById('target-progress-bar').style.width = `${pct}%`;
+    const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    setText('stat-answered', answered);
+    setText('stat-flagged', flagged);
+    setText('stat-blank', blank);
+    setText('answered-count-bottom', answered);
     if (typeof updateCareerProgress === 'function') updateCareerProgress();
 }
 

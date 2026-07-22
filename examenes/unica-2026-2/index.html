@@ -644,12 +644,11 @@ function updateStats() {
     const answered = Object.keys(userAnswers).length;
     const flagged = flaggedQuestions.size;
     const blank = 100 - answered;
-    document.getElementById('stat-answered').textContent = answered;
-    document.getElementById('stat-flagged').textContent = flagged;
-    document.getElementById('stat-blank').textContent = blank;
-    document.getElementById('answered-count-bottom').textContent = answered;
-    const pct = Math.min(100, Math.round((answered / 52) * 100));
-    document.getElementById('target-progress-bar').style.width = `${pct}%`;
+    const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    setText('stat-answered', answered);
+    setText('stat-flagged', flagged);
+    setText('stat-blank', blank);
+    setText('answered-count-bottom', answered);
     if (typeof updateCareerProgress === 'function') updateCareerProgress();
 }
 
