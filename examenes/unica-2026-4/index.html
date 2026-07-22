@@ -234,6 +234,10 @@
                     <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
                 </button>
                 <div class="flex gap-2">
+                    <button onclick="downloadFeedbackMD()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Markdown completo del examen, tus respuestas, errores y plan de estudio para pasárselo a una IA">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L4.5 12l5.25-5.25m6 10.5L20.25 12l-5.25-5.25"></path></svg>
+                        <span>Feedback para IA (.md)</span>
+                    </button>
                     <button onclick="downloadRespuestas()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar .txt con tus respuestas">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
                         <span>Descargar respuestas (.txt)</span>
@@ -698,6 +702,202 @@ function downloadRespuestas() {
         lines.push(String(i).padStart(3, '0') + '. ' + v);
     }
     downloadBlob('respuestas-unica-2026-4.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+}
+
+function downloadFeedbackMD() {
+    const total = questionsDB.length;
+    let buenas = 0, malas = 0, blancas = 0;
+    for (const q of questionsDB) {
+        const v = userAnswers[q.id];
+        if (!v) blancas++;
+        else if (v === q.correct) buenas++;
+        else malas++;
+    }
+    const scoreEl = document.getElementById('res-score-100');
+    const notaEl  = document.getElementById('res-score-20');
+    const condEl  = document.getElementById('res-condition-text');
+    const score = scoreEl ? scoreEl.textContent : '0';
+    const nota  = notaEl  ? notaEl.textContent  : '0';
+    const cond  = condEl  ? condEl.textContent  : '';
+    const sel = document.getElementById('career-select');
+    const career = sel && sel.value ? sel.value : '(sin seleccionar)';
+    const fecha = new Date().toLocaleString('es-PE');
+
+    const esc = (s) => String(s == null ? '' : s)
+        .replace(/\|/g, '\\|').replace(/\n/g, ' ')
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<\/p>/gi, ' ')
+        .replace(/<[^>]+>/g, '');
+
+    // 1. Rendimiento por sección
+    const secStats = {};
+    // 2. Rendimiento por categoría dentro de sección
+    const catStats = {};
+    for (const q of questionsDB) {
+        const v = userAnswers[q.id];
+        const ok = v === q.correct;
+        const blank = !v;
+        if (!secStats[q.sec]) secStats[q.sec] = { title: q.secTitle, b: 0, m: 0, w: 0, total: 0 };
+        secStats[q.sec].total++;
+        if (blank) secStats[q.sec].w++;
+        else if (ok) secStats[q.sec].b++;
+        else secStats[q.sec].m++;
+
+        const catKey = q.sec + '||' + q.cat;
+        if (!catStats[catKey]) catStats[catKey] = { sec: q.sec, secTitle: q.secTitle, cat: q.cat, b: 0, m: 0, w: 0, total: 0, errors: [], blanks: [] };
+        catStats[catKey].total++;
+        if (blank) catStats[catKey].w++;
+        else if (ok) catStats[catKey].b++;
+        else { catStats[catKey].m++; catStats[catKey].errors.push(q.id); }
+        if (blank) catStats[catKey].blanks.push(q.id);
+    }
+
+    const secRows = Object.entries(secStats).map(([k, s]) => {
+        const acc = (s.b / s.total) * 100;
+        return `| ${esc(s.title)} | ${s.total} | ${s.b} | ${s.m} | ${s.w} | ${acc.toFixed(1)}% |`;
+    }).join('\n');
+
+    // Categorías ordenadas por % de error más alto
+    const catOrder = Object.values(catStats).sort((a, b) => {
+        const ea = a.m / a.total, eb = b.m / b.total;
+        if (eb !== ea) return eb - ea;
+        return (b.w / b.total) - (a.w / a.total);
+    });
+    const catRows = catOrder.map(c => {
+        const errPct = (c.m / c.total) * 100;
+        const blanksPct = (c.w / c.total) * 100;
+        return `| ${esc(c.cat)} | ${esc(c.secTitle)} | ${c.total} | ${c.b} | ${c.m} | ${c.w} | ${errPct.toFixed(1)}% err · ${blanksPct.toFixed(1)}% blanco |`;
+    }).join('\n');
+
+    const lost = [];      // fallos
+    const untouched = []; // blancos
+    for (const q of questionsDB) {
+        const v = userAnswers[q.id];
+        if (!v) untouched.push(q);
+        else if (v !== q.correct) lost.push(q);
+    }
+
+    // 3. Listado de errores
+    const lostMD = lost.length ? lost.map(q => {
+        const v = userAnswers[q.id];
+        return `- **Pregunta ${q.id}** (${esc(q.cat)} · ${esc(q.secTitle)}): respondiste **${v}**, clave correcta **${q.correct}**. Enunciado resumido: ${esc(q.text).slice(0, 220)}…`;
+    }).join('\n') : '_No tuviste errores._';
+
+    const blankMD = untouched.length ? untouched.map(q =>
+        `- **Pregunta ${q.id}** (${esc(q.cat)} · ${esc(q.secTitle)}): quedaste en blanco. Enunciado: ${esc(q.text).slice(0, 220)}…`
+    ).join('\n') : '_Respondiste todas._';
+
+    // 4. Plan de estudio sugerido (de las categorías con más error / blanco)
+    const studyPlan = catOrder.slice(0, 12).map(c => {
+        const err = c.m, blanks = c.w;
+        const pct = ((err + blanks) / c.total) * 100;
+        return `- **${esc(c.cat)}** (${esc(c.secTitle)}) — fallaste ${err}/${c.total} y dejaste en blanco ${blanks}/${c.total} (≈${pct.toFixed(0)}% a reforzar).`;
+    }).join('\n');
+
+    // 5. Examen completo en bloque HTML + alternativas + clave
+    const qBlocks = questionsDB.map((q, i) => {
+        const v = userAnswers[q.id];
+        const status = !v ? '⬜' : (v === q.correct ? '✅' : '❌');
+        const opts = q.options.map((o, idx) => {
+            const letter = String.fromCharCode(65 + idx);
+            const mark = letter === q.correct ? '✅' : '   ';
+            return `  - ${mark} ${letter}) ${o}`;
+        }).join('\n');
+        return `### ${q.id}. ${esc(q.cat)} — ${esc(q.secTitle)}  ${status}\n**Tu respuesta:** ${v || '— (en blanco)'} · **Clave:** ${q.correct}\n\n${esc(q.text)}\n\n**Alternativas:**\n${opts}`;
+    }).join('\n\n---\n\n');
+
+    // 6. Tabla hoja de respuestas
+    const respuestas = Array.from({ length: total }, (_, i) => i + 1).map(i => {
+        const v = userAnswers[i];
+        const q = questionsDB.find(q => q.id === i);
+        const ok = v === q.correct;
+        const sym = !v ? '⬜' : (ok ? '✅' : '❌');
+        return `| ${i} | ${v || '—'} | ${q.correct} | ${sym} | ${esc(q.cat)} |`;
+    }).join('\n');
+
+    const md = `# Feedback Examen Real UNICA · CCC-52
+
+> Generado el ${fecha}. Carrera objetivo: **${esc(career)}**.
+
+## Resumen
+
+- **Puntaje crudo:** ${score} / 100
+- **Nota vigesimal:** ${nota} / 20
+- **Veredicto:** ${cond}
+- **Buenas:** ${buenas}  ·  **Malas:** ${malas}  ·  **En blanco:** ${blancas}
+
+> Fórmula oficial UNICA: **Puntaje = B + M/3 · (−1) + V/16** (B = buenas, M = malas, V = vacías). Cada error resta lo mismo que 3 vacías te aportan.
+
+---
+
+## 1) Rendimiento por bloque del examen
+
+| Bloque | Total | Buenas | Malas | Blanco | Aciertos |
+|---|---:|---:|---:|---:|---:|
+${secRows}
+
+---
+
+## 2) Rendimiento por tema (ordenado por % de error descendente)
+
+| Tema | Sección | Total | ✅ | ❌ | ⬜ | Aciertos |
+|---|---|---:|---:|---:|---:|---|
+${catRows}
+
+> Estos son los **temas puntuales** donde concentraste tus peores resultados.
+
+---
+
+## 3) ¿Dónde te equivocaste? (${lost.length} fallos)
+
+${lostMD}
+
+---
+
+## 4) ¿Dónde ni siquiera respondiste? (${untouched.length} en blanco)
+
+${blankMD}
+
+> Cada blanco te da **+0.0625** y cada mala te resta **−0.333**. Si en una duda no puedes descartar 3 opciones, es matemáticamente mejor dejarla en blanco.
+
+---
+
+## 5) Plan de estudio sugerido (priorizado)
+
+${studyPlan}
+
+**Recomendación general:** ataca los temas ordenados de mayor a menor % de fallo + blanco, porque es donde más margen de puntos recuperas por hora de estudio.
+
+---
+
+## 6) Mis respuestas vs clave (resumen)
+
+| # | Mi respuesta | Clave | Resultado | Tema |
+|---:|:---:|:---:|:---:|---|
+${respuestas}
+
+---
+
+## 7) Examen completo (texto · alternativas · clave)
+
+${qBlocks}
+
+---
+
+## Indicaciones para la IA
+
+Eres mi tutor del examen UNICA (CCC-52, Área C: Ingeniería). Con este markdown:
+
+1. **Diagnostica mis brechas**: dime por qué fallé cada pregunta de la sección 3 y por qué dejé en blanco cada una de la sección 4 (qué concepto me faltaba).
+2. **Plan de estudio semanal**: usa la sección 5 para proponerme un cronograma de 2 semanas con teoría + práctica por tema, priorizando lo que más puntos recupera.
+3. **Microlecciones**: por cada tema de la sección 2 con ≥ 30% de error, explícame con un ejemplo resuelto paso a paso al estilo PRE-UNICA.
+4. **Estrategia de examen**: confirma si estoy aplicando bien el filtro semáforo (B + 1 / M − 0.333 / V + 0.0625) y cuántas preguntas adicionales pasaría si convierto todas mis malas en blanco.
+5. **Carrera objetivo**: soy postulante a **${esc(career)}**. Adapta las recomendaciones al perfil e intensidad de esta carrera.
+
+Por favor responde en español, con foco en acción concreta, no en discurso motivacional.
+`;
+
+    downloadBlob('feedback-unica-ccc52.md', md, 'text/markdown;charset=utf-8');
 }
 
 function openTimerModal() {
