@@ -384,8 +384,7 @@ function onCareerChange() {
   const name = sel.value;
   const info = document.getElementById('career-info');
   const badge = document.getElementById('career-badge');
-  try { localStorage.setItem(STORAGE_KEY + '_career', name || ''); } catch {}
-  try { if (name) localStorage.setItem('unica_career', name); } catch {}
+  try { if (name) localStorage.setItem('unica_career', name); else localStorage.removeItem('unica_career'); } catch {}
   if (!name) {
     info.classList.add('hidden');
     badge.textContent = 'Sin selección';
@@ -438,8 +437,7 @@ function updateCareerProgress() {
     sel.appendChild(opt);
   });
   try {
-    let saved = localStorage.getItem(STORAGE_KEY + '_career');
-    if (!saved) saved = localStorage.getItem('unica_career');
+    const saved = localStorage.getItem('unica_career');
     if (saved && CAREERS_MIN[saved]) {
       sel.value = saved;
       onCareerChange();
