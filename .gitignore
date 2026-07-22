@@ -4,3 +4,10 @@ node_modules/
 .env
 .vscode/
 .idea/
+
+# OCR & local artifacts
+tessdata/
+ccc52_ocr.txt
+ocr_examen.py
+build_qs.py
+CCC-52.pdf

@@ -28,5 +28,15 @@
     "questions": 100,
     "duration": 180,
     "url": "examenes/unica-2026-3/index.html"
+  },
+  {
+    "slug": "unica-2026-4",
+    "title": "Simulacro Oficial UNICA N°4 (Examen Real CCC-52)",
+    "area": "Área C: Ingeniería",
+    "year": "CCC-52 · Examen Real Anterior",
+    "description": "Copia del examen real anterior (CCC-52.pdf): 100 preguntas idénticas, alternativas, clave y feedback súper explicativo para consultar con IA.",
+    "questions": 100,
+    "duration": 180,
+    "url": "examenes/unica-2026-4/index.html"
   }
 ]
