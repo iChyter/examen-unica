@@ -411,6 +411,48 @@ let totalTimeSeconds = 3 * 3600;
 let timerInterval = null;
 let submitted = false;
 
+let state = { analysis: null, career: null, meta: null };
+
+const CAREERS_DB = {
+  'Medicina Humana':15.5959,'Enfermería':10.9792,'Obstetricia':4.0876,'Psicología':4.8293,'Odontología':5.3334,
+  'Farmacia y Bioquímica':2.4709,'Biología':3.0918,'Medicina Veterinaria y Zootecnia':2.0875,
+  'Ingeniería de Sistemas':6.2417,'Ingeniería Civil':4.4459,'Agronomía':3.2209,'Ingeniería de Minas':2.9667,
+  'Ingeniería Ambiental y Sanitaria':1.8085,'Ingeniería Mecánica Eléctrica':4.3959,'Ingeniería Metalúrgica':1.6418,
+  'Contabilidad':0.2669,'Administración':1.8209,'Ingeniería Electrónica':1.7417,'Arquitectura':4.0044,
+  'Ingeniería de Alimentos':0.0294,'Ingeniería Química':0.0797,'Ingeniería Pesquera':0.9501,
+  'Derecho':4.6045,'Negocios Internacionales':1.3338,'Economía':0.0005,
+  'Ciencias de la Comunicación':0.1377,'Turismo':0.1545,'Arqueología':0.2544,
+  'Ciencias de la Educación Inicial':2.4004,'Ciencias de la Educación Física':1.2751,'Ciencias de la Educación Primaria':1.4586,
+  'Ciencias de la Educación Lengua y Literatura':1.0417,'Ciencias de la Educación Historia y Geografía':0.1545,
+  'Ciencias de la Educación Matemática e Informática':0.8005,'Ciencias de la Educación Filosofía, Psicología y CC.SS.':0.2672,
+  'Ciencias de la Educación Arte':0.0753,'Ciencias de la Educación Biología y Química':0.8086,
+  'Matemática e Informática':0.8005,'Estadística':0.2672,'Física':0.3376
+};
+
+function onCareerChange() {
+    const sel = document.getElementById('careerSelectExam');
+    const name = sel.value;
+    const info = document.getElementById('career-target-info');
+    const badge = document.getElementById('career-meta-badge');
+    if (!name) {
+        state.career = null; state.meta = null;
+        info.classList.add('hidden');
+        badge.textContent = 'Sin selección';
+        badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+        return;
+    }
+    const min = CAREERS_DB[name];
+    const meta = min + 1.0;
+    state.career = name; state.meta = meta;
+    document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
+    document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
+    badge.textContent = 'Meta ' + meta.toFixed(1);
+    badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
+    info.classList.remove('hidden');
+    document.getElementById('career-tip').innerHTML = 'Con 0 errores y el resto en blanco: marca <strong>' + Math.max(0, Math.ceil((meta * 5 * 16 - (100 - meta * 5)) / 17)) + ' seguras</strong> de 100. Filtro Semáforo: si dudas, deja en blanco.';
+    try { localStorage.setItem(STORAGE_KEY + '_career', name); } catch {}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     renderQuestions();
     renderQuestionGrid();
