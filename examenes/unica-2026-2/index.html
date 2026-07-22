@@ -75,7 +75,7 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mi carrera</span>
                     <span id="career-badge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Sin selección</span>
                 </div>
-                <select id="career" onchange="onCareerChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-unica-600 mb-2">
+                <select id="career-select" onchange="onCareerChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-unica-600 mb-2">
                     <option value="">-- Elige tu carrera --</option>
                 </select>
                 <div id="career-info" class="hidden">
@@ -90,9 +90,6 @@
                     <div class="flex justify-between text-xs text-slate-600">
                         <span>Seguras necesarias:</span>
                         <span class="font-bold text-slate-800" id="career-seguras">-</span>
-                    </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-1.5">
-                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[0%] transition-all duration-300"></div>
                     </div>
                 </div>
             </div>
@@ -425,7 +422,7 @@ const CAREERS_MIN = {
 };
 
 function onCareerChange() {
-  const sel = document.getElementById('career');
+  const sel = document.getElementById('career-select');
   const name = sel.value;
   const info = document.getElementById('career-info');
   const badge = document.getElementById('career-badge');
@@ -447,9 +444,8 @@ function onCareerChange() {
   info.classList.remove('hidden');
 }
 
-// Poblar el select al cargar
 (function() {
-  const sel = document.getElementById('career');
+  const sel = document.getElementById('career-select');
   if (!sel) return;
   Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
     const opt = document.createElement('option');
@@ -458,7 +454,6 @@ function onCareerChange() {
     sel.appendChild(opt);
   });
 })();
-
 
 document.addEventListener('DOMContentLoaded', () => {
     renderQuestions();
@@ -649,7 +644,7 @@ function submitExam() {
     const condText = document.getElementById('res-condition-text');
     const condSub = document.getElementById('res-condition-sub');
     const feedbackBox = document.getElementById('res-feedback-box');
-        const sel = document.getElementById('career');
+    const sel = document.getElementById('career-select');
     const career = sel ? sel.value : '';
     const minCorte = career ? CAREERS_MIN[career] : null;
     const meta = minCorte != null ? minCorte + 1 : 9.0;
@@ -659,33 +654,19 @@ function submitExam() {
         condText.textContent = "¡META ALCANZADA!";
         condText.className = "text-lg font-black text-emerald-700";
         condSub.textContent = career ? `Superaste ${meta.toFixed(2)}/20 en ${career}` : `Superaste ${meta.toFixed(2)}/20`;
-        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>${career ? `Pasarías la nota de corte de <strong>${career}</strong> (mín histórico ${minCorte.toFixed(2)} + 1 de margen).` : 'Has alcanzado el puntaje objetivo.'} Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución.</div><p>${career ? `Pasarías la nota de corte de <strong>${career}</strong> (mín histórico ${minCorte.toFixed(2)} + 1 de margen).` : 'Has alcanzado el puntaje objetivo.'} Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
     } else if (notaVigesimal >= 6.7) {
         condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
         condText.textContent = career ? "EN CORTE (sin margen)" : "ZONA DE CORTE";
         condText.className = "text-lg font-black text-amber-700";
         condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20 — te falta ${(meta - notaVigesimal).toFixed(2)}` : "Cerca del umbral mínimo";
-        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Estás cerca de la meta.</div><p>${career ? `<strong>${career}</strong> requiere ${meta.toFixed(2)}/20. ` : ''}Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Cerca de la meta.</div><p>${career ? `<strong>${career}</strong> requiere ${meta.toFixed(2)}/20. ` : ''}Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
     } else {
         condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
         condText.textContent = "AJUSTAR FILTRO";
         condText.className = "text-lg font-black text-rose-700";
         condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Por debajo del objetivo";
         feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
-    }
-
- else if (notaVigesimal >= 6.7) {
-        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "ZONA DE CORTE";
-        condText.className = "text-lg font-black text-amber-700";
-        condSub.textContent = "Cerca del umbral mínimo";
-        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Cerca de la meta.</div><p><strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} malas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>.</p>`;
-    } else {
-        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "AJUSTAR FILTRO";
-        condText.className = "text-lg font-black text-rose-700";
-        condSub.textContent = "Por debajo del objetivo";
-        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p><strong>${malas} errores</strong> restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica Filtro Semáforo.</p>`;
     }
     renderSolucionario();
     document.getElementById('results-modal').classList.remove('hidden');
