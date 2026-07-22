@@ -75,6 +75,9 @@
                 <option value="">-- Selecciona carrera --</option>
             </select>
             <div id="careerResult" class="mt-4 hidden"></div>
+            <div id="careerAction" class="mt-3 hidden flex gap-2">
+                <a id="careerGoExam" href="examenes/unica-2026-3/index.html" class="flex-1 text-center bg-unica-600 hover:bg-unica-800 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">Ir a mi examen</a>
+            </div>
         </section>
 
         <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
@@ -211,7 +214,9 @@ sorted.forEach(([name, min]) => {
 function calcMeta() {
   const name = sel.value;
   const res = document.getElementById('careerResult');
-  if (!name) { res.classList.add('hidden'); return; }
+  const act = document.getElementById('careerAction');
+  if (!name) { res.classList.add('hidden'); act.classList.add('hidden'); try { localStorage.removeItem('unica_career'); } catch {} return; }
+  try { localStorage.setItem('unica_career', name); } catch {}
   const min = CAREERS[name];
   const meta = min + 1;
   const meta100 = meta * 5;
@@ -229,7 +234,21 @@ function calcMeta() {
     '<p class="text-xs text-slate-700">Con <strong>0 errores</strong> y dejando el resto en blanco: marca <strong>' + bien + ' preguntas seguras</strong> de 100 y deja <strong>' + vacias + ' en blanco</strong>.</p>' +
     '<p class="text-[10px] text-slate-500 mt-2">Cálculo: P = ' + bien + ' + ' + vacias + '/16 = ' + (bien + vacias/16).toFixed(2) + ' / 100 = ' + meta.toFixed(2) + '/20.</p>' +
     '</div>';
+  const link = document.getElementById('careerGoExam');
+  if (link) link.href = 'examenes/unica-2026-3/index.html?c=' + encodeURIComponent(name);
+  act.classList.remove('hidden');
 }
+
+// Restaurar al cargar
+(function() {
+  try {
+    const saved = localStorage.getItem('unica_career');
+    if (saved && CAREERS[saved]) {
+      sel.value = saved;
+      calcMeta();
+    }
+  } catch {}
+})();
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then((regs) => {

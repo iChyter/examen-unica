@@ -91,6 +91,14 @@
                         <span>Seguras necesarias:</span>
                         <span class="font-bold text-slate-800" id="career-seguras">-</span>
                     </div>
+                    <div class="flex justify-between text-xs text-slate-600" id="career-progress-row" style="display:none;">
+                        <span>Tu avance:</span>
+                        <span class="font-bold text-emerald-700" id="career-progress">0 / -</span>
+                    </div>
+                    <div id="career-progress-wrap" style="display:none;" class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                        <div id="career-progress-bar" class="bg-emerald-500 h-full transition-all duration-200" style="width:0%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1 hidden" id="career-progress-tip">Marca solo lo seguro. Lo dudoso, déjalo en blanco.</p>
                 </div>
             </div>
 
@@ -369,28 +377,55 @@ const CAREERS_MIN = {
   'Matemática e Informática':0.8005,'Estadística':0.2672,'Física':0.3376
 };
 
+let careerSeguras = 0;
+
 function onCareerChange() {
   const sel = document.getElementById('career-select');
   const name = sel.value;
   const info = document.getElementById('career-info');
   const badge = document.getElementById('career-badge');
   try { localStorage.setItem(STORAGE_KEY + '_career', name || ''); } catch {}
+  try { if (name) localStorage.setItem('unica_career', name); } catch {}
   if (!name) {
     info.classList.add('hidden');
     badge.textContent = 'Sin selección';
     badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+    document.getElementById('career-progress-row').style.display = 'none';
+    document.getElementById('career-progress-wrap').style.display = 'none';
+    document.getElementById('career-progress-tip').classList.add('hidden');
+    careerSeguras = 0;
     return;
   }
   const min = CAREERS_MIN[name];
   const meta = min + 1;
   const meta100 = meta * 5;
   const bien = Math.max(0, Math.ceil((meta100 * 16 - (100 - meta100)) / 17));
+  careerSeguras = bien;
   document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
   document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
   document.getElementById('career-seguras').textContent = bien + ' de 100';
   badge.textContent = 'Meta ' + meta.toFixed(1);
   badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
   info.classList.remove('hidden');
+  document.getElementById('career-progress-row').style.display = '';
+  document.getElementById('career-progress-wrap').style.display = '';
+  document.getElementById('career-progress-tip').classList.remove('hidden');
+  updateCareerProgress();
+}
+
+function updateCareerProgress() {
+  if (careerSeguras <= 0) return;
+  const answered = Object.keys(userAnswers).length;
+  const prog = document.getElementById('career-progress');
+  const bar = document.getElementById('career-progress-bar');
+  const tip = document.getElementById('career-progress-tip');
+  if (prog) prog.textContent = answered + ' / ' + careerSeguras;
+  const pct = Math.min(100, Math.round((answered / careerSeguras) * 100));
+  if (bar) bar.style.width = pct + '%';
+  if (tip) {
+    if (answered >= careerSeguras) tip.innerHTML = 'Alcanzaste la meta. Deja en blanco lo dudoso.';
+    else tip.innerHTML = 'Te faltan <strong>' + (careerSeguras - answered) + '</strong> seguras para tu meta.';
+  }
 }
 
 (function() {
@@ -403,7 +438,8 @@ function onCareerChange() {
     sel.appendChild(opt);
   });
   try {
-    const saved = localStorage.getItem(STORAGE_KEY + '_career');
+    let saved = localStorage.getItem(STORAGE_KEY + '_career');
+    if (!saved) saved = localStorage.getItem('unica_career');
     if (saved && CAREERS_MIN[saved]) {
       sel.value = saved;
       onCareerChange();
@@ -615,6 +651,7 @@ function updateStats() {
     document.getElementById('answered-count-bottom').textContent = answered;
     const pct = Math.min(100, Math.round((answered / 52) * 100));
     document.getElementById('target-progress-bar').style.width = `${pct}%`;
+    if (typeof updateCareerProgress === 'function') updateCareerProgress();
 }
 
 function scrollToQuestion(qId) { document.getElementById(`q-card-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
