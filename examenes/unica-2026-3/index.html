@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="../_shared/motor-unica.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -789,10 +790,17 @@ function resetTimer() {
     try { localStorage.removeItem(TIMER_KEY); } catch {}
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
     try { localStorage.removeItem(STORAGE_KEY + '_flagged'); } catch {}
+    try { localStorage.removeItem('unica_rare_2026_3'); } catch {}
     userAnswers = {};
     flaggedQuestions = new Set();
     location.reload();
 }
+
+window.exUnica.bind({
+    storageKey: 'unica_exam_2026_3',
+    rareStorageKey: 'unica_rare_2026_3',
+    title: 'Examen 3 - UNICA'
+});
 </script>
 </body>
 </html>
