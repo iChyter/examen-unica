@@ -507,12 +507,12 @@ function renderQuestions() {
                     <span class="bg-unica-100 text-unica-800 font-bold text-xs px-2.5 py-1 rounded-lg">Pregunta ${q.id}</span>
                     <span class="text-xs font-semibold text-slate-500">${q.cat}</span>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <button type="button" onclick="toggleRare(${q.id})" id="rare-btn-${q.id}" title="Enunciado confuso, mal OCR, gráfico faltante, símbolos raros…" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 flex items-center space-x-1 transition-all">
-                        <span>⚠ Rara</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleRare(${q.id})" id="rare-btn-${q.id}" title="Marcar como pregunta rara — enunciado confuso, mal OCR, gráfico faltante o símbolos raros" aria-label="Pregunta rara" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 flex items-center justify-center transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm.75 5.5a.75.75 0 0 0-1.5 0v6.25c0 .41.34.75.75.75h4.25a.75.75 0 0 0 0-1.5h-3.5V7.5Z"/></svg>
                     </button>
-                    <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all">
-                        <span>Marcar Duda</span>
+                    <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" title="Marcar como duda — para repasar después" aria-label="Marcar duda" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 flex items-center justify-center transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2 1.5 21h21L12 2Zm0 6.5L18.5 19h-13L12 8.5Zm-.75 3.25v3.5h1.5v-3.5h-1.5Zm0 4.5v1.5h1.5v-1.5h-1.5Z"/></svg>
                     </button>
                 </div>
             </div>
@@ -595,14 +595,14 @@ function updateCardStyle(qId) {
 
     if (flagBtn) {
         flagBtn.className = isFlagged
-            ? "text-xs px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-100 text-amber-800 font-bold flex items-center space-x-1"
-            : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all";
+            ? "w-8 h-8 rounded-lg border border-amber-400 bg-amber-400 text-amber-900 flex items-center justify-center transition-all shadow-sm"
+            : "w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 flex items-center justify-center transition-all";
     }
 
     if (rareBtn) {
         rareBtn.className = isRare
-            ? "text-xs px-2.5 py-1 rounded-lg border border-rose-300 bg-rose-100 text-rose-800 font-bold flex items-center space-x-1"
-            : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 flex items-center space-x-1 transition-all";
+            ? "w-8 h-8 rounded-lg border border-rose-500 bg-rose-500 text-white flex items-center justify-center transition-all shadow-sm"
+            : "w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 flex items-center justify-center transition-all";
     }
 
     let badge = document.getElementById(badgeId);
