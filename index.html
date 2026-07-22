@@ -225,9 +225,6 @@ async function downloadExam(examUrl, slug) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-loadExams();
-loadCareers();
-
 const CAREERS = [
   { name: 'Medicina Humana',                       min: 15.5959, max: 17.8667 },
   { name: 'Enfermería',                            min: 10.9792, max: 17.6001 },
@@ -317,6 +314,9 @@ function showCareerTarget() {
         '  <strong>Con 5 errores</strong> (no dejas en blanco ninguna adicional): meta sube a ' + ((meta * 5 + 5/3) / 1).toFixed(2) + ' puntos brutos. Cada error cuesta ≈0.33 y baja tu nota en ≈0.07/20.' +
         '</div>';
 }
+
+loadExams();
+loadCareers();
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
