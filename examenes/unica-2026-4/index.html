@@ -234,7 +234,7 @@
                     <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
                 </button>
                 <div class="flex gap-2">
-                    <button onclick="downloadFeedbackMD()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Markdown completo del examen, tus respuestas, errores y plan de estudio para pasárselo a una IA">
+                    <button onclick="downloadFeedbackMD(true)" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descarga el .md y lo abre previsualizado en una pestaña nueva (envíalo a tu IA con copiar/pegar)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L4.5 12l5.25-5.25m6 10.5L20.25 12l-5.25-5.25"></path></svg>
                         <span>Feedback para IA (.md)</span>
                     </button>
@@ -704,7 +704,7 @@ function downloadRespuestas() {
     downloadBlob('respuestas-unica-2026-4.txt', lines.join('\n'), 'text/plain;charset=utf-8');
 }
 
-function downloadFeedbackMD() {
+function downloadFeedbackMD(openPreview) {
     const total = questionsDB.length;
     let buenas = 0, malas = 0, blancas = 0;
     for (const q of questionsDB) {
@@ -898,6 +898,11 @@ Por favor responde en español, con foco en acción concreta, no en discurso mot
 `;
 
     downloadBlob('feedback-unica-ccc52.md', md, 'text/markdown;charset=utf-8');
+    if (openPreview) {
+        const url = URL.createObjectURL(new Blob([md], { type: 'text/markdown;charset=utf-8' }));
+        window.open(url, '_blank', 'noopener');
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }
 }
 
 function openTimerModal() {
