@@ -882,13 +882,6 @@ function downloadRespuestas() {
     lines.push('3) Sugiere un plan de estudio de 3 días focalizado en las secciones débiles.');
     downloadBlob('analisis-unica.txt', lines.join('\n'), 'text/plain;charset=utf-8');
 }
-    downloadBlob('respuestas-unica-2026-1.txt', lines.join('\n'), 'text/plain;charset=utf-8');
-}
-
-function openTimerModal() {
-    if (submitted) return;
-    let m = document.getElementById('timer-modal');
-    if (m) { m.classList.remove('hidden'); return; }
     m = document.createElement('div');
     m.id = 'timer-modal';
     m.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4';
