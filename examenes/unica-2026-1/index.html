@@ -763,18 +763,6 @@ const meta = state.meta;
         condText.className = "text-lg font-black text-rose-700";
         condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Por debajo del objetivo";
         feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p><strong>${malas} errores</strong> restaron <strong>${(malas/3).toFixed(2)}</strong> puntos. Si dudas, blanco.</p>`;
-    } else if (notaVigesimal >= 6.7) {
-        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "ZONA DE CORTE";
-        condText.className = "text-lg font-black text-amber-700";
-        condSub.textContent = "Cerca del umbral mínimo";
-        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Estás muy cerca de la meta.</div><p>Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
-    } else {
-        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "AJUSTAR FILTRO";
-        condText.className = "text-lg font-black text-rose-700";
-        condSub.textContent = "Por debajo del objetivo";
-        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
     }
 
     renderSolucionario();
