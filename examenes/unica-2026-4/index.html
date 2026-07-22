@@ -174,6 +174,31 @@
         </section>
     </main>
 
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 sm:p-8 my-8 relative">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4 sticky top-0 bg-white z-10">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Feedback para IA</h2>
+                    <p class="text-xs text-slate-500">Markdown completo del examen. Cópialo y pégalo en tu IA favorita.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="copyFeedbackMD()" id="feedback-copy-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Copiar todo al portapapeles">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <span>Copiar</span>
+                    </button>
+                    <button onclick="downloadCurrentFeedback()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar feedback-unica-ccc52.md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
+                        <span>Descargar .md</span>
+                    </button>
+                    <button onclick="closeFeedbackModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors" title="Cerrar">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <pre id="feedback-preview" class="text-[11px] sm:text-xs font-mono leading-relaxed whitespace-pre-wrap break-words bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-800 select-all"></pre>
+        </div>
+    </div>
+
     <div id="results-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 sm:p-8 my-8 relative">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
@@ -234,7 +259,7 @@
                     <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
                 </button>
                 <div class="flex gap-2">
-                    <button onclick="downloadFeedbackMD(true)" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descarga el .md y lo abre previsualizado en una pestaña nueva (envíalo a tu IA con copiar/pegar)">
+                    <button onclick="openFeedbackPreview()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Abre el feedback completo en .md para copiar/pegar a tu IA">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L4.5 12l5.25-5.25m6 10.5L20.25 12l-5.25-5.25"></path></svg>
                         <span>Feedback para IA (.md)</span>
                     </button>
@@ -704,7 +729,9 @@ function downloadRespuestas() {
     downloadBlob('respuestas-unica-2026-4.txt', lines.join('\n'), 'text/plain;charset=utf-8');
 }
 
-function downloadFeedbackMD(openPreview) {
+let _lastFeedbackMD = '';
+
+function buildFeedbackMD() {
     const total = questionsDB.length;
     let buenas = 0, malas = 0, blancas = 0;
     for (const q of questionsDB) {
@@ -729,9 +756,7 @@ function downloadFeedbackMD(openPreview) {
         .replace(/<\/p>/gi, ' ')
         .replace(/<[^>]+>/g, '');
 
-    // 1. Rendimiento por sección
     const secStats = {};
-    // 2. Rendimiento por categoría dentro de sección
     const catStats = {};
     for (const q of questionsDB) {
         const v = userAnswers[q.id];
@@ -757,7 +782,6 @@ function downloadFeedbackMD(openPreview) {
         return `| ${esc(s.title)} | ${s.total} | ${s.b} | ${s.m} | ${s.w} | ${acc.toFixed(1)}% |`;
     }).join('\n');
 
-    // Categorías ordenadas por % de error más alto
     const catOrder = Object.values(catStats).sort((a, b) => {
         const ea = a.m / a.total, eb = b.m / b.total;
         if (eb !== ea) return eb - ea;
@@ -769,15 +793,13 @@ function downloadFeedbackMD(openPreview) {
         return `| ${esc(c.cat)} | ${esc(c.secTitle)} | ${c.total} | ${c.b} | ${c.m} | ${c.w} | ${errPct.toFixed(1)}% err · ${blanksPct.toFixed(1)}% blanco |`;
     }).join('\n');
 
-    const lost = [];      // fallos
-    const untouched = []; // blancos
+    const lost = [], untouched = [];
     for (const q of questionsDB) {
         const v = userAnswers[q.id];
         if (!v) untouched.push(q);
         else if (v !== q.correct) lost.push(q);
     }
 
-    // 3. Listado de errores
     const lostMD = lost.length ? lost.map(q => {
         const v = userAnswers[q.id];
         return `- **Pregunta ${q.id}** (${esc(q.cat)} · ${esc(q.secTitle)}): respondiste **${v}**, clave correcta **${q.correct}**. Enunciado resumido: ${esc(q.text).slice(0, 220)}…`;
@@ -787,15 +809,13 @@ function downloadFeedbackMD(openPreview) {
         `- **Pregunta ${q.id}** (${esc(q.cat)} · ${esc(q.secTitle)}): quedaste en blanco. Enunciado: ${esc(q.text).slice(0, 220)}…`
     ).join('\n') : '_Respondiste todas._';
 
-    // 4. Plan de estudio sugerido (de las categorías con más error / blanco)
     const studyPlan = catOrder.slice(0, 12).map(c => {
         const err = c.m, blanks = c.w;
         const pct = ((err + blanks) / c.total) * 100;
         return `- **${esc(c.cat)}** (${esc(c.secTitle)}) — fallaste ${err}/${c.total} y dejaste en blanco ${blanks}/${c.total} (≈${pct.toFixed(0)}% a reforzar).`;
     }).join('\n');
 
-    // 5. Examen completo en bloque HTML + alternativas + clave
-    const qBlocks = questionsDB.map((q, i) => {
+    const qBlocks = questionsDB.map((q) => {
         const v = userAnswers[q.id];
         const status = !v ? '⬜' : (v === q.correct ? '✅' : '❌');
         const opts = q.options.map((o, idx) => {
@@ -806,7 +826,6 @@ function downloadFeedbackMD(openPreview) {
         return `### ${q.id}. ${esc(q.cat)} — ${esc(q.secTitle)}  ${status}\n**Tu respuesta:** ${v || '— (en blanco)'} · **Clave:** ${q.correct}\n\n${esc(q.text)}\n\n**Alternativas:**\n${opts}`;
     }).join('\n\n---\n\n');
 
-    // 6. Tabla hoja de respuestas
     const respuestas = Array.from({ length: total }, (_, i) => i + 1).map(i => {
         const v = userAnswers[i];
         const q = questionsDB.find(q => q.id === i);
@@ -815,7 +834,7 @@ function downloadFeedbackMD(openPreview) {
         return `| ${i} | ${v || '—'} | ${q.correct} | ${sym} | ${esc(q.cat)} |`;
     }).join('\n');
 
-    const md = `# Feedback Examen Real UNICA · CCC-52
+    return `# Feedback Examen Real UNICA · CCC-52
 
 > Generado el ${fecha}. Carrera objetivo: **${esc(career)}**.
 
@@ -896,14 +915,40 @@ Eres mi tutor del examen UNICA (CCC-52, Área C: Ingeniería). Con este markdown
 
 Por favor responde en español, con foco en acción concreta, no en discurso motivacional.
 `;
-
-    downloadBlob('feedback-unica-ccc52.md', md, 'text/markdown;charset=utf-8');
-    if (openPreview) {
-        const url = URL.createObjectURL(new Blob([md], { type: 'text/markdown;charset=utf-8' }));
-        window.open(url, '_blank', 'noopener');
-        setTimeout(() => URL.revokeObjectURL(url), 30000);
-    }
 }
+
+function downloadCurrentFeedback() {
+    if (!_lastFeedbackMD) return;
+    downloadBlob('feedback-unica-ccc52.md', _lastFeedbackMD, 'text/markdown;charset=utf-8');
+}
+
+function copyFeedbackMD() {
+    if (!_lastFeedbackMD) return;
+    const btn = document.getElementById('feedback-copy-btn');
+    const fallback = () => {
+        const ta = document.createElement('textarea');
+        ta.value = _lastFeedbackMD;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); }
+        finally { ta.remove(); }
+    };
+    const ok = () => {
+        if (btn) { const t = btn.querySelector('span'); const prev = t.textContent; t.textContent = '¡Copiado!'; setTimeout(() => t.textContent = prev, 1500); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(_lastFeedbackMD).then(ok, () => { fallback(); ok(); });
+    } else { fallback(); ok(); }
+}
+
+function openFeedbackPreview() {
+    _lastFeedbackMD = buildFeedbackMD();
+    const pre = document.getElementById('feedback-preview');
+    if (pre) pre.textContent = _lastFeedbackMD;
+    document.getElementById('feedback-modal').classList.remove('hidden');
+}
+
+function closeFeedbackModal() { document.getElementById('feedback-modal').classList.add('hidden'); }
 
 function openTimerModal() {
     if (submitted) return;
