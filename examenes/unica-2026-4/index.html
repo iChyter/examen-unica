@@ -182,11 +182,11 @@
                     <p class="text-xs text-slate-500">Markdown completo del examen. Cópialo y pégalo en tu IA favorita.</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="copyFeedbackMD()" id="feedback-copy-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Copiar todo al portapapeles">
+                    <button onclick="copyFeedbackHTML()" id="feedback-copy-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Copia el HTML al portapapeles (pega en una IA con soporte de HTML)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                         <span>Copiar</span>
                     </button>
-                    <button onclick="downloadCurrentFeedback()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar feedback-unica-ccc52.md">
+                    <button onclick="downloadCurrentFeedback()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar feedback-unica-ccc52.html (pégalo en cualquier IA o navegador)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
                         <span>Descargar .md</span>
                     </button>
@@ -195,7 +195,7 @@
                     </button>
                 </div>
             </div>
-            <pre id="feedback-preview" class="text-[11px] sm:text-xs font-mono leading-relaxed whitespace-pre-wrap break-words bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-800 select-all"></pre>
+            <div id="feedback-preview" class="text-[12px] sm:text-sm leading-relaxed bg-slate-50 border border-slate-200 rounded-2xl p-5 text-slate-800 prose-sm select-text"></div>
         </div>
     </div>
 
@@ -729,9 +729,22 @@ function downloadRespuestas() {
     downloadBlob('respuestas-unica-2026-4.txt', lines.join('\n'), 'text/plain;charset=utf-8');
 }
 
-let _lastFeedbackMD = '';
+let _lastFeedbackHTML = '';
 
-function buildFeedbackMD() {
+function escTxt(s) {
+    return String(s == null ? '' : s)
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<\/p>/gi, ' ')
+        .replace(/<[^>]+>/g, '');
+}
+
+function escHTML(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function buildFeedbackHTML({ standalone = false } = {}) {
     const total = questionsDB.length;
     let buenas = 0, malas = 0, blancas = 0;
     for (const q of questionsDB) {
@@ -750,48 +763,27 @@ function buildFeedbackMD() {
     const career = sel && sel.value ? sel.value : '(sin seleccionar)';
     const fecha = new Date().toLocaleString('es-PE');
 
-    const esc = (s) => String(s == null ? '' : s)
-        .replace(/\|/g, '\\|').replace(/\n/g, ' ')
-        .replace(/<br\s*\/?>/gi, ' ')
-        .replace(/<\/p>/gi, ' ')
-        .replace(/<[^>]+>/g, '');
-
-    const secStats = {};
-    const catStats = {};
+    const secStats = {}, catStats = {};
     for (const q of questionsDB) {
         const v = userAnswers[q.id];
-        const ok = v === q.correct;
-        const blank = !v;
-        if (!secStats[q.sec]) secStats[q.sec] = { title: q.secTitle, b: 0, m: 0, w: 0, total: 0 };
+        const ok = v === q.correct, blank = !v;
+        secStats[q.sec] = secStats[q.sec] || { title: q.secTitle, b: 0, m: 0, w: 0, total: 0 };
         secStats[q.sec].total++;
-        if (blank) secStats[q.sec].w++;
-        else if (ok) secStats[q.sec].b++;
-        else secStats[q.sec].m++;
+        if (blank) secStats[q.sec].w++; else if (ok) secStats[q.sec].b++; else secStats[q.sec].m++;
 
         const catKey = q.sec + '||' + q.cat;
-        if (!catStats[catKey]) catStats[catKey] = { sec: q.sec, secTitle: q.secTitle, cat: q.cat, b: 0, m: 0, w: 0, total: 0, errors: [], blanks: [] };
+        catStats[catKey] = catStats[catKey] || { secTitle: q.secTitle, cat: q.cat, b: 0, m: 0, w: 0, total: 0, errors: [], blanks: [] };
         catStats[catKey].total++;
-        if (blank) catStats[catKey].w++;
+        if (blank) { catStats[catKey].w++; catStats[catKey].blanks.push(q.id); }
         else if (ok) catStats[catKey].b++;
         else { catStats[catKey].m++; catStats[catKey].errors.push(q.id); }
-        if (blank) catStats[catKey].blanks.push(q.id);
     }
-
-    const secRows = Object.entries(secStats).map(([k, s]) => {
-        const acc = (s.b / s.total) * 100;
-        return `| ${esc(s.title)} | ${s.total} | ${s.b} | ${s.m} | ${s.w} | ${acc.toFixed(1)}% |`;
-    }).join('\n');
 
     const catOrder = Object.values(catStats).sort((a, b) => {
         const ea = a.m / a.total, eb = b.m / b.total;
         if (eb !== ea) return eb - ea;
         return (b.w / b.total) - (a.w / a.total);
     });
-    const catRows = catOrder.map(c => {
-        const errPct = (c.m / c.total) * 100;
-        const blanksPct = (c.w / c.total) * 100;
-        return `| ${esc(c.cat)} | ${esc(c.secTitle)} | ${c.total} | ${c.b} | ${c.m} | ${c.w} | ${errPct.toFixed(1)}% err · ${blanksPct.toFixed(1)}% blanco |`;
-    }).join('\n');
 
     const lost = [], untouched = [];
     for (const q of questionsDB) {
@@ -800,134 +792,178 @@ function buildFeedbackMD() {
         else if (v !== q.correct) lost.push(q);
     }
 
-    const lostMD = lost.length ? lost.map(q => {
+    const secTableRows = Object.values(secStats).map(s => {
+        const acc = (s.b / s.total) * 100;
+        return `<tr><td>${escHTML(s.title)}</td><td class="num">${s.total}</td><td class="num ok">${s.b}</td><td class="num bad">${s.m}</td><td class="num mute">${s.w}</td><td class="num">${acc.toFixed(1)}%</td></tr>`;
+    }).join('');
+
+    const catTableRows = catOrder.map(c => {
+        const errPct = (c.m / c.total) * 100;
+        const blanksPct = (c.w / c.total) * 100;
+        const cls = (c.m / c.total) > 0.3 ? 'class="hot"' : (c.m / c.total) > 0.1 ? '' : 'class="cold"';
+        return `<tr ${cls}><td>${escHTML(c.cat)}</td><td>${escHTML(c.secTitle)}</td><td class="num">${c.total}</td><td class="num ok">${c.b}</td><td class="num bad">${c.m}</td><td class="num mute">${c.w}</td><td class="num">${errPct.toFixed(1)}% err · ${blanksPct.toFixed(1)}% blanco</td></tr>`;
+    }).join('');
+
+    const lostItems = lost.length ? lost.map(q => {
         const v = userAnswers[q.id];
-        return `- **Pregunta ${q.id}** (${esc(q.cat)} · ${esc(q.secTitle)}): respondiste **${v}**, clave correcta **${q.correct}**. Enunciado resumido: ${esc(q.text).slice(0, 220)}…`;
-    }).join('\n') : '_No tuviste errores._';
+        return `<li><strong>P${q.id}</strong> <span class="tag">${escHTML(q.cat)}</span> <span class="tag sec">${escHTML(q.secTitle)}</span> — respondiste <strong class="bad">${v}</strong>, clave <strong class="ok">${q.correct}</strong>. <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`;
+    }).join('') : '<li><em>No tuviste errores.</em></li>';
 
-    const blankMD = untouched.length ? untouched.map(q =>
-        `- **Pregunta ${q.id}** (${esc(q.cat)} · ${esc(q.secTitle)}): quedaste en blanco. Enunciado: ${esc(q.text).slice(0, 220)}…`
-    ).join('\n') : '_Respondiste todas._';
+    const blankItems = untouched.length ? untouched.map(q =>
+        `<li><strong>P${q.id}</strong> <span class="tag">${escHTML(q.cat)}</span> <span class="tag sec">${escHTML(q.secTitle)}</span> — en blanco. <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`
+    ).join('') : '<li><em>Respondiste todas.</em></li>';
 
-    const studyPlan = catOrder.slice(0, 12).map(c => {
+    const studyPlanItems = catOrder.slice(0, 12).map(c => {
         const err = c.m, blanks = c.w;
         const pct = ((err + blanks) / c.total) * 100;
-        return `- **${esc(c.cat)}** (${esc(c.secTitle)}) — fallaste ${err}/${c.total} y dejaste en blanco ${blanks}/${c.total} (≈${pct.toFixed(0)}% a reforzar).`;
-    }).join('\n');
+        return `<li><strong>${escHTML(c.cat)}</strong> <span class="tag sec">${escHTML(c.secTitle)}</span> — fallaste ${err}/${c.total}, blanco ${blanks}/${c.total} (≈${pct.toFixed(0)}% a reforzar).</li>`;
+    }).join('');
 
-    const qBlocks = questionsDB.map((q) => {
-        const v = userAnswers[q.id];
-        const status = !v ? '⬜' : (v === q.correct ? '✅' : '❌');
-        const opts = q.options.map((o, idx) => {
-            const letter = String.fromCharCode(65 + idx);
-            const mark = letter === q.correct ? '✅' : '   ';
-            return `  - ${mark} ${letter}) ${o}`;
-        }).join('\n');
-        return `### ${q.id}. ${esc(q.cat)} — ${esc(q.secTitle)}  ${status}\n**Tu respuesta:** ${v || '— (en blanco)'} · **Clave:** ${q.correct}\n\n${esc(q.text)}\n\n**Alternativas:**\n${opts}`;
-    }).join('\n\n---\n\n');
-
-    const respuestas = Array.from({ length: total }, (_, i) => i + 1).map(i => {
+    const respuestasRows = Array.from({ length: total }, (_, i) => i + 1).map(i => {
         const v = userAnswers[i];
         const q = questionsDB.find(q => q.id === i);
         const ok = v === q.correct;
+        const cls = !v ? 'class="mute"' : (ok ? 'class="ok"' : 'class="bad"');
         const sym = !v ? '⬜' : (ok ? '✅' : '❌');
-        return `| ${i} | ${v || '—'} | ${q.correct} | ${sym} | ${esc(q.cat)} |`;
-    }).join('\n');
+        return `<tr ${cls}><td class="num">${i}</td><td>${v || '—'}</td><td>${q.correct}</td><td>${sym}</td><td>${escHTML(q.cat)}</td></tr>`;
+    }).join('');
 
-    return `# Feedback Examen Real UNICA · CCC-52
+    const qBlocks = questionsDB.map(q => {
+        const v = userAnswers[q.id];
+        const status = !v ? 'blank' : (v === q.correct ? 'ok' : 'bad');
+        const statusIcon = !v ? '⬜' : (v === q.correct ? '✅' : '❌');
+        const opts = q.options.map((o, idx) => {
+            const letter = String.fromCharCode(65 + idx);
+            const isCorrect = letter === q.correct;
+            return `<li class="${isCorrect ? 'correct' : ''} ${letter === v && !isCorrect ? 'picked' : ''}"><span class="letter">${letter}</span> ${escHTML(o)}${isCorrect ? ' <span class="ok-mark">✓ clave</span>' : ''}</li>`;
+        }).join('');
+        return `
+        <article class="q ${status}" id="q-${q.id}">
+            <header>
+                <span class="qid">P${q.id}</span>
+                <span class="tag">${escHTML(q.cat)}</span>
+                <span class="tag sec">${escHTML(q.secTitle)}</span>
+                <span class="status">${statusIcon}</span>
+            </header>
+            <p class="enunciado">${escHTML(escTxt(q.text))}</p>
+            <ol class="alternativas">${opts}</ol>
+            <footer>
+                <span>Tu respuesta: <strong class="${status === 'ok' ? 'ok' : (status === 'bad' ? 'bad' : 'mute')}">${v || '— (en blanco)'}</strong></span>
+                <span>Clave oficial: <strong class="ok">${q.correct}</strong></span>
+            </footer>
+        </article>`;
+    }).join('');
 
-> Generado el ${fecha}. Carrera objetivo: **${esc(career)}**.
+    const css = `
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { font: 14px/1.55 system-ui, -apple-system, "Segoe UI", Inter, sans-serif; color: #0f172a; background: #f1f5f9; margin: 0; padding: 24px; }
+    main { max-width: 1080px; margin: 0 auto; }
+    h1 { font-size: 26px; margin: 0 0 8px; letter-spacing: -.02em; }
+    h2 { font-size: 18px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; letter-spacing: -.01em; }
+    h3 { font-size: 15px; margin: 18px 0 6px; }
+    .meta { color: #64748b; font-size: 12px; margin-bottom: 20px; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 10px; margin: 14px 0; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
+    .card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #64748b; }
+    .card .value { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    table { border-collapse: collapse; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    th { background: #f8fafc; font-size: 11px; text-transform: uppercase; color: #475569; letter-spacing: .04em; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    tr.hot td { background: #fef2f2; }
+    tr.cold td { background: #f0fdf4; }
+    .ok { color: #047857; } .bad { color: #b91c1c; } .mute { color: #94a3b8; }
+    ul.fb-list { padding-left: 18px; } ul.fb-list li { margin: 6px 0; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; margin-left: 4px; }
+    .tag.sec { background: #f1f5f9; color: #334155; }
+    .ia-prompt { background: #fff7ed; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 0 12px 12px 0; margin-top: 8px; font-size: 13px; }
+    .q { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin: 16px 0; }
+    .q.ok { border-left: 4px solid #10b981; } .q.bad { border-left: 4px solid #ef4444; } .q.blank { border-left: 4px solid #cbd5e1; }
+    .q header { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .qid { font-weight: 800; background: #0f172a; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+    .q .status { margin-left: auto; font-size: 18px; }
+    .enunciado { margin: 6px 0 10px; }
+    ol.alternativas { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+    ol.alternativas li { padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 13px; }
+    ol.alternativas li.correct { background: #ecfdf5; border-color: #10b981; }
+    ol.alternativas li.picked { background: #fef2f2; border-color: #ef4444; }
+    ol.alternativas .letter { font-weight: 700; color: #475569; margin-right: 6px; font-family: ui-monospace, monospace; }
+    .ok-mark { font-size: 11px; color: #047857; font-weight: 700; }
+    .q footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #475569; border-top: 1px dashed #e2e8f0; padding-top: 8px; }
+    `;
 
-## Resumen
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Examen Real UNICA · CCC-52</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>${css}</style>
+</head>
+<body>
+<main>
+    <h1>Feedback Examen Real UNICA · CCC-52</h1>
+    <div class="meta">Generado el ${escHTML(fecha)} · Carrera objetivo: <strong>${escHTML(career)}</strong></div>
 
-- **Puntaje crudo:** ${score} / 100
-- **Nota vigesimal:** ${nota} / 20
-- **Veredicto:** ${cond}
-- **Buenas:** ${buenas}  ·  **Malas:** ${malas}  ·  **En blanco:** ${blancas}
+    <div class="summary">
+        <div class="card"><div class="label">Puntaje crudo</div><div class="value">${escHTML(score)} / 100</div></div>
+        <div class="card"><div class="label">Nota vigesimal</div><div class="value">${escHTML(nota)} / 20</div></div>
+        <div class="card"><div class="label">Veredicto</div><div class="value">${escHTML(cond)}</div></div>
+        <div class="card"><div class="label">Buenas / Malas / Blanco</div><div class="value"><span class="ok">${buenas}</span> · <span class="bad">${malas}</span> · <span class="mute">${blancas}</span></div></div>
+    </div>
 
-> Fórmula oficial UNICA: **Puntaje = B + M/3 · (−1) + V/16** (B = buenas, M = malas, V = vacías). Cada error resta lo mismo que 3 vacías te aportan.
+    <div class="ia-prompt"><strong>Fórmula UNICA</strong>: Puntaje = B + M/3·(−1) + V/16. Cada error resta lo mismo que ~5 vacías te aportan; si no descartas 3 opciones, deja en blanco.</div>
 
----
+    <h2>1) Rendimiento por bloque del examen</h2>
+    <table><thead><tr><th>Bloque</th><th class="num">Total</th><th class="num">✅</th><th class="num">❌</th><th class="num">⬜</th><th class="num">Aciertos</th></tr></thead><tbody>${secTableRows}</tbody></table>
 
-## 1) Rendimiento por bloque del examen
+    <h2>2) Rendimiento por tema (ordenado por % de error)</h2>
+    <table><thead><tr><th>Tema</th><th>Sección</th><th class="num">Total</th><th class="num">✅</th><th class="num">❌</th><th class="num">⬜</th><th class="num">% (err · blanco)</th></tr></thead><tbody>${catTableRows}</tbody></table>
 
-| Bloque | Total | Buenas | Malas | Blanco | Aciertos |
-|---|---:|---:|---:|---:|---:|
-${secRows}
+    <h2>3) ¿Dónde te equivocaste? (${lost.length} fallos)</h2>
+    <ul class="fb-list">${lostItems}</ul>
 
----
+    <h2>4) ¿Dónde ni siquiera respondiste? (${untouched.length} en blanco)</h2>
+    <ul class="fb-list">${blankItems}</ul>
 
-## 2) Rendimiento por tema (ordenado por % de error descendente)
+    <h2>5) Plan de estudio sugerido (priorizado)</h2>
+    <ul class="fb-list">${studyPlanItems}</ul>
 
-| Tema | Sección | Total | ✅ | ❌ | ⬜ | Aciertos |
-|---|---|---:|---:|---:|---:|---|
-${catRows}
+    <h2>6) Mis respuestas vs clave (resumen)</h2>
+    <table><thead><tr><th class="num">#</th><th>Mi respuesta</th><th>Clave</th><th>Resultado</th><th>Tema</th></tr></thead><tbody>${respuestasRows}</tbody></table>
 
-> Estos son los **temas puntuales** donde concentraste tus peores resultados.
+    <h2>7) Examen completo (texto · alternativas · clave)</h2>
+    ${qBlocks}
 
----
-
-## 3) ¿Dónde te equivocaste? (${lost.length} fallos)
-
-${lostMD}
-
----
-
-## 4) ¿Dónde ni siquiera respondiste? (${untouched.length} en blanco)
-
-${blankMD}
-
-> Cada blanco te da **+0.0625** y cada mala te resta **−0.333**. Si en una duda no puedes descartar 3 opciones, es matemáticamente mejor dejarla en blanco.
-
----
-
-## 5) Plan de estudio sugerido (priorizado)
-
-${studyPlan}
-
-**Recomendación general:** ataca los temas ordenados de mayor a menor % de fallo + blanco, porque es donde más margen de puntos recuperas por hora de estudio.
-
----
-
-## 6) Mis respuestas vs clave (resumen)
-
-| # | Mi respuesta | Clave | Resultado | Tema |
-|---:|:---:|:---:|:---:|---|
-${respuestas}
-
----
-
-## 7) Examen completo (texto · alternativas · clave)
-
-${qBlocks}
-
----
-
-## Indicaciones para la IA
-
-Eres mi tutor del examen UNICA (CCC-52, Área C: Ingeniería). Con este markdown:
-
-1. **Diagnostica mis brechas**: dime por qué fallé cada pregunta de la sección 3 y por qué dejé en blanco cada una de la sección 4 (qué concepto me faltaba).
-2. **Plan de estudio semanal**: usa la sección 5 para proponerme un cronograma de 2 semanas con teoría + práctica por tema, priorizando lo que más puntos recupera.
-3. **Microlecciones**: por cada tema de la sección 2 con ≥ 30% de error, explícame con un ejemplo resuelto paso a paso al estilo PRE-UNICA.
-4. **Estrategia de examen**: confirma si estoy aplicando bien el filtro semáforo (B + 1 / M − 0.333 / V + 0.0625) y cuántas preguntas adicionales pasaría si convierto todas mis malas en blanco.
-5. **Carrera objetivo**: soy postulante a **${esc(career)}**. Adapta las recomendaciones al perfil e intensidad de esta carrera.
-
-Por favor responde en español, con foco en acción concreta, no en discurso motivacional.
-`;
+    <div class="ia-prompt">
+        <strong>Indicaciones para la IA</strong><br>
+        Eres mi tutor del examen UNICA (CCC-52, Área C: Ingeniería). Con este HTML:
+        <ol>
+            <li><strong>Diagnostica mis brechas</strong>: explica por qué fallé cada pregunta de la sección 3 y por qué dejé en blanco cada una de la sección 4 (qué concepto me faltaba).</li>
+            <li><strong>Plan de estudio semanal</strong>: usa la sección 2 y 5 para proponerme un cronograma de 2 semanas con teoría + práctica por tema.</li>
+            <li><strong>Microlecciones</strong>: por cada tema con ≥ 30% de error, explícame con un ejemplo resuelto paso a paso al estilo PRE-UNICA.</li>
+            <li><strong>Estrategia de examen</strong>: confirma si estoy aplicando bien el filtro semáforo (B +1 / M −0.333 / V +0.0625) y cuántas preguntas adicionales pasaría si convierto todas mis malas en blanco.</li>
+            <li><strong>Carrera objetivo</strong>: soy postulante a <strong>${escHTML(career)}</strong>. Adapta las recomendaciones al perfil de esta carrera.</li>
+        </ol>
+        Por favor responde en español, con foco en acción concreta, no en discurso motivacional.
+    </div>
+</main>
+</body>
+</html>`;
 }
 
 function downloadCurrentFeedback() {
-    if (!_lastFeedbackMD) return;
-    downloadBlob('feedback-unica-ccc52.md', _lastFeedbackMD, 'text/markdown;charset=utf-8');
+    if (!_lastFeedbackHTML) return;
+    downloadBlob('feedback-unica-ccc52.html', _lastFeedbackHTML, 'text/html;charset=utf-8');
 }
 
-function copyFeedbackMD() {
-    if (!_lastFeedbackMD) return;
+function copyFeedbackHTML() {
+    if (!_lastFeedbackHTML) return;
     const btn = document.getElementById('feedback-copy-btn');
     const fallback = () => {
         const ta = document.createElement('textarea');
-        ta.value = _lastFeedbackMD;
+        ta.value = _lastFeedbackHTML;
         ta.style.position = 'fixed'; ta.style.left = '-9999px';
         document.body.appendChild(ta); ta.select();
         try { document.execCommand('copy'); }
@@ -937,14 +973,22 @@ function copyFeedbackMD() {
         if (btn) { const t = btn.querySelector('span'); const prev = t.textContent; t.textContent = '¡Copiado!'; setTimeout(() => t.textContent = prev, 1500); }
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(_lastFeedbackMD).then(ok, () => { fallback(); ok(); });
+        navigator.clipboard.writeText(_lastFeedbackHTML).then(ok, () => { fallback(); ok(); });
     } else { fallback(); ok(); }
 }
 
 function openFeedbackPreview() {
-    _lastFeedbackMD = buildFeedbackMD();
-    const pre = document.getElementById('feedback-preview');
-    if (pre) pre.textContent = _lastFeedbackMD;
+    _lastFeedbackHTML = buildFeedbackHTML();
+    const box = document.getElementById('feedback-preview');
+    if (box) {
+        box.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'width:100%;height:70vh;border:0;border-radius:12px;background:#fff;';
+        iframe.setAttribute('sandbox', 'allow-same-origin');
+        box.appendChild(iframe);
+        const idoc = iframe.contentDocument || iframe.contentWindow.document;
+        idoc.open(); idoc.write(_lastFeedbackHTML); idoc.close();
+    }
     document.getElementById('feedback-modal').classList.remove('hidden');
 }
 
