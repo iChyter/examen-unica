@@ -72,20 +72,28 @@
         <aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Meta de Ingreso</span>
-                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Nota 9.0+</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mi carrera</span>
+                    <span id="career-badge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Sin selección</span>
                 </div>
-                <div class="space-y-2">
+                <select id="career" onchange="onCareerChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-unica-600 mb-2">
+                    <option value="">-- Elige tu carrera --</option>
+                </select>
+                <div id="career-info" class="hidden">
                     <div class="flex justify-between text-xs text-slate-600">
-                        <span>Puntaje Objetivo:</span>
-                        <span class="font-bold text-unica-900">45.00 Pts</span>
+                        <span>Mín. histórica:</span>
+                        <span class="font-bold text-slate-800" id="career-min">-</span>
                     </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[45%] transition-all duration-300"></div>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Meta (mín + 1):</span>
+                        <span class="font-bold text-amber-700" id="career-meta">-</span>
                     </div>
-                    <p class="text-[11px] text-slate-500 leading-tight">
-                        Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas, déjalas en blanco.
-                    </p>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Seguras necesarias:</span>
+                        <span class="font-bold text-slate-800" id="career-seguras">-</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-1.5">
+                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[0%] transition-all duration-300"></div>
+                    </div>
                 </div>
             </div>
 
@@ -355,6 +363,108 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const STORAGE_KEY = 'unica_exam_100';
+
+const CAREERS_MIN = {
+  'Medicina Humana':15.5959,'Enfermería':10.9792,'Obstetricia':4.0876,'Psicología':4.8293,'Odontología':5.3334,
+  'Farmacia y Bioquímica':2.4709,'Biología':3.0918,'Medicina Veterinaria y Zootecnia':2.0875,
+  'Ingeniería de Sistemas':6.2417,'Ingeniería Civil':4.4459,'Agronomía':3.2209,'Ingeniería de Minas':2.9667,
+  'Ingeniería Ambiental y Sanitaria':1.8085,'Ingeniería Mecánica Eléctrica':4.3959,'Ingeniería Metalúrgica':1.6418,
+  'Contabilidad':0.2669,'Administración':1.8209,'Ingeniería Electrónica':1.7417,'Arquitectura':4.0044,
+  'Ingeniería de Alimentos':0.0294,'Ingeniería Química':0.0797,'Ingeniería Pesquera':0.9501,
+  'Derecho':4.6045,'Negocios Internacionales':1.3338,'Economía':0.0005,
+  'Ciencias de la Comunicación':0.1377,'Turismo':0.1545,'Arqueología':0.2544,
+  'Ciencias de la Educación Inicial':2.4004,'Ciencias de la Educación Física':1.2751,'Ciencias de la Educación Primaria':1.4586,
+  'Ciencias de la Educación Lengua y Literatura':1.0417,'Ciencias de la Educación Historia y Geografía':0.1545,
+  'Ciencias de la Educación Matemática e Informática':0.8005,'Ciencias de la Educación Filosofía, Psicología y CC.SS.':0.2672,
+  'Ciencias de la Educación Arte':0.0753,'Ciencias de la Educación Biología y Química':0.8086,
+  'Matemática e Informática':0.8005,'Estadística':0.2672,'Física':0.3376
+};
+
+function onCareerChange() {
+  const sel = document.getElementById('career');
+  const name = sel.value;
+  const info = document.getElementById('career-info');
+  const badge = document.getElementById('career-badge');
+  if (!name) {
+    info.classList.add('hidden');
+    badge.textContent = 'Sin selección';
+    badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+    return;
+  }
+  const min = CAREERS_MIN[name];
+  const meta = min + 1;
+  const meta100 = meta * 5;
+  const bien = Math.max(0, Math.ceil((meta100 * 16 - (100 - meta100)) / 17));
+  document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
+  document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
+  document.getElementById('career-seguras').textContent = bien + ' de 100';
+  badge.textContent = 'Meta ' + meta.toFixed(1);
+  badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
+  info.classList.remove('hidden');
+}
+
+// Poblar el select al cargar
+(function() {
+  const sel = document.getElementById('career');
+  if (!sel) return;
+  Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
+    sel.appendChild(opt);
+  });
+
+function onCareerChange() {
+  const sel = document.getElementById('career');
+  const name = sel.value;
+  const info = document.getElementById('career-info');
+  const badge = document.getElementById('career-badge');
+  if (!name) {
+    info.classList.add('hidden');
+    badge.textContent = 'Sin selección';
+    badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+    return;
+  }
+  const min = CAREERS_MIN[name];
+  const meta = min + 1;
+  const meta100 = meta * 5;
+  const bien = Math.max(0, Math.ceil((meta100 * 16 - (100 - meta100)) / 17));
+  document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
+  document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
+  document.getElementById('career-seguras').textContent = bien + ' de 100';
+  badge.textContent = 'Meta ' + meta.toFixed(1);
+  badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
+  info.classList.remove('hidden');
+}
+
+// Poblar el select al cargar
+(function() {
+  const sel = document.getElementById('career');
+  if (!sel) return;
+  Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
+    sel.appendChild(opt);
+  });
+})();
+
+function saveToStorage() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}
+}
+
+
+// Poblar el select al cargar
+(function() {
+  const sel = document.getElementById('career');
+  if (!sel) return;
+  Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
+    sel.appendChild(opt);
+  });
+})();
 const TIMER_KEY = 'unica_exam_100_startedAt';
 
 function saveToStorage() {
@@ -596,12 +706,302 @@ function submitExam() {
     const condSub = document.getElementById('res-condition-sub');
     const feedbackBox = document.getElementById('res-feedback-box');
 
-    if (notaVigesimal >= 9.0) {
+const sel = document.getElementById('career');
+  const name = sel.value;
+  const info = document.getElementById('career-info');
+  const badge = document.getElementById('career-badge');
+  if (!name) {
+    info.classList.add('hidden');
+    badge.textContent = 'Sin selección';
+    badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+    return;
+  }
+  const min = CAREERS_MIN[name];
+  const meta = min + 1;
+  const meta100 = meta * 5;
+  const bien = Math.max(0, Math.ceil((meta100 * 16 - (100 - meta100)) / 17));
+  document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
+  document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
+  document.getElementById('career-seguras').textContent = bien + ' de 100';
+  badge.textContent = 'Meta ' + meta.toFixed(1);
+  badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
+  info.classList.remove('hidden');
+}
+
+// Poblar el select al cargar
+(function() {
+  const sel = document.getElementById('career');
+  if (!sel) return;
+  Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
+    sel.appendChild(opt);
+  });
+})();
+
+function saveToStorage() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}
+}
+
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
+function startTimer() {
+    const timerEl = document.getElementById('timer');
+    const duration = 3 * 3600;
+    let startedAt = parseInt(localStorage.getItem(TIMER_KEY) || '0', 10);
+    if (!startedAt) {
+        startedAt = Date.now();
+        localStorage.setItem(TIMER_KEY, String(startedAt));
+    }
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    totalTimeSeconds = Math.max(0, duration - elapsed);
+
+    timerInterval = setInterval(() => {
+        if (totalTimeSeconds <= 0) {
+            clearInterval(timerInterval);
+            if (!submitted) { alert("Tiempo concluido. Se calculará tu puntaje."); submitExam(); }
+            return;
+        }
+        totalTimeSeconds--;
+        const h = Math.floor(totalTimeSeconds / 3600);
+        const m = Math.floor((totalTimeSeconds % 3600) / 60);
+        const s = totalTimeSeconds % 60;
+        timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+    const h = Math.floor(totalTimeSeconds / 3600);
+    const m = Math.floor((totalTimeSeconds % 3600) / 60);
+    const s = totalTimeSeconds % 60;
+    timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = "";
+    let currentSection = "";
+
+    questionsDB.forEach((q) => {
+        if (q.sec !== currentSection) {
+            currentSection = q.sec;
+            const secHeader = document.createElement('div');
+            secHeader.id = q.sec;
+            secHeader.className = "bg-unica-900 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between mt-8 mb-4";
+            secHeader.innerHTML = `<div class="flex items-center space-x-2"><span class="w-2 h-6 bg-amber-400 rounded-full"></span><h3 class="font-bold text-sm sm:text-base tracking-wide uppercase">${q.secTitle}</h3></div><span class="text-xs bg-unica-800 text-blue-200 px-3 py-1 rounded-full font-mono font-medium">Oficial UNICA</span>`;
+            container.appendChild(secHeader);
+        }
+
+        const card = document.createElement('div');
+        card.id = `q-card-${q.id}`;
+        card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+        const svgContent = q.svg || "";
+
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-unica-100 text-unica-800 font-bold text-xs px-2.5 py-1 rounded-lg">Pregunta ${q.id}</span>
+                    <span class="text-xs font-semibold text-slate-500">${q.cat}</span>
+                </div>
+                <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all">
+                    <span>Marcar Duda</span>
+                </button>
+            </div>
+            <div class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium mb-4">${q.text}</div>
+            ${svgContent}
+            <div class="space-y-2.5">
+                ${q.options.map((opt, idx) => {
+                    const optVal = ["A","B","C","D","E"][idx];
+                    return `<label id="label-q${q.id}-${optVal}" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-all text-xs sm:text-sm font-medium text-slate-700">
+                        <input type="radio" name="q_${q.id}" value="${optVal}" onchange="selectOption(${q.id}, '${optVal}')" class="w-4 h-4 text-unica-600 focus:ring-unica-500 border-slate-300 mr-3">
+                        <span>${opt}</span>
+                    </label>`;
+                }).join('')}
+            </div>
+            <div class="mt-3 text-right">
+                <button type="button" onclick="clearOption(${q.id})" class="text-[11px] text-slate-400 hover:text-slate-600 underline">Dejar esta pregunta en blanco</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderQuestionGrid() {
+    const grid = document.getElementById('question-grid');
+    grid.innerHTML = "";
+    for (let i = 1; i <= 100; i++) {
+        const btn = document.createElement('button');
+        btn.id = `grid-btn-${i}`;
+        btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+        btn.textContent = i;
+        btn.onclick = () => scrollToQuestion(i);
+        grid.appendChild(btn);
+    }
+}
+
+function selectOption(qId, val) {
+    userAnswers[qId] = val;
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function clearOption(qId) {
+    delete userAnswers[qId];
+    document.getElementsByName(`q_${qId}`).forEach(r => r.checked = false);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function toggleFlag(qId) {
+    if (flaggedQuestions.has(qId)) flaggedQuestions.delete(qId);
+    else flaggedQuestions.add(qId);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function updateCardStyle(qId) {
+    const card = document.getElementById(`q-card-${qId}`);
+    const flagBtn = document.getElementById(`flag-btn-${qId}`);
+    if (!card) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+
+    if (flagBtn) {
+        flagBtn.className = isFlagged
+            ? "text-xs px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-100 text-amber-800 font-bold flex items-center space-x-1"
+            : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all";
+    }
+
+    if (isFlagged) card.className = "bg-amber-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-amber-400 relative transition-all";
+    else if (isAnswered) card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-unica-600 relative transition-all";
+    else card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+}
+
+function updateGridButton(qId) {
+    const btn = document.getElementById(`grid-btn-${qId}`);
+    if (!btn) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+    if (isFlagged) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-amber-400 text-slate-950 shadow-sm border border-amber-500";
+    else if (isAnswered) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-unica-600 text-white shadow-sm border border-unica-700";
+    else btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+}
+
+function updateStats() {
+    const answered = Object.keys(userAnswers).length;
+    const flagged = flaggedQuestions.size;
+    const blank = 100 - answered;
+    document.getElementById('stat-answered').textContent = answered;
+    document.getElementById('stat-flagged').textContent = flagged;
+    document.getElementById('stat-blank').textContent = blank;
+    document.getElementById('answered-count-bottom').textContent = answered;
+    const pct = Math.min(100, Math.round((answered / 52) * 100));
+    document.getElementById('target-progress-bar').style.width = `${pct}%`;
+}
+
+function scrollToQuestion(qId) { document.getElementById(`q-card-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function scrollToSection(secId) { document.getElementById(secId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function confirmSubmitExam() {
+    const answered = Object.keys(userAnswers).length;
+    if (answered < 30) {
+        if (!window.confirm(`Solo has respondido ${answered} preguntas de 100. ¿Seguro de finalizar?`)) return;
+    }
+    submitExam();
+    return true;
+}
+
+function submitExam() {
+    if (submitted) return;
+    submitted = true;
+    clearInterval(timerInterval);
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
+
+    let buenas = 0, malas = 0, vacias = 0;
+    questionsDB.forEach(q => {
+        const a = userAnswers[q.id];
+        if (!a) vacias++;
+        else if (a === q.correct) buenas++;
+        else malas++;
+    });
+
+    const puntajeReal = buenas * 1.0 + vacias * (1/16) - malas * (1/3);
+    const notaVigesimal = Math.max(0, puntajeReal / 5);
+    const efectividad = (buenas + malas > 0) ? Math.round((buenas / (buenas + malas)) * 100) : 0;
+
+    document.getElementById('res-score-100').textContent = puntajeReal.toFixed(4);
+    document.getElementById('res-score-20').textContent = `${notaVigesimal.toFixed(2)} / 20`;
+    document.getElementById('res-buenas').textContent = buenas;
+    document.getElementById('res-malas').textContent = malas;
+    document.getElementById('res-vacias').textContent = vacias;
+    document.getElementById('res-efectividad').textContent = `${efectividad}%`;
+
+    const condCard = document.getElementById('res-condition-card');
+    const condText = document.getElementById('res-condition-text');
+    const condSub = document.getElementById('res-condition-sub');
+    const feedbackBox = document.getElementById('res-feedback-box');
+
+    const sel = document.getElementById('career');
+    const career = sel ? sel.value : '';
+    const minCorte = career ? CAREERS_MIN[career] : null;
+    const meta = minCorte != null ? minCorte + 1 : 9.0;
+
+    if (notaVigesimal >= meta) {
         condCard.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "¡ALCANZÓ LA META!";
+        condText.textContent = "¡META ALCANZADA!";
         condText.className = "text-lg font-black text-emerald-700";
-        condSub.textContent = "Superaste los 45.0 puntos (Nota 9.0+)";
-        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>Has alcanzado el puntaje objetivo manteniendo un excelente control del riesgo. Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+        condSub.textContent = career ? `Superaste ${meta.toFixed(2)}/20 en ${career}` : `Superaste ${meta.toFixed(2)}/20`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>${career ? `Pasarías la nota de corte de <strong>${career}</strong> (mín histórico ${minCorte.toFixed(2)} + 1 de margen).` : 'Has alcanzado el puntaje objetivo.'} Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+    } else if (notaVigesimal >= 6.7) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = career ? "EN CORTE (sin margen)" : "ZONA DE CORTE";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20 — te falta ${(meta - notaVigesimal).toFixed(2)}` : "Cerca del umbral mínimo";
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Estás cerca de la meta.</div><p>${career ? `<strong>${career}</strong> requiere ${meta.toFixed(2)}/20. ` : ''}Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
+    } else {
+        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "AJUSTAR FILTRO";
+        condText.className = "text-lg font-black text-rose-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Por debajo del objetivo";
+        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
     } else if (notaVigesimal >= 6.7) {
         condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
         condText.textContent = "ZONA DE CORTE";

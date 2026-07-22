@@ -72,18 +72,28 @@
         <aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Meta de Ingreso</span>
-                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Nota 9.0+</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mi carrera</span>
+                    <span id="career-badge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Sin selección</span>
                 </div>
-                <div class="space-y-2">
+                <select id="career" onchange="onCareerChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-unica-600 mb-2">
+                    <option value="">-- Elige tu carrera --</option>
+                </select>
+                <div id="career-info" class="hidden">
                     <div class="flex justify-between text-xs text-slate-600">
-                        <span>Puntaje Objetivo:</span>
-                        <span class="font-bold text-unica-900">45.00 Pts</span>
+                        <span>Mín. histórica:</span>
+                        <span class="font-bold text-slate-800" id="career-min">-</span>
                     </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[45%] transition-all duration-300"></div>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Meta (mín + 1):</span>
+                        <span class="font-bold text-amber-700" id="career-meta">-</span>
                     </div>
-                    <p class="text-[11px] text-slate-500 leading-tight">Filtro Semáforo: marca entre 50 y 55 respuestas de las que estés seguro. Las dudosas déjalas en blanco.</p>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Seguras necesarias:</span>
+                        <span class="font-bold text-slate-800" id="career-seguras">-</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-1.5">
+                        <div id="target-progress-bar" class="bg-amber-500 h-full w-[0%] transition-all duration-300"></div>
+                    </div>
                 </div>
             </div>
 
@@ -398,6 +408,58 @@ let submitted = false;
 const STORAGE_KEY = 'unica_exam_2026_2';
 const TIMER_KEY = 'unica_exam_2026_2_startedAt';
 
+const CAREERS_MIN = {
+  'Medicina Humana':15.5959,'Enfermería':10.9792,'Obstetricia':4.0876,'Psicología':4.8293,'Odontología':5.3334,
+  'Farmacia y Bioquímica':2.4709,'Biología':3.0918,'Medicina Veterinaria y Zootecnia':2.0875,
+  'Ingeniería de Sistemas':6.2417,'Ingeniería Civil':4.4459,'Agronomía':3.2209,'Ingeniería de Minas':2.9667,
+  'Ingeniería Ambiental y Sanitaria':1.8085,'Ingeniería Mecánica Eléctrica':4.3959,'Ingeniería Metalúrgica':1.6418,
+  'Contabilidad':0.2669,'Administración':1.8209,'Ingeniería Electrónica':1.7417,'Arquitectura':4.0044,
+  'Ingeniería de Alimentos':0.0294,'Ingeniería Química':0.0797,'Ingeniería Pesquera':0.9501,
+  'Derecho':4.6045,'Negocios Internacionales':1.3338,'Economía':0.0005,
+  'Ciencias de la Comunicación':0.1377,'Turismo':0.1545,'Arqueología':0.2544,
+  'Ciencias de la Educación Inicial':2.4004,'Ciencias de la Educación Física':1.2751,'Ciencias de la Educación Primaria':1.4586,
+  'Ciencias de la Educación Lengua y Literatura':1.0417,'Ciencias de la Educación Historia y Geografía':0.1545,
+  'Ciencias de la Educación Matemática e Informática':0.8005,'Ciencias de la Educación Filosofía, Psicología y CC.SS.':0.2672,
+  'Ciencias de la Educación Arte':0.0753,'Ciencias de la Educación Biología y Química':0.8086,
+  'Matemática e Informática':0.8005,'Estadística':0.2672,'Física':0.3376
+};
+
+function onCareerChange() {
+  const sel = document.getElementById('career');
+  const name = sel.value;
+  const info = document.getElementById('career-info');
+  const badge = document.getElementById('career-badge');
+  if (!name) {
+    info.classList.add('hidden');
+    badge.textContent = 'Sin selección';
+    badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+    return;
+  }
+  const min = CAREERS_MIN[name];
+  const meta = min + 1;
+  const meta100 = meta * 5;
+  const bien = Math.max(0, Math.ceil((meta100 * 16 - (100 - meta100)) / 17));
+  document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
+  document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
+  document.getElementById('career-seguras').textContent = bien + ' de 100';
+  badge.textContent = 'Meta ' + meta.toFixed(1);
+  badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
+  info.classList.remove('hidden');
+}
+
+// Poblar el select al cargar
+(function() {
+  const sel = document.getElementById('career');
+  if (!sel) return;
+  Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
+    sel.appendChild(opt);
+  });
+})();
+
+
 document.addEventListener('DOMContentLoaded', () => {
     renderQuestions();
     renderQuestionGrid();
@@ -587,13 +649,32 @@ function submitExam() {
     const condText = document.getElementById('res-condition-text');
     const condSub = document.getElementById('res-condition-sub');
     const feedbackBox = document.getElementById('res-feedback-box');
-    if (notaVigesimal >= 9.0) {
+        const sel = document.getElementById('career');
+    const career = sel ? sel.value : '';
+    const minCorte = career ? CAREERS_MIN[career] : null;
+    const meta = minCorte != null ? minCorte + 1 : 9.0;
+
+    if (notaVigesimal >= meta) {
         condCard.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
-        condText.textContent = "¡ALCANZÓ LA META!";
+        condText.textContent = "¡META ALCANZADA!";
         condText.className = "text-lg font-black text-emerald-700";
-        condSub.textContent = "Superaste los 45.0 puntos (Nota 9.0+)";
-        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución.</div><p>Alcanzaste el objetivo. Tus <strong>${vacias} preguntas en blanco</strong> aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong>.</p>`;
+        condSub.textContent = career ? `Superaste ${meta.toFixed(2)}/20 en ${career}` : `Superaste ${meta.toFixed(2)}/20`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución de la estrategia.</div><p>${career ? `Pasarías la nota de corte de <strong>${career}</strong> (mín histórico ${minCorte.toFixed(2)} + 1 de margen).` : 'Has alcanzado el puntaje objetivo.'} Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
     } else if (notaVigesimal >= 6.7) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = career ? "EN CORTE (sin margen)" : "ZONA DE CORTE";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20 — te falta ${(meta - notaVigesimal).toFixed(2)}` : "Cerca del umbral mínimo";
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Estás cerca de la meta.</div><p>${career ? `<strong>${career}</strong> requiere ${meta.toFixed(2)}/20. ` : ''}Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
+    } else {
+        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "AJUSTAR FILTRO";
+        condText.className = "text-lg font-black text-rose-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Por debajo del objetivo";
+        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
+    }
+
+ else if (notaVigesimal >= 6.7) {
         condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
         condText.textContent = "ZONA DE CORTE";
         condText.className = "text-lg font-black text-amber-700";
