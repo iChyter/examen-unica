@@ -350,6 +350,8 @@ let flaggedQuestions = new Set();
 let totalTimeSeconds = 3 * 3600;
 let timerInterval = null;
 let submitted = false;
+const STORAGE_KEY = 'unica_exam_2026_3';
+const TIMER_KEY = 'unica_exam_2026_3_startedAt';
 
 const CAREERS_MIN = {
   'Medicina Humana':15.5959,'Enfermería':10.9792,'Obstetricia':4.0876,'Psicología':4.8293,'Odontología':5.3334,
@@ -372,6 +374,7 @@ function onCareerChange() {
   const name = sel.value;
   const info = document.getElementById('career-info');
   const badge = document.getElementById('career-badge');
+  try { localStorage.setItem(STORAGE_KEY + '_career', name || ''); } catch {}
   if (!name) {
     info.classList.add('hidden');
     badge.textContent = 'Sin selección';
@@ -399,6 +402,13 @@ function onCareerChange() {
     opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
     sel.appendChild(opt);
   });
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY + '_career');
+    if (saved && CAREERS_MIN[saved]) {
+      sel.value = saved;
+      onCareerChange();
+    }
+  } catch {}
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -409,8 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 });
 
-const STORAGE_KEY = 'unica_exam_2026_3';
-const TIMER_KEY = 'unica_exam_2026_3_startedAt';
 
 function saveToStorage() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}

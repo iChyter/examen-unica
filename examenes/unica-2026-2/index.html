@@ -426,6 +426,7 @@ function onCareerChange() {
   const name = sel.value;
   const info = document.getElementById('career-info');
   const badge = document.getElementById('career-badge');
+  try { localStorage.setItem(STORAGE_KEY + '_career', name || ''); } catch {}
   if (!name) {
     info.classList.add('hidden');
     badge.textContent = 'Sin selección';
@@ -453,6 +454,13 @@ function onCareerChange() {
     opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
     sel.appendChild(opt);
   });
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY + '_career');
+    if (saved && CAREERS_MIN[saved]) {
+      sel.value = saved;
+      onCareerChange();
+    }
+  } catch {}
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
