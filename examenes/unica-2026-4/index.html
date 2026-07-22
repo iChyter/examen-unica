@@ -104,18 +104,22 @@
 
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Estado de Respuestas</h3>
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="grid grid-cols-4 gap-2 text-center text-xs">
                     <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-200">
                         <div id="stat-answered" class="text-base font-extrabold text-emerald-700">0</div>
-                        <div class="text-[10px] text-emerald-600 font-semibold">Respondidas</div>
+                        <div class="text-[10px] text-emerald-600 font-semibold">Respond.</div>
                     </div>
                     <div class="p-2 bg-amber-50 rounded-xl border border-amber-200">
                         <div id="stat-flagged" class="text-base font-extrabold text-amber-700">0</div>
-                        <div class="text-[10px] text-amber-600 font-semibold">En Duda</div>
+                        <div class="text-[10px] text-amber-600 font-semibold">Duda</div>
+                    </div>
+                    <div class="p-2 bg-rose-50 rounded-xl border border-rose-200">
+                        <div id="stat-rare" class="text-base font-extrabold text-rose-700">0</div>
+                        <div class="text-[10px] text-rose-600 font-semibold">Raras</div>
                     </div>
                     <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
                         <div id="stat-blank" class="text-base font-extrabold text-slate-600">100</div>
-                        <div class="text-[10px] text-slate-500 font-semibold">En Blanco</div>
+                        <div class="text-[10px] text-slate-500 font-semibold">Blanco</div>
                     </div>
                 </div>
                 <div class="pt-2 border-t border-slate-100">
@@ -308,6 +312,7 @@ let questionsDB = [];
 
 let userAnswers = {};
 let flaggedQuestions = new Set();
+let rareQuestions = new Set();
 let totalTimeSeconds = 3 * 3600;
 let timerInterval = null;
 let submitted = false;
@@ -423,7 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 function saveToStorage() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions] })); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions], rare: [...rareQuestions] })); } catch {}
 }
 
 function loadFromStorage() {
@@ -433,13 +438,16 @@ function loadFromStorage() {
         const data = JSON.parse(raw);
         userAnswers = data.answers || {};
         flaggedQuestions = new Set(data.flagged || []);
+        rareQuestions = new Set(data.rare || []);
         for (const id in userAnswers) {
             const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
             if (r) r.checked = true;
         }
         for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id of rareQuestions) updateCardStyle(parseInt(id));
         for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
         for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        for (const id of rareQuestions) updateGridButton(parseInt(id));
         updateStats();
     } catch {}
 }
@@ -499,9 +507,14 @@ function renderQuestions() {
                     <span class="bg-unica-100 text-unica-800 font-bold text-xs px-2.5 py-1 rounded-lg">Pregunta ${q.id}</span>
                     <span class="text-xs font-semibold text-slate-500">${q.cat}</span>
                 </div>
-                <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all">
-                    <span>Marcar Duda</span>
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="toggleRare(${q.id})" id="rare-btn-${q.id}" title="Enunciado confuso, mal OCR, gráfico faltante, símbolos raros…" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 flex items-center space-x-1 transition-all">
+                        <span>⚠ Rara</span>
+                    </button>
+                    <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" class="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all">
+                        <span>Marcar Duda</span>
+                    </button>
+                </div>
             </div>
             <div class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium mb-4">${q.text}</div>
             ${svgContent}
@@ -561,12 +574,24 @@ function toggleFlag(qId) {
     updateGridButton(qId);
 }
 
+function toggleRare(qId) {
+    if (rareQuestions.has(qId)) rareQuestions.delete(qId);
+    else rareQuestions.add(qId);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
 function updateCardStyle(qId) {
     const card = document.getElementById(`q-card-${qId}`);
     const flagBtn = document.getElementById(`flag-btn-${qId}`);
+    const rareBtn = document.getElementById(`rare-btn-${qId}`);
+    const badgeId = `q-rare-badge-${qId}`;
     if (!card) return;
     const isAnswered = !!userAnswers[qId];
     const isFlagged = flaggedQuestions.has(qId);
+    const isRare = rareQuestions.has(qId);
 
     if (flagBtn) {
         flagBtn.className = isFlagged
@@ -574,7 +599,29 @@ function updateCardStyle(qId) {
             : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center space-x-1 transition-all";
     }
 
+    if (rareBtn) {
+        rareBtn.className = isRare
+            ? "text-xs px-2.5 py-1 rounded-lg border border-rose-300 bg-rose-100 text-rose-800 font-bold flex items-center space-x-1"
+            : "text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 flex items-center space-x-1 transition-all";
+    }
+
+    let badge = document.getElementById(badgeId);
+    if (isRare) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.id = badgeId;
+            badge.title = 'Marcada como pregunta rara (enunciado confuso / OCR / gráfico faltante)';
+            badge.className = 'ml-2 bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-200';
+            badge.textContent = '⚠ RARA';
+            const head = card.querySelector('div.flex.items-center.justify-between');
+            if (head && head.firstElementChild) head.firstElementChild.appendChild(badge);
+        }
+    } else if (badge) {
+        badge.remove();
+    }
+
     if (isFlagged) card.className = "bg-amber-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-amber-400 relative transition-all";
+    else if (isRare) card.className = "bg-rose-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-rose-400 relative transition-all";
     else if (isAnswered) card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-unica-600 relative transition-all";
     else card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
 }
@@ -592,11 +639,13 @@ function updateGridButton(qId) {
 function updateStats() {
     const answered = Object.keys(userAnswers).length;
     const flagged = flaggedQuestions.size;
+    const rare = rareQuestions.size;
     const blank = 100 - answered;
     const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
     setText('stat-answered', answered);
     setText('stat-flagged', flagged);
     setText('stat-blank', blank);
+    if (document.getElementById('stat-rare')) setText('stat-rare', rare);
     setText('answered-count-bottom', answered);
     if (typeof updateCareerProgress === 'function') updateCareerProgress();
 }
@@ -809,6 +858,14 @@ function buildFeedbackHTML({ standalone = false } = {}) {
         return `<li><strong>P${q.id}</strong> <span class="tag">${escHTML(q.cat)}</span> <span class="tag sec">${escHTML(q.secTitle)}</span> — respondiste <strong class="bad">${v}</strong>, clave <strong class="ok">${q.correct}</strong>. <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`;
     }).join('') : '<li><em>No tuviste errores.</em></li>';
 
+    const rareOrdered = [...rareQuestions].sort((a,b)=>a-b);
+    const rareItems = rareOrdered.length ? rareOrdered.map(id => {
+        const q = questionsDB.find(q => q.id === id);
+        if (!q) return '';
+        const v = userAnswers[id];
+        return `<li><strong>P${id}</strong> <span class="tag sec">${escHTML(q.secTitle)}</span> <span class="tag">${escHTML(q.cat)}</span> — ${v ? `respondiste <strong>${v}</strong>, clave <strong class="ok">${q.correct}</strong>.` : '<span class="mute">en blanco.</span>'} <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`;
+    }).join('') : '<li><em>No marcaste ninguna pregunta como rara.</em></li>';
+
     const blankItems = untouched.length ? untouched.map(q =>
         `<li><strong>P${q.id}</strong> <span class="tag">${escHTML(q.cat)}</span> <span class="tag sec">${escHTML(q.secTitle)}</span> — en blanco. <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`
     ).join('') : '<li><em>Respondiste todas.</em></li>';
@@ -936,6 +993,10 @@ function buildFeedbackHTML({ standalone = false } = {}) {
     <h2>7) Examen completo (texto · alternativas · clave)</h2>
     ${qBlocks}
 
+    <h2>8) Preguntas marcadas como "raras" (${rareOrdered.length})</h2>
+    <p>Preguntas que el postulante señaló como confusas, mal transcritas, con gráfico faltante o símbolos raros:</p>
+    <ul class="fb-list">${rareItems}</ul>
+
     <div class="ia-prompt">
         <strong>Indicaciones para la IA</strong><br>
         Eres mi tutor del examen UNICA (CCC-52, Área C: Ingeniería). Con este HTML:
@@ -945,6 +1006,7 @@ function buildFeedbackHTML({ standalone = false } = {}) {
             <li><strong>Microlecciones</strong>: por cada tema con ≥ 30% de error, explícame con un ejemplo resuelto paso a paso al estilo PRE-UNICA.</li>
             <li><strong>Estrategia de examen</strong>: confirma si estoy aplicando bien el filtro semáforo (B +1 / M −0.333 / V +0.0625) y cuántas preguntas adicionales pasaría si convierto todas mis malas en blanco.</li>
             <li><strong>Carrera objetivo</strong>: soy postulante a <strong>${escHTML(career)}</strong>. Adapta las recomendaciones al perfil de esta carrera.</li>
+            <li><strong>Preguntas raras</strong>: revisa la sección 8. Por cada pregunta marcada como rara: (a) reescríbela con notación LaTeX/Unicode correcta, (b) si falta gráfico, propón cómo se vería y la información que transmitiría, (c) si los datos/alternativas son insuficientes, sugiere la corrección basándote en el patrón del banco CCC-52. Devuélveme la versión corregida y un JSON por pregunta con <code>{id, fix_md, missing_figure, alternatives_fixed}</code>.</li>
         </ol>
         Por favor responde en español, con foco en acción concreta, no en discurso motivacional.
     </div>
@@ -1021,9 +1083,9 @@ function openTimerModal() {
 function resetTimer() {
     try { localStorage.removeItem(TIMER_KEY); } catch {}
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
-    try { localStorage.removeItem(STORAGE_KEY + '_flagged'); } catch {}
     userAnswers = {};
     flaggedQuestions = new Set();
+    rareQuestions = new Set();
     location.reload();
 }
 </script>
