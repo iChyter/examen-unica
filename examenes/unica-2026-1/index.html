@@ -793,7 +793,7 @@ function openTimerModal() {
                 <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <h3 class="text-lg font-bold text-slate-900 mb-1">Reiniciar temporizador</h3>
-            <p class="text-sm text-slate-500 mb-5">Esto pone el contador a 03:00:00 y borra tu progreso de inicio. Tus respuestas y marcas se conservan.</p>
+            <p class="text-sm text-slate-500 mb-5">Esto pone el contador a 03:00:00 y borra todas tus respuestas y marcas. Si solo querés seguir donde quedaste, presiona Cancelar.</p>
             <div class="flex gap-2">
                 <button type="button" onclick="document.getElementById('timer-modal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancelar</button>
                 <button type="button" onclick="resetTimer()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition-colors">Sí, reiniciar</button>
@@ -806,6 +806,10 @@ function openTimerModal() {
 
 function resetTimer() {
     try { localStorage.removeItem(TIMER_KEY); } catch {}
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.removeItem(STORAGE_KEY + '_flagged'); } catch {}
+    userAnswers = {};
+    flaggedQuestions = new Set();
     location.reload();
 }
 </script>
