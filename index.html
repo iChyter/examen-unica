@@ -319,8 +319,8 @@ loadExams();
 loadCareers();
 
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW fail:', e));
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.unregister());
     });
 }
 </script>
