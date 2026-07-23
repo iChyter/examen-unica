@@ -38,5 +38,15 @@
     "questions": 100,
     "duration": 180,
     "url": "examenes/unica-2026-4/index.html"
+  },
+  {
+    "slug": "unica-2026-5",
+    "title": "Simulacro Oficial UNICA N°5 (Banco de Preguntas Nuevo)",
+    "area": "Área C: Ingeniería",
+    "year": "N°5 · Banco UNICA",
+    "description": "Simulacro N°5 con 100 preguntas nuevas (misma estructura que CCC-52, distintos planteamientos), feedback para IA y marcadores de duda/rara.",
+    "questions": 100,
+    "duration": 180,
+    "url": "examenes/unica-2026-5/index.html"
   }
 ]

@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen N°5 · Simulacro UNICA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        unica: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            gold: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-unica-600 selection:text-white">
+
+    <header class="no-print sticky top-0 z-40 bg-unica-900 text-white shadow-lg border-b border-unica-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-md font-black text-unica-900 text-xl tracking-tighter">U</div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">Simulacro Oficial UNICA N°4</h1>
+                    <p class="text-xs text-blue-200 font-medium">Simulacro N°5 · Área C: Ingeniería</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button type="button" onclick="openTimerModal()" id="timer-btn" title="Click para reiniciar" class="bg-unica-800/80 hover:bg-unica-700 backdrop-blur border border-blue-400/30 px-3 sm:px-4 py-1.5 rounded-xl flex items-center space-x-2 transition-colors cursor-pointer">
+                    <svg class="w-4 h-4 text-amber-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="timer" class="font-mono font-bold text-lg text-amber-300 tracking-wider">03:00:00</span>
+                </button>
+                <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all flex items-center space-x-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Finalizar Examen</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <aside class="no-print lg:col-span-4 xl:col-span-3 space-y-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mi carrera</span>
+                    <span id="career-badge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Sin selección</span>
+                </div>
+                <select id="career-select" onchange="onCareerChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-unica-600 mb-2">
+                    <option value="">-- Elige tu carrera --</option>
+                </select>
+                <div id="career-info" class="hidden">
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Mín. histórica:</span>
+                        <span class="font-bold text-slate-800" id="career-min">-</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Meta (mín + 1):</span>
+                        <span class="font-bold text-amber-700" id="career-meta">-</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Seguras necesarias:</span>
+                        <span class="font-bold text-slate-800" id="career-seguras">-</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600" id="career-progress-row" style="display:none;">
+                        <span>Tu avance:</span>
+                        <span class="font-bold text-emerald-700" id="career-progress">0 / -</span>
+                    </div>
+                    <div id="career-progress-wrap" style="display:none;" class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                        <div id="career-progress-bar" class="bg-emerald-500 h-full transition-all duration-200" style="width:0%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1 hidden" id="career-progress-tip">Marca solo lo seguro. Lo dudoso, déjalo en blanco.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Estado de Respuestas</h3>
+                <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                    <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-200">
+                        <div id="stat-answered" class="text-base font-extrabold text-emerald-700">0</div>
+                        <div class="text-[10px] text-emerald-600 font-semibold">Respond.</div>
+                    </div>
+                    <div class="p-2 bg-amber-50 rounded-xl border border-amber-200">
+                        <div id="stat-flagged" class="text-base font-extrabold text-amber-700">0</div>
+                        <div class="text-[10px] text-amber-600 font-semibold">Duda</div>
+                    </div>
+                    <div class="p-2 bg-rose-50 rounded-xl border border-rose-200">
+                        <div id="stat-rare" class="text-base font-extrabold text-rose-700">0</div>
+                        <div class="text-[10px] text-rose-600 font-semibold">Raras</div>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                        <div id="stat-blank" class="text-base font-extrabold text-slate-600">100</div>
+                        <div class="text-[10px] text-slate-500 font-semibold">Blanco</div>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-100">
+                    <span class="text-[11px] font-semibold text-slate-500 block mb-1.5">Ir a Sección:</span>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="scrollToSection('sec-aptitud')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">1. Aptitud Académica</button>
+                        <button onclick="scrollToSection('sec-matematica')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">2. Matemática</button>
+                        <button onclick="scrollToSection('sec-cta')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">3. Física y Química</button>
+                        <button onclick="scrollToSection('sec-humanidades')" class="text-left text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-unica-50 text-slate-700 font-medium truncate">4. Humanidades</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Navegador de Ficha (100)</h3>
+                    <span class="text-[10px] text-slate-400">Haz clic para ir</span>
+                </div>
+                <div id="question-grid" class="grid grid-cols-5 gap-1.5 max-h-[300px] overflow-y-auto pr-1"></div>
+            </div>
+        </aside>
+
+        <section class="lg:col-span-8 xl:col-span-9 space-y-6">
+            <div class="bg-gradient-to-r from-unica-900 via-unica-800 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-unica-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-block bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full mb-1 tracking-wider">Simulacro Oficial UNICA N°5</span>
+                    <h2 class="text-xl font-extrabold tracking-tight">Simulacro Oficial UNICA N°5</h2>
+                    <p class="text-xs text-blue-200 mt-1 max-w-xl">Aplica la <strong>Regla del Semáforo</strong>: +1.00 por buena, -0.3333 por mala, +0.0625 por dejar en blanco. No adivines a ciegas.</p>
+                </div>
+                <div class="flex items-center space-x-3 text-xs bg-white/10 backdrop-blur p-3 rounded-xl border border-white/10">
+                    <div class="text-center">
+                        <span class="block text-amber-300 font-bold text-sm">100</span>
+                        <span class="text-[10px] text-blue-200">Preguntas</span>
+                    </div>
+                    <div class="h-6 w-px bg-white/20"></div>
+                    <div class="text-center">
+                        <span class="block text-amber-300 font-bold text-sm">180 Min</span>
+                        <span class="text-[10px] text-blue-200">Tiempo</span>
+                    </div>
+                </div>
+            </div>
+
+            <form id="exam-form" onsubmit="event.preventDefault();" class="space-y-8">
+                <div id="questions-container" class="space-y-8"></div>
+            </form>
+
+            <div class="no-print sticky bottom-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 flex items-center justify-between">
+                <div class="text-xs text-slate-500">
+                    <span id="answered-count-bottom" class="font-bold text-unica-900">0</span> de 100 respondidas
+                </div>
+                <button onclick="confirmSubmitExam()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                    <span>Calcular Puntaje Oficial UNICA</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 sm:p-8 my-8 relative">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4 sticky top-0 bg-white z-10">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Feedback para IA</h2>
+                    <p class="text-xs text-slate-500">Markdown completo del examen. Cópialo y pégalo en tu IA favorita.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="copyFeedbackHTML()" id="feedback-copy-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Copia el HTML al portapapeles (pega en una IA con soporte de HTML)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <span>Copiar</span>
+                    </button>
+                    <button onclick="downloadCurrentFeedback()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar feedback-unica-ccc52.html (pégalo en cualquier IA o navegador)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
+                        <span>Descargar .md</span>
+                    </button>
+                    <button onclick="closeFeedbackModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors" title="Cerrar">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="feedback-preview" class="text-[12px] sm:text-sm leading-relaxed bg-slate-50 border border-slate-200 rounded-2xl p-5 text-slate-800 prose-sm select-text"></div>
+        </div>
+    </div>
+
+    <div id="results-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-6 sm:p-8 my-8 relative">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg bg-unica-50 text-unica-900">UNICA</div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Resultado Oficial UNICA</h2>
+                        <p class="text-xs text-slate-500">Evaluación calculada con ponderación exacta de admisión</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="bg-unica-50 border border-unica-100 p-4 rounded-2xl text-center">
+                    <span class="text-xs font-bold text-unica-800 uppercase tracking-wider block mb-1">Puntaje Real UNICA</span>
+                    <span id="res-score-100" class="text-3xl font-black text-unica-900">0.0000</span>
+                    <span class="text-[11px] text-unica-600 block mt-1">de 100.00 puntos posibles</span>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl text-center">
+                    <span class="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-1">Nota Vigesimal</span>
+                    <span id="res-score-20" class="text-3xl font-black text-amber-700">0.00</span>
+                    <span class="text-[11px] text-amber-600 block mt-1">Escala de 00 a 20</span>
+                </div>
+                <div id="res-condition-card" class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl text-center flex flex-col items-center justify-center">
+                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">Estado Estimado</span>
+                    <span id="res-condition-text" class="text-lg font-black text-emerald-700">INGRESÓ</span>
+                    <span id="res-condition-sub" class="text-[11px] text-emerald-600 block mt-1">Supera nota de corte</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs mb-6">
+                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <span class="block text-emerald-800 font-extrabold text-lg" id="res-buenas">0</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold">Buenas (+1.00)</span>
+                </div>
+                <div class="p-3 bg-rose-50 rounded-xl border border-rose-200">
+                    <span class="block text-rose-800 font-extrabold text-lg" id="res-malas">0</span>
+                    <span class="text-[10px] text-rose-600 font-semibold">Malas (-0.333)</span>
+                </div>
+                <div class="p-3 bg-slate-100 rounded-xl border border-slate-200">
+                    <span class="block text-slate-800 font-extrabold text-lg" id="res-vacias">0</span>
+                    <span class="text-[10px] text-slate-600 font-semibold">En Blanco (+0.0625)</span>
+                </div>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 col-span-2 sm:col-span-1">
+                    <span class="block text-amber-800 font-extrabold text-lg" id="res-efectividad">0%</span>
+                    <span class="text-[10px] text-amber-600 font-semibold">Efectividad</span>
+                </div>
+            </div>
+
+            <div id="res-feedback-box" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed mb-6"></div>
+
+            <div class="flex items-center justify-between border-t border-slate-100 pt-6">
+                <button onclick="toggleSolucionario()" class="bg-unica-900 hover:bg-unica-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span id="solucionario-btn-text">Ver Solucionario Paso a Paso</span>
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="openFeedbackPreview()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Abre el feedback completo en .md para copiar/pegar a tu IA">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L4.5 12l5.25-5.25m6 10.5L20.25 12l-5.25-5.25"></path></svg>
+                        <span>Feedback para IA (.md)</span>
+                    </button>
+                    <button onclick="downloadRespuestas()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 transition-colors" title="Descargar .txt con tus respuestas">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg>
+                        <span>Descargar respuestas (.txt)</span>
+                    </button>
+                    <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-xl text-xs">Cerrar</button>
+                </div>
+            </div>
+
+            <div id="solucionario-container" class="mt-6 pt-6 border-t border-slate-200 hidden space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Solucionario Detallado con Explicación Completa</h3>
+                <div id="solucionario-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const FIGURES = {
+  fig1:  '<svg viewBox="0 0 320 180" class="mx-auto my-3 max-w-full h-auto"><polygon points="180,30 60,150 260,150" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="180" cy="30" r="3" fill="currentColor"/><circle cx="60" cy="150" r="3" fill="currentColor"/><circle cx="260" cy="150" r="3" fill="currentColor"/><text x="180" y="22" text-anchor="middle" font-size="13">B</text><text x="52" y="162" text-anchor="middle" font-size="13">A</text><text x="268" y="162" text-anchor="middle" font-size="13">C</text><text x="195" y="50" font-size="13">10°</text><text x="78" y="138" font-size="13">80°</text><text x="248" y="138" font-size="13">x</text><line x1="120" y1="120" x2="180" y2="150" stroke="currentColor" stroke-width="1.6"/><text x="158" y="156" font-size="13">P</text></svg>',
+  fig2:  '<svg viewBox="0 0 320 200" class="mx-auto my-3 max-w-full h-auto"><polygon points="20,160 220,160 290,40 60,40" fill="none" stroke="currentColor" stroke-width="1.6"/><text x="14" y="172" font-size="13">B</text><text x="70" y="34" font-size="13">C</text><text x="226" y="172" font-size="13">A</text><text x="296" y="34" font-size="13">D</text><text x="120" y="135" font-size="13">P</text><text x="105" y="120" font-size="13">θ</text><text x="195" y="100" font-size="13">θ</text><circle cx="120" cy="125" r="2" fill="currentColor"/><circle cx="195" cy="95" r="2" fill="currentColor"/><circle cx="80" cy="100" r="2" fill="currentColor"/><circle cx="220" cy="100" r="2" fill="currentColor"/></svg>',
+  fig3:  '<svg viewBox="0 0 320 100" class="mx-auto my-3 max-w-full h-auto"><line x1="20" y1="80" x2="300" y2="80" stroke="currentColor"/><rect x="50" y="55" width="40" height="25" fill="none" stroke="currentColor"/><line x1="40" y1="55" x2="100" y2="55" stroke="currentColor"/><text x="68" y="50" font-size="12">A</text><rect x="230" y="55" width="40" height="25" fill="none" stroke="currentColor"/><line x1="220" y1="55" x2="280" y2="55" stroke="currentColor"/><text x="248" y="50" font-size="12">B</text><circle cx="50" cy="80" r="3" fill="currentColor"/><circle cx="270" cy="80" r="3" fill="currentColor"/><text x="155" y="95" font-size="12">2 m</text></svg>',
+  fig4:  '<svg viewBox="0 0 320 200" class="mx-auto my-3 max-w-full h-auto"><rect x="20" y="30" width="220" height="140" fill="none" stroke="currentColor"/><text x="34" y="46" font-size="13">K</text><circle cx="60" cy="60" r="18" fill="none" stroke="currentColor"/><text x="55" y="80" font-size="13">B</text><line x1="60" y1="105" x2="60" y2="155" stroke="currentColor"/><line x1="50" y1="155" x2="70" y2="155" stroke="currentColor"/><line x1="50" y1="170" x2="70" y2="170" stroke="currentColor"/><line x1="55" y1="125" x2="65" y2="125" stroke="currentColor"/><line x1="55" y1="140" x2="65" y2="140" stroke="currentColor"/><line x1="55" y1="170" x2="65" y2="170" stroke="currentColor"/><polygon points="240,40 280,40 280,170 290,170" fill="none" stroke="currentColor"/><rect x="190" y="80" width="40" height="30" fill="none" stroke="currentColor"/><text x="206" y="100" font-size="13">A</text><text x="260" y="180" font-size="13">37°</text></svg>',
+  fig5:  '<svg viewBox="0 0 320 200" class="mx-auto my-3 max-w-full h-auto"><polygon points="20,180 280,180 60,30" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="80" y1="110" x2="200" y2="180" stroke="currentColor"/><line x1="100" y1="80" x2="200" y2="180" stroke="currentColor"/><line x1="120" y1="60" x2="220" y2="180" stroke="currentColor"/><line x1="150" y1="40" x2="250" y2="180" stroke="currentColor"/><line x1="190" y1="35" x2="280" y2="180" stroke="currentColor"/><line x1="60" y1="30" x2="280" y2="180" stroke="currentColor" stroke-dasharray="3 3"/></svg>',
+  fig6:  '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><polygon points="160,20 30,200 290,200" fill="none" stroke="currentColor"/><text x="160" y="14" text-anchor="middle" font-size="13">B</text><text x="22" y="212" font-size="13">A</text><text x="294" y="212" font-size="13">C</text><line x1="80" y1="120" x2="240" y2="200" stroke="currentColor"/><line x1="180" y1="80" x2="120" y2="180" stroke="currentColor"/><text x="64" y="146" font-size="12">3β</text><text x="172" y="78" font-size="12">α</text><text x="100" y="170" font-size="12">2β</text><text x="208" y="180" font-size="12">2α</text><text x="180" y="100" font-size="12">F</text><text x="148" y="160" font-size="12">E</text></svg>',
+  fig7:  '<svg viewBox="0 0 360 200" class="mx-auto my-3 max-w-full h-auto"><text x="20" y="20" font-size="13">A</text><g transform="translate(20,40) rotate(15)"><circle cx="0" cy="40" r="6" fill="currentColor"/><polygon points="-12,10 12,10 0,30" fill="currentColor"/><polygon points="-10,0 10,0 0,-12" fill="currentColor"/></g><text x="100" y="20" font-size="13">B</text><g transform="translate(110,40)"><circle cx="0" cy="40" r="6" fill="currentColor"/><polygon points="-12,18 12,18 0,2" fill="currentColor"/><polygon points="0,-12 -10,0 10,0" fill="currentColor"/></g><text x="190" y="20" font-size="13">C</text><g transform="translate(190,40) rotate(45)"><circle cx="0" cy="40" r="6" fill="currentColor"/><polygon points="-12,12 12,12 0,28" fill="currentColor"/></g><text x="270" y="20" font-size="13">D</text><g transform="translate(270,40) rotate(90)"><circle cx="0" cy="40" r="6" fill="currentColor"/><polygon points="-12,12 12,12 0,28" fill="currentColor"/></g><text x="280" y="190" font-size="13">figura original</text><g transform="translate(330,100) rotate(180)"><polygon points="-15,0 15,0 0,-20" fill="currentColor"/><polygon points="0,0 -10,20 10,20" fill="currentColor"/></g></svg>',
+  fig8:  '<svg viewBox="0 0 320 180" class="mx-auto my-3 max-w-full h-auto"><text x="160" y="40" text-anchor="middle" font-size="20" font-family="serif" font-style="italic">a / [q(1) − a]</text><line x1="120" y1="60" x2="200" y2="60" stroke="currentColor"/><line x1="120" y1="60" x2="120" y2="50" stroke="currentColor"/><line x1="200" y1="60" x2="200" y2="50" stroke="currentColor"/></svg>',
+  fig9:  '<svg viewBox="0 0 320 180" class="mx-auto my-3 max-w-full h-auto"><polygon points="240,30 60,30 100,150 260,150" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="100" y1="150" x2="260" y2="30" stroke="currentColor"/><line x1="100" y1="150" x2="200" y2="90" stroke="currentColor"/><line x1="200" y1="90" x2="260" y2="30" stroke="currentColor"/><text x="80" y="160" font-size="13">3°</text><text x="80" y="148" font-size="13">3°</text><text x="210" y="44" font-size="13">5°</text><text x="220" y="68" font-size="13">82°</text><text x="80" y="110" font-size="13">x</text></svg>',
+  fig10: '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><path d="M40,200 A230,230 0 0 1 280,200" fill="none" stroke="currentColor"/><line x1="40" y1="200" x2="280" y2="200" stroke="currentColor"/><line x1="40" y1="200" x2="160" y2="40" stroke="currentColor"/><line x1="40" y1="200" x2="220" y2="120" stroke="currentColor"/><line x1="220" y1="120" x2="280" y2="200" stroke="currentColor"/><text x="34" y="212" font-size="13">O</text><text x="160" y="34" text-anchor="middle" font-size="13">A</text><text x="284" y="212" font-size="13">C</text><text x="226" y="116" font-size="13">D</text><text x="70" y="180" font-size="13">θ</text><text x="155" y="178" font-size="13">α</text><text x="210" y="155" font-size="13">β</text></svg>',
+  fig11: '<svg viewBox="0 0 320 200" class="mx-auto my-3 max-w-full h-auto"><path d="M40,180 L260,180 L260,40 Z" fill="none" stroke="currentColor"/><text x="32" y="192" font-size="13">O</text><text x="32" y="170" font-size="13">50°</text><text x="32" y="158" font-size="13">25°</text><text x="266" y="46" font-size="13">A</text><text x="266" y="192" font-size="13">B</text><line x1="160" y1="180" x2="160" y2="100" stroke="currentColor" stroke-dasharray="4 3"/><text x="146" y="142" font-size="13">M</text><text x="100" y="192" font-size="13">r</text></svg>',
+  fig12: '<svg viewBox="0 0 360 130" class="mx-auto my-3 max-w-full h-auto"><text x="20" y="50" font-size="14">A</text><text x="100" y="50" font-size="14">B</text><text x="180" y="50" font-size="14">C</text><text x="260" y="50" font-size="14">D</text><text x="320" y="50" font-size="14">E</text><g transform="translate(20,80)"><line x1="-8" y1="-10" x2="0" y2="10" stroke="currentColor"/><line x1="8" y1="-10" x2="0" y2="10" stroke="currentColor"/><line x1="-8" y1="10" x2="8" y2="10" stroke="currentColor"/></g><g transform="translate(100,80)"><path d="M-10,5 q5,-15 10,0" fill="none" stroke="currentColor"/><circle r="3" fill="currentColor"/></g><g transform="translate(180,80)"><path d="M-12,0 a12,12 0 1 0 12,0" fill="none" stroke="currentColor"/><circle r="3" fill="currentColor"/></g><g transform="translate(260,80)"><path d="M-10,-5 q15,-5 5,10 z M-10,5 q-5,-10 5,-15 z" fill="currentColor"/></g><g transform="translate(320,80)"><path d="M-12,5 q10,-15 12,0 q-2,10 -12,5 z M-8,-3 a3,3 0 1 1 6,0" fill="none" stroke="currentColor"/></g></svg>',
+  fig13: '<svg viewBox="0 0 360 120" class="mx-auto my-3 max-w-full h-auto"><g transform="translate(20,60)"><rect x="-15" y="-15" width="30" height="30" fill="none" stroke="currentColor"/><circle cx="0" cy="0" r="3" fill="currentColor"/><circle cx="-10" cy="-10" r="2" fill="currentColor"/><circle cx="10" cy="10" r="2" fill="currentColor"/></g><g transform="translate(80,60)"><rect x="-15" y="-15" width="30" height="30" fill="none" stroke="currentColor"/><circle cx="0" cy="0" r="3" fill="currentColor"/><circle cx="10" cy="-10" r="2" fill="currentColor"/><circle cx="-10" cy="10" r="2" fill="currentColor"/></g><g transform="translate(140,60)"><rect x="-15" y="-15" width="30" height="30" fill="none" stroke="currentColor"/><circle cx="0" cy="0" r="3" fill="currentColor"/><circle cx="-10" cy="-10" r="2" fill="currentColor"/><circle cx="-10" cy="10" r="2" fill="currentColor"/></g><text x="180" y="64" font-size="14">=</text><text x="210" y="55" font-size="13">a:</text><g transform="translate(240,60)"><rect x="-15" y="-15" width="30" height="30" fill="none" stroke="currentColor"/><circle cx="0" cy="0" r="3" fill="currentColor"/></g><text x="285" y="64" font-size="14">=</text><text x="300" y="55" font-size="13">a :</text><g transform="translate(335,60)"><circle r="14" fill="none" stroke="currentColor"/><circle cx="0" cy="-8" r="2" fill="currentColor"/></g></svg>',
+  fig14: '<svg viewBox="0 0 320 160" class="mx-auto my-3 max-w-full h-auto"><rect x="30" y="40" width="260" height="100" fill="none" stroke="currentColor"/><text x="20" y="56" font-size="13">A</text><rect x="50" y="50" width="40" height="20" fill="none" stroke="currentColor"/><text x="62" y="64" font-size="11">12Ω</text><rect x="120" y="50" width="40" height="20" fill="none" stroke="currentColor"/><text x="124" y="64" font-size="11">40V</text><rect x="170" y="50" width="40" height="20" fill="none" stroke="currentColor"/><text x="180" y="64" font-size="11">3Ω</text><rect x="220" y="50" width="40" height="20" fill="none" stroke="currentColor"/><text x="232" y="64" font-size="11">10V</text><rect x="100" y="110" width="40" height="20" fill="none" stroke="currentColor"/><text x="104" y="124" font-size="11">30V</text><rect x="170" y="110" width="40" height="20" fill="none" stroke="currentColor"/><text x="180" y="124" font-size="11">5Ω</text><circle cx="40" cy="95" r="10" fill="none" stroke="currentColor"/></svg>',
+  fig15: '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><polygon points="20,40 280,200 280,40" fill="none" stroke="currentColor"/><text x="2" y="46" font-size="13">37°</text><line x1="160" y1="40" x2="160" y2="200" stroke="currentColor"/><text x="160" y="60" font-size="12">v=50 m/s</text><text x="106" y="120" font-size="12">135 m</text><line x1="80" y1="200" x2="240" y2="200" stroke="currentColor" stroke-dasharray="3 3"/><path d="M160,40 q40,40 0,160" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><line x1="120" y1="210" x2="220" y2="210" stroke="currentColor"/><line x1="120" y1="215" x2="220" y2="215" stroke="currentColor"/><text x="160" y="232" text-anchor="middle" font-size="13">x</text></svg>',
+  fig16: '<svg viewBox="0 0 360 120" class="mx-auto my-3 max-w-full h-auto"><rect x="10" y="20" width="50" height="50" fill="none" stroke="currentColor"/><circle cx="55" cy="65" r="3" fill="currentColor"/><circle cx="15" cy="25" r="3" fill="currentColor"/><text x="34" y="100" font-size="13">1</text><rect x="80" y="20" width="50" height="50" fill="none" stroke="currentColor"/><circle cx="125" cy="65" r="3" fill="currentColor"/><text x="105" y="100" font-size="13">2</text><rect x="150" y="20" width="50" height="50" fill="none" stroke="currentColor"/><circle cx="195" cy="25" r="3" fill="currentColor"/><text x="175" y="100" font-size="13">3</text><rect x="220" y="20" width="50" height="50" fill="none" stroke="currentColor"/><circle cx="265" cy="25" r="3" fill="currentColor"/><circle cx="225" cy="65" r="3" fill="currentColor"/><text x="245" y="100" font-size="13">4</text><rect x="290" y="20" width="50" height="50" fill="none" stroke="currentColor"/><text x="310" y="60" font-size="20">?</text><text x="313" y="100" font-size="13">5</text></svg>',
+  fig17: '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><polygon points="20,200 280,200 240,40" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="240" y1="40" x2="200" y2="200" stroke="currentColor"/><line x1="20" y1="200" x2="160" y2="120" stroke="currentColor"/><text x="14" y="212" font-size="13">B</text><text x="284" y="212" font-size="13">A</text><text x="244" y="34" font-size="13">D</text><text x="164" y="116" font-size="13">C</text><text x="36" y="190" font-size="13">x</text><text x="156" y="158" font-size="13">20</text><text x="186" y="180" font-size="13">30</text></svg>',
+  fig18: '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><line x1="10" y1="40" x2="270" y2="40" stroke="currentColor"/><text x="270" y="36" font-size="13">L₁</text><line x1="10" y1="200" x2="310" y2="200" stroke="currentColor"/><text x="310" y="214" font-size="13">L₂</text><polygon points="120,40 200,200 60,200" fill="none" stroke="currentColor"/><text x="100" y="32" font-size="13">3α</text><text x="140" y="62" font-size="13">2α</text><text x="56" y="194" font-size="13">α</text><text x="200" y="194" font-size="13">3α</text><line x1="200" y1="200" x2="270" y2="120" stroke="currentColor"/><text x="246" y="146" font-size="13">x</text></svg>',
+  fig19: '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><polygon points="40,200 280,200 160,30" fill="none" stroke="currentColor" stroke-width="1.6"/><text x="30" y="212" font-size="13">A</text><text x="286" y="212" font-size="13">C</text><text x="160" y="24" text-anchor="middle" font-size="13">B</text><line x1="100" y1="200" x2="180" y2="100" stroke="currentColor"/><line x1="100" y1="200" x2="220" y2="120" stroke="currentColor"/><line x1="100" y1="200" x2="220" y2="200" stroke="currentColor" stroke-dasharray="4 3"/><polygon points="100,200 220,200 180,100 140,120" fill="currentColor" opacity="0.2"/><text x="92" y="212" font-size="13">Q</text><text x="226" y="212" font-size="13">R</text><text x="140" y="116" font-size="13">P</text></svg>',
+  fig20: '<svg viewBox="0 0 360 130" class="mx-auto my-3 max-w-full h-auto"><text x="20" y="20" font-size="13">A</text><text x="100" y="20" font-size="13">B</text><text x="180" y="20" font-size="13">C</text><text x="260" y="20" font-size="13">D</text><text x="320" y="20" font-size="13">E</text><g transform="translate(40,80)"><line x1="-20" y1="0" x2="20" y2="0" stroke="currentColor"/><line x1="0" y1="-12" x2="0" y2="12" stroke="currentColor"/><rect x="-10" y="-6" width="20" height="12" fill="none" stroke="currentColor"/></g><g transform="translate(120,80)"><rect x="-18" y="-18" width="36" height="36" fill="none" stroke="currentColor"/><circle cx="-8" cy="-8" r="2" fill="currentColor"/><circle cx="8" cy="-8" r="2" fill="currentColor"/><circle cx="-8" cy="8" r="2" fill="currentColor"/><circle cx="8" cy="8" r="2" fill="currentColor"/></g><g transform="translate(200,80)"><circle r="18" fill="none" stroke="currentColor"/><line x1="-18" y1="0" x2="18" y2="0" stroke="currentColor"/><line x1="0" y1="-18" x2="0" y2="18" stroke="currentColor"/></g><g transform="translate(280,80)"><circle r="18" fill="none" stroke="currentColor"/><circle cx="0" cy="0" r="3" fill="currentColor"/><circle cx="-6" cy="0" r="2" fill="currentColor"/><circle cx="6" cy="0" r="2" fill="currentColor"/><circle cx="-9" cy="3" r="2" fill="currentColor"/><circle cx="9" cy="3" r="2" fill="currentColor"/><circle cx="-6" cy="6" r="2" fill="currentColor"/><circle cx="6" cy="6" r="2" fill="currentColor"/></g><g transform="translate(340,80)"><polygon points="0,-18 16,10 -16,10" fill="none" stroke="currentColor"/><circle cx="0" cy="6" r="2" fill="currentColor"/><circle cx="-6" cy="2" r="2" fill="currentColor"/><circle cx="6" cy="2" r="2" fill="currentColor"/></g></svg>',
+  fig21: '<svg viewBox="0 0 320 220" class="mx-auto my-3 max-w-full h-auto"><rect x="10" y="10" width="300" height="200" fill="none" stroke="currentColor"/><text x="20" y="30" font-size="13">Empleabilidad universitaria</text><text x="20" y="50" font-size="11">Del total de egresados:</text><circle cx="50" cy="100" r="10" fill="currentColor" opacity="0.4"/><text x="50" y="135" font-size="11" text-anchor="middle">87,5%</text><text x="50" y="148" font-size="10" text-anchor="middle">tiene empleo</text><circle cx="120" cy="100" r="10" fill="currentColor" opacity="0.4"/><text x="120" y="135" font-size="11" text-anchor="middle">5,5%</text><text x="120" y="148" font-size="10" text-anchor="middle">busca trabajo</text><circle cx="190" cy="100" r="10" fill="currentColor" opacity="0.4"/><text x="190" y="135" font-size="11" text-anchor="middle">7%</text><text x="190" y="151" font-size="10" text-anchor="middle">estudia / hogar</text><text x="180" y="60" font-size="11">Trabaja vinculado:</text><text x="180" y="74" font-size="10">45,2% hombres</text><text x="180" y="86" font-size="10">54,8% mujeres</text><text x="20" y="170" font-size="10">Universidad de procedencia:</text><text x="20" y="184" font-size="10">44,6% pública   55,2% privada</text><text x="20" y="198" font-size="10">45,9% Lima     54,1% provincia</text><text x="270" y="208" font-size="10">Fuente: INE</text></svg>'
+};
+
+let questionsDB = [];
+
+
+let userAnswers = {};
+let flaggedQuestions = new Set();
+let rareQuestions = new Set();
+let totalTimeSeconds = 3 * 3600;
+let timerInterval = null;
+let submitted = false;
+const STORAGE_KEY = 'unica_exam_2026_5';
+const TIMER_KEY = 'unica_exam_2026_5_startedAt';
+
+const CAREERS_MIN = {
+  'Medicina Humana':15.5959,'Enfermería':10.9792,'Obstetricia':4.0876,'Psicología':4.8293,'Odontología':5.3334,
+  'Farmacia y Bioquímica':2.4709,'Biología':3.0918,'Medicina Veterinaria y Zootecnia':2.0875,
+  'Ingeniería de Sistemas':6.2417,'Ingeniería Civil':4.4459,'Agronomía':3.2209,'Ingeniería de Minas':2.9667,
+  'Ingeniería Ambiental y Sanitaria':1.8085,'Ingeniería Mecánica Eléctrica':4.3959,'Ingeniería Metalúrgica':1.6418,
+  'Contabilidad':0.2669,'Administración':1.8209,'Ingeniería Electrónica':1.7417,'Arquitectura':4.0044,
+  'Ingeniería de Alimentos':0.0294,'Ingeniería Química':0.0797,'Ingeniería Pesquera':0.9501,
+  'Derecho':4.6045,'Negocios Internacionales':1.3338,'Economía':0.0005,
+  'Ciencias de la Comunicación':0.1377,'Turismo':0.1545,'Arqueología':0.2544,
+  'Ciencias de la Educación Inicial':2.4004,'Ciencias de la Educación Física':1.2751,'Ciencias de la Educación Primaria':1.4586,
+  'Ciencias de la Educación Lengua y Literatura':1.0417,'Ciencias de la Educación Historia y Geografía':0.1545,
+  'Ciencias de la Educación Matemática e Informática':0.8005,'Ciencias de la Educación Filosofía, Psicología y CC.SS.':0.2672,
+  'Ciencias de la Educación Arte':0.0753,'Ciencias de la Educación Biología y Química':0.8086,
+  'Matemática e Informática':0.8005,'Estadística':0.2672,'Física':0.3376
+};
+
+let careerSeguras = 0;
+
+function onCareerChange() {
+  const sel = document.getElementById('career-select');
+  const name = sel.value;
+  const info = document.getElementById('career-info');
+  const badge = document.getElementById('career-badge');
+  try { if (name) localStorage.setItem('unica_career', name); else localStorage.removeItem('unica_career'); } catch {}
+  if (!name) {
+    info.classList.add('hidden');
+    badge.textContent = 'Sin selección';
+    badge.className = 'text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full';
+    document.getElementById('career-progress-row').style.display = 'none';
+    document.getElementById('career-progress-wrap').style.display = 'none';
+    document.getElementById('career-progress-tip').classList.add('hidden');
+    careerSeguras = 0;
+    return;
+  }
+  const min = CAREERS_MIN[name];
+  const meta = min + 1;
+  const meta100 = meta * 5;
+  const bien = Math.max(0, Math.ceil((meta100 * 16 - (100 - meta100)) / 17));
+  careerSeguras = bien;
+  document.getElementById('career-min').textContent = min.toFixed(2) + ' / 20';
+  document.getElementById('career-meta').textContent = meta.toFixed(2) + ' / 20';
+  document.getElementById('career-seguras').textContent = bien + ' de 100';
+  badge.textContent = 'Meta ' + meta.toFixed(1);
+  badge.className = 'text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full';
+  info.classList.remove('hidden');
+  document.getElementById('career-progress-row').style.display = '';
+  document.getElementById('career-progress-wrap').style.display = '';
+  document.getElementById('career-progress-tip').classList.remove('hidden');
+  updateCareerProgress();
+}
+
+function updateCareerProgress() {
+  if (careerSeguras <= 0) return;
+  const answered = Object.keys(userAnswers).length;
+  const prog = document.getElementById('career-progress');
+  const bar = document.getElementById('career-progress-bar');
+  const tip = document.getElementById('career-progress-tip');
+  if (prog) prog.textContent = answered + ' / ' + careerSeguras;
+  const pct = Math.min(100, Math.round((answered / careerSeguras) * 100));
+  if (bar) bar.style.width = pct + '%';
+  if (tip) {
+    if (answered >= careerSeguras) tip.innerHTML = 'Alcanzaste la meta. Deja en blanco lo dudoso.';
+    else tip.innerHTML = 'Te faltan <strong>' + (careerSeguras - answered) + '</strong> seguras para tu meta.';
+  }
+}
+
+(function() {
+  const sel = document.getElementById('career-select');
+  if (!sel) return;
+  Object.entries(CAREERS_MIN).sort((a, b) => b[1] - a[1]).forEach(([name, min]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (mín ' + min.toFixed(2) + ')';
+    sel.appendChild(opt);
+  });
+  try {
+    const saved = localStorage.getItem('unica_career');
+    if (saved && CAREERS_MIN[saved]) {
+      sel.value = saved;
+      onCareerChange();
+    }
+  } catch {}
+})();
+
+async function loadQuestions(){
+  try {
+    const res = await fetch('qs_phase1.json?_=' + Date.now());
+    if (!res.ok) throw new Error(res.statusText);
+    const raw = await res.json();
+    questionsDB = raw.map(q => Object.assign({}, q, {
+      explanation: q.correct + ') — Pregunta ' + q.id + ' del Simulacro N°5 UNICA. Revisala con tu IA favorita para profundizar el porqué.'
+    }));
+  } catch (e) {
+    document.getElementById('questions-container').innerHTML =
+      '<div class="p-6 bg-red-50 text-red-700 rounded">No se pudo cargar <code>qs_phase1.json</code>: ' + e + '</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadQuestions();
+    renderQuestions();
+    renderQuestionGrid();
+    startTimer();
+    updateStats();
+    loadFromStorage();
+});
+
+
+function saveToStorage() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, flagged: [...flaggedQuestions], rare: [...rareQuestions] })); } catch {}
+}
+
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        userAnswers = data.answers || {};
+        flaggedQuestions = new Set(data.flagged || []);
+        rareQuestions = new Set(data.rare || []);
+        for (const id in userAnswers) {
+            const r = document.querySelector(`input[name="q_${id}"][value="${userAnswers[id]}"]`);
+            if (r) r.checked = true;
+        }
+        for (const id of flaggedQuestions) updateCardStyle(parseInt(id));
+        for (const id of rareQuestions) updateCardStyle(parseInt(id));
+        for (const id in userAnswers) { updateCardStyle(parseInt(id)); updateGridButton(parseInt(id)); }
+        for (const id of flaggedQuestions) updateGridButton(parseInt(id));
+        for (const id of rareQuestions) updateGridButton(parseInt(id));
+        updateStats();
+    } catch {}
+}
+
+function startTimer() {
+    const timerEl = document.getElementById('timer');
+    const duration = 3 * 3600;
+    let startedAt = parseInt(localStorage.getItem(TIMER_KEY) || '0', 10);
+    if (!startedAt) {
+        startedAt = Date.now();
+        localStorage.setItem(TIMER_KEY, String(startedAt));
+    }
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    totalTimeSeconds = Math.max(0, duration - elapsed);
+
+    timerInterval = setInterval(() => {
+        if (totalTimeSeconds <= 0) {
+            clearInterval(timerInterval);
+            if (!submitted) { alert("Tiempo concluido. Se calculará tu puntaje."); submitExam(); }
+            return;
+        }
+        totalTimeSeconds--;
+        const h = Math.floor(totalTimeSeconds / 3600);
+        const m = Math.floor((totalTimeSeconds % 3600) / 60);
+        const s = totalTimeSeconds % 60;
+        timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+    const h = Math.floor(totalTimeSeconds / 3600);
+    const m = Math.floor((totalTimeSeconds % 3600) / 60);
+    const s = totalTimeSeconds % 60;
+    timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = "";
+    let currentSection = "";
+
+    questionsDB.forEach((q) => {
+        if (q.sec !== currentSection) {
+            currentSection = q.sec;
+            const secHeader = document.createElement('div');
+            secHeader.id = q.sec;
+            secHeader.className = "bg-unica-900 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between mt-8 mb-4";
+            secHeader.innerHTML = `<div class="flex items-center space-x-2"><span class="w-2 h-6 bg-amber-400 rounded-full"></span><h3 class="font-bold text-sm sm:text-base tracking-wide uppercase">${q.secTitle}</h3></div><span class="text-xs bg-unica-800 text-blue-200 px-3 py-1 rounded-full font-mono font-medium">Oficial UNICA</span>`;
+            container.appendChild(secHeader);
+        }
+
+        const card = document.createElement('div');
+        card.id = `q-card-${q.id}`;
+        card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+        const svgContent = (q.svg && FIGURES[q.svg]) || "";
+
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-unica-100 text-unica-800 font-bold text-xs px-2.5 py-1 rounded-lg">Pregunta ${q.id}</span>
+                    <span class="text-xs font-semibold text-slate-500">${q.cat}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleRare(${q.id})" id="rare-btn-${q.id}" title="Marcar como pregunta rara — enunciado confuso, mal OCR, gráfico faltante o símbolos raros" aria-label="Pregunta rara" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 flex items-center justify-center transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm.75 5.5a.75.75 0 0 0-1.5 0v6.25c0 .41.34.75.75.75h4.25a.75.75 0 0 0 0-1.5h-3.5V7.5Z"/></svg>
+                    </button>
+                    <button type="button" onclick="toggleFlag(${q.id})" id="flag-btn-${q.id}" title="Marcar como duda — para repasar después" aria-label="Marcar duda" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 flex items-center justify-center transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 2 1.5 21h21L12 2Zm0 6.5L18.5 19h-13L12 8.5Zm-.75 3.25v3.5h1.5v-3.5h-1.5Zm0 4.5v1.5h1.5v-1.5h-1.5Z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium mb-4">${q.text}</div>
+            ${svgContent}
+            <div class="space-y-2.5">
+                ${q.options.map((opt, idx) => {
+                    const optVal = ["A","B","C","D","E"][idx];
+                    return `<label id="label-q${q.id}-${optVal}" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-all text-xs sm:text-sm font-medium text-slate-700">
+                        <input type="radio" name="q_${q.id}" value="${optVal}" onchange="selectOption(${q.id}, '${optVal}')" class="w-4 h-4 text-unica-600 focus:ring-unica-500 border-slate-300 mr-3">
+                        <span>${opt}</span>
+                    </label>`;
+                }).join('')}
+            </div>
+            <div class="mt-3 text-right">
+                <button type="button" onclick="clearOption(${q.id})" class="text-[11px] text-slate-400 hover:text-slate-600 underline">Dejar esta pregunta en blanco</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderQuestionGrid() {
+    const grid = document.getElementById('question-grid');
+    grid.innerHTML = "";
+    for (let i = 1; i <= 100; i++) {
+        const btn = document.createElement('button');
+        btn.id = `grid-btn-${i}`;
+        btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+        btn.textContent = i;
+        btn.onclick = () => scrollToQuestion(i);
+        grid.appendChild(btn);
+    }
+}
+
+function selectOption(qId, val) {
+    userAnswers[qId] = val;
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function clearOption(qId) {
+    delete userAnswers[qId];
+    document.getElementsByName(`q_${qId}`).forEach(r => r.checked = false);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function toggleFlag(qId) {
+    if (flaggedQuestions.has(qId)) flaggedQuestions.delete(qId);
+    else flaggedQuestions.add(qId);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function toggleRare(qId) {
+    if (rareQuestions.has(qId)) rareQuestions.delete(qId);
+    else rareQuestions.add(qId);
+    saveToStorage();
+    updateStats();
+    updateCardStyle(qId);
+    updateGridButton(qId);
+}
+
+function updateCardStyle(qId) {
+    const card = document.getElementById(`q-card-${qId}`);
+    const flagBtn = document.getElementById(`flag-btn-${qId}`);
+    const rareBtn = document.getElementById(`rare-btn-${qId}`);
+    const badgeId = `q-rare-badge-${qId}`;
+    if (!card) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+    const isRare = rareQuestions.has(qId);
+
+    if (flagBtn) {
+        flagBtn.className = isFlagged
+            ? "w-8 h-8 rounded-lg border border-amber-400 bg-amber-400 text-amber-900 flex items-center justify-center transition-all shadow-sm"
+            : "w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 flex items-center justify-center transition-all";
+    }
+
+    if (rareBtn) {
+        rareBtn.className = isRare
+            ? "w-8 h-8 rounded-lg border border-rose-500 bg-rose-500 text-white flex items-center justify-center transition-all shadow-sm"
+            : "w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 flex items-center justify-center transition-all";
+    }
+
+    let badge = document.getElementById(badgeId);
+    if (isRare) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.id = badgeId;
+            badge.title = 'Marcada como pregunta rara (enunciado confuso / OCR / gráfico faltante)';
+            badge.className = 'ml-2 bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-200';
+            badge.textContent = '⚠ RARA';
+            const head = card.querySelector('div.flex.items-center.justify-between');
+            if (head && head.firstElementChild) head.firstElementChild.appendChild(badge);
+        }
+    } else if (badge) {
+        badge.remove();
+    }
+
+    if (isFlagged) card.className = "bg-amber-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-amber-400 relative transition-all";
+    else if (isRare) card.className = "bg-rose-50/30 rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-rose-400 relative transition-all";
+    else if (isAnswered) card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-unica-600 relative transition-all";
+    else card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition-all hover:border-slate-300 relative";
+}
+
+function updateGridButton(qId) {
+    const btn = document.getElementById(`grid-btn-${qId}`);
+    if (!btn) return;
+    const isAnswered = !!userAnswers[qId];
+    const isFlagged = flaggedQuestions.has(qId);
+    if (isFlagged) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-amber-400 text-slate-950 shadow-sm border border-amber-500";
+    else if (isAnswered) btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-unica-600 text-white shadow-sm border border-unica-700";
+    else btn.className = "h-8 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200";
+}
+
+function updateStats() {
+    const answered = Object.keys(userAnswers).length;
+    const flagged = flaggedQuestions.size;
+    const rare = rareQuestions.size;
+    const blank = 100 - answered;
+    const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    setText('stat-answered', answered);
+    setText('stat-flagged', flagged);
+    setText('stat-blank', blank);
+    if (document.getElementById('stat-rare')) setText('stat-rare', rare);
+    setText('answered-count-bottom', answered);
+    if (typeof updateCareerProgress === 'function') updateCareerProgress();
+}
+
+function scrollToQuestion(qId) { document.getElementById(`q-card-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function scrollToSection(secId) { document.getElementById(secId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function confirmSubmitExam() {
+    const answered = Object.keys(userAnswers).length;
+    if (answered < 30) {
+        if (!window.confirm(`Solo has respondido ${answered} preguntas de 100. ¿Seguro de finalizar?`)) return;
+    }
+    submitExam();
+    return true;
+}
+
+function submitExam() {
+    if (submitted) return;
+    submitted = true;
+    clearInterval(timerInterval);
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
+
+    let buenas = 0, malas = 0, vacias = 0;
+    questionsDB.forEach(q => {
+        const a = userAnswers[q.id];
+        if (!a) vacias++;
+        else if (a === q.correct) buenas++;
+        else malas++;
+    });
+
+    const puntajeReal = buenas * 1.0 + vacias * (1/16) - malas * (1/3);
+    const notaVigesimal = Math.max(0, puntajeReal / 5);
+    const efectividad = (buenas + malas > 0) ? Math.round((buenas / (buenas + malas)) * 100) : 0;
+
+    document.getElementById('res-score-100').textContent = puntajeReal.toFixed(4);
+    document.getElementById('res-score-20').textContent = `${notaVigesimal.toFixed(2)} / 20`;
+    document.getElementById('res-buenas').textContent = buenas;
+    document.getElementById('res-malas').textContent = malas;
+    document.getElementById('res-vacias').textContent = vacias;
+    document.getElementById('res-efectividad').textContent = `${efectividad}%`;
+
+    const condCard = document.getElementById('res-condition-card');
+    const condText = document.getElementById('res-condition-text');
+    const condSub = document.getElementById('res-condition-sub');
+    const feedbackBox = document.getElementById('res-feedback-box');
+
+    const sel = document.getElementById('career-select');
+    const career = sel ? sel.value : '';
+    const minCorte = career ? CAREERS_MIN[career] : null;
+    const meta = minCorte != null ? minCorte + 1 : 9.0;
+
+    if (notaVigesimal >= meta) {
+        condCard.className = "bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "¡META ALCANZADA!";
+        condText.className = "text-lg font-black text-emerald-700";
+        condSub.textContent = career ? `Superaste ${meta.toFixed(2)}/20 en ${career}` : `Superaste ${meta.toFixed(2)}/20`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-800 mb-1">Excelente ejecución.</div><p>${career ? `Pasarías la nota de corte de <strong>${career}</strong> (mín histórico ${minCorte.toFixed(2)} + 1 de margen).` : 'Has alcanzado el puntaje objetivo.'} Tus <strong>${vacias} preguntas en blanco</strong> te aportaron <strong>+${(vacias/16).toFixed(2)} puntos limpios</strong> sin riesgo de penalización.</p>`;
+    } else if (notaVigesimal >= 6.7) {
+        condCard.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = career ? "EN CORTE (sin margen)" : "ZONA DE CORTE";
+        condText.className = "text-lg font-black text-amber-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20 — te falta ${(meta - notaVigesimal).toFixed(2)}` : "Cerca del umbral mínimo";
+        feedbackBox.innerHTML = `<div class="font-bold text-amber-800 mb-1">Cerca de la meta.</div><p>${career ? `<strong>${career}</strong> requiere ${meta.toFixed(2)}/20. ` : ''}Obtuviste <strong>${puntajeReal.toFixed(2)} puntos</strong>. Tus <strong>${malas} respuestas incorrectas</strong> restaron <strong>-${(malas/3).toFixed(2)} puntos</strong>. Si las dudosas las hubieras dejado en blanco, tu nota habría sido superior.</p>`;
+    } else {
+        condCard.className = "bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center flex flex-col items-center justify-center";
+        condText.textContent = "AJUSTAR FILTRO";
+        condText.className = "text-lg font-black text-rose-700";
+        condSub.textContent = career ? `Meta ${career}: ${meta.toFixed(2)}/20` : "Por debajo del objetivo";
+        feedbackBox.innerHTML = `<div class="font-bold text-rose-800 mb-1">Cuidado con las adivinaciones.</div><p>Tuviste <strong>${malas} errores</strong> que restaron <strong>${(malas/3).toFixed(2)} puntos</strong>. Aplica el Filtro Semáforo: si no descartas 3 opciones, se deja en blanco.</p>`;
+    }
+
+    renderSolucionario();
+    document.getElementById('results-modal').classList.remove('hidden');
+}
+
+function renderSolucionario() {
+    const list = document.getElementById('solucionario-list');
+    list.innerHTML = "";
+    questionsDB.forEach(q => {
+        const userAns = userAnswers[q.id];
+        const isCorrect = userAns === q.correct;
+        const isBlank = !userAns;
+        let badge = isCorrect ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Correcta (+1.00)</span>`
+            : isBlank ? `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">En Blanco (+0.0625)</span>`
+            : `<span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Incorrecta (-0.333)</span>`;
+        const item = document.createElement('div');
+        item.className = "p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2";
+        item.innerHTML = `<div class="flex items-center justify-between"><span class="font-bold text-slate-800">Pregunta ${q.id} (${q.cat})</span>${badge}</div><div class="text-slate-700">${q.text}</div><div class="grid grid-cols-2 gap-2 pt-1 font-mono"><div>Tu respuesta: <strong class="${isCorrect ? 'text-emerald-700' : 'text-rose-600'}">${userAns || 'En Blanco'}</strong></div><div>Clave Oficial: <strong class="text-unica-900">${q.correct}</strong></div></div><div class="bg-white p-2.5 rounded-lg border border-slate-200 text-slate-600 leading-relaxed font-sans mt-2">Solución: ${q.explanation}</div>`;
+        list.appendChild(item);
+    });
+}
+
+function toggleSolucionario() {
+    const c = document.getElementById('solucionario-container');
+    const t = document.getElementById('solucionario-btn-text');
+    if (c.classList.contains('hidden')) { c.classList.remove('hidden'); t.textContent = 'Ocultar Solucionario'; }
+    else { c.classList.add('hidden'); t.textContent = 'Ver Solucionario Paso a Paso'; }
+}
+
+function closeModal() { document.getElementById('results-modal').classList.add('hidden'); }
+
+function downloadBlob(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadRespuestas() {
+    const lines = [
+        'SIMULACRO OFICIAL UNICA N°5 — RESPUESTAS',
+        'Simulacro N°5 · Área C: Ingeniería',
+        'Fecha: ' + new Date().toLocaleString('es-PE'),
+        'Total preguntas: 100',
+        'Puntaje: ' + document.getElementById('res-score-100').textContent + ' / 100',
+        'Nota: ' + document.getElementById('res-score-20').textContent,
+        'Buenas: ' + document.getElementById('res-buenas').textContent +
+        ' | Malas: ' + document.getElementById('res-malas').textContent +
+        ' | En blanco: ' + document.getElementById('res-vacias').textContent,
+        '',
+        '----- RESPUESTAS MARCADAS -----',
+        ''
+    ];
+    for (let i = 1; i <= 100; i++) {
+        const v = userAnswers[i] || '-';
+        lines.push(String(i).padStart(3, '0') + '. ' + v);
+    }
+    downloadBlob('respuestas-unica-2026-4.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+}
+
+let _lastFeedbackHTML = '';
+
+function escTxt(s) {
+    return String(s == null ? '' : s)
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<\/p>/gi, ' ')
+        .replace(/<[^>]+>/g, '');
+}
+
+function escHTML(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function buildFeedbackHTML({ standalone = false } = {}) {
+    const total = questionsDB.length;
+    let buenas = 0, malas = 0, blancas = 0;
+    for (const q of questionsDB) {
+        const v = userAnswers[q.id];
+        if (!v) blancas++;
+        else if (v === q.correct) buenas++;
+        else malas++;
+    }
+    const scoreEl = document.getElementById('res-score-100');
+    const notaEl  = document.getElementById('res-score-20');
+    const condEl  = document.getElementById('res-condition-text');
+    const score = scoreEl ? scoreEl.textContent : '0';
+    const nota  = notaEl  ? notaEl.textContent  : '0';
+    const cond  = condEl  ? condEl.textContent  : '';
+    const sel = document.getElementById('career-select');
+    const career = sel && sel.value ? sel.value : '(sin seleccionar)';
+    const fecha = new Date().toLocaleString('es-PE');
+
+    const secStats = {}, catStats = {};
+    for (const q of questionsDB) {
+        const v = userAnswers[q.id];
+        const ok = v === q.correct, blank = !v;
+        secStats[q.sec] = secStats[q.sec] || { title: q.secTitle, b: 0, m: 0, w: 0, total: 0 };
+        secStats[q.sec].total++;
+        if (blank) secStats[q.sec].w++; else if (ok) secStats[q.sec].b++; else secStats[q.sec].m++;
+
+        const catKey = q.sec + '||' + q.cat;
+        catStats[catKey] = catStats[catKey] || { secTitle: q.secTitle, cat: q.cat, b: 0, m: 0, w: 0, total: 0, errors: [], blanks: [] };
+        catStats[catKey].total++;
+        if (blank) { catStats[catKey].w++; catStats[catKey].blanks.push(q.id); }
+        else if (ok) catStats[catKey].b++;
+        else { catStats[catKey].m++; catStats[catKey].errors.push(q.id); }
+    }
+
+    const catOrder = Object.values(catStats).sort((a, b) => {
+        const ea = a.m / a.total, eb = b.m / b.total;
+        if (eb !== ea) return eb - ea;
+        return (b.w / b.total) - (a.w / a.total);
+    });
+
+    const lost = [], untouched = [];
+    for (const q of questionsDB) {
+        const v = userAnswers[q.id];
+        if (!v) untouched.push(q);
+        else if (v !== q.correct) lost.push(q);
+    }
+
+    const secTableRows = Object.values(secStats).map(s => {
+        const acc = (s.b / s.total) * 100;
+        return `<tr><td>${escHTML(s.title)}</td><td class="num">${s.total}</td><td class="num ok">${s.b}</td><td class="num bad">${s.m}</td><td class="num mute">${s.w}</td><td class="num">${acc.toFixed(1)}%</td></tr>`;
+    }).join('');
+
+    const catTableRows = catOrder.map(c => {
+        const errPct = (c.m / c.total) * 100;
+        const blanksPct = (c.w / c.total) * 100;
+        const cls = (c.m / c.total) > 0.3 ? 'class="hot"' : (c.m / c.total) > 0.1 ? '' : 'class="cold"';
+        return `<tr ${cls}><td>${escHTML(c.cat)}</td><td>${escHTML(c.secTitle)}</td><td class="num">${c.total}</td><td class="num ok">${c.b}</td><td class="num bad">${c.m}</td><td class="num mute">${c.w}</td><td class="num">${errPct.toFixed(1)}% err · ${blanksPct.toFixed(1)}% blanco</td></tr>`;
+    }).join('');
+
+    const lostItems = lost.length ? lost.map(q => {
+        const v = userAnswers[q.id];
+        return `<li><strong>P${q.id}</strong> <span class="tag">${escHTML(q.cat)}</span> <span class="tag sec">${escHTML(q.secTitle)}</span> — respondiste <strong class="bad">${v}</strong>, clave <strong class="ok">${q.correct}</strong>. <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`;
+    }).join('') : '<li><em>No tuviste errores.</em></li>';
+
+    const rareOrdered = [...rareQuestions].sort((a,b)=>a-b);
+    const rareItems = rareOrdered.length ? rareOrdered.map(id => {
+        const q = questionsDB.find(q => q.id === id);
+        if (!q) return '';
+        const v = userAnswers[id];
+        return `<li><strong>P${id}</strong> <span class="tag sec">${escHTML(q.secTitle)}</span> <span class="tag">${escHTML(q.cat)}</span> — ${v ? `respondiste <strong>${v}</strong>, clave <strong class="ok">${q.correct}</strong>.` : '<span class="mute">en blanco.</span>'} <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`;
+    }).join('') : '<li><em>No marcaste ninguna pregunta como rara.</em></li>';
+
+    const blankItems = untouched.length ? untouched.map(q =>
+        `<li><strong>P${q.id}</strong> <span class="tag">${escHTML(q.cat)}</span> <span class="tag sec">${escHTML(q.secTitle)}</span> — en blanco. <em>${escHTML(escTxt(q.text)).slice(0, 220)}…</em></li>`
+    ).join('') : '<li><em>Respondiste todas.</em></li>';
+
+    const studyPlanItems = catOrder.slice(0, 12).map(c => {
+        const err = c.m, blanks = c.w;
+        const pct = ((err + blanks) / c.total) * 100;
+        return `<li><strong>${escHTML(c.cat)}</strong> <span class="tag sec">${escHTML(c.secTitle)}</span> — fallaste ${err}/${c.total}, blanco ${blanks}/${c.total} (≈${pct.toFixed(0)}% a reforzar).</li>`;
+    }).join('');
+
+    const respuestasRows = Array.from({ length: total }, (_, i) => i + 1).map(i => {
+        const v = userAnswers[i];
+        const q = questionsDB.find(q => q.id === i);
+        const ok = v === q.correct;
+        const cls = !v ? 'class="mute"' : (ok ? 'class="ok"' : 'class="bad"');
+        const sym = !v ? '⬜' : (ok ? '✅' : '❌');
+        return `<tr ${cls}><td class="num">${i}</td><td>${v || '—'}</td><td>${q.correct}</td><td>${sym}</td><td>${escHTML(q.cat)}</td></tr>`;
+    }).join('');
+
+    const qBlocks = questionsDB.map(q => {
+        const v = userAnswers[q.id];
+        const status = !v ? 'blank' : (v === q.correct ? 'ok' : 'bad');
+        const statusIcon = !v ? '⬜' : (v === q.correct ? '✅' : '❌');
+        const opts = q.options.map((o, idx) => {
+            const letter = String.fromCharCode(65 + idx);
+            const isCorrect = letter === q.correct;
+            return `<li class="${isCorrect ? 'correct' : ''} ${letter === v && !isCorrect ? 'picked' : ''}"><span class="letter">${letter}</span> ${escHTML(o)}${isCorrect ? ' <span class="ok-mark">✓ clave</span>' : ''}</li>`;
+        }).join('');
+        return `
+        <article class="q ${status}" id="q-${q.id}">
+            <header>
+                <span class="qid">P${q.id}</span>
+                <span class="tag">${escHTML(q.cat)}</span>
+                <span class="tag sec">${escHTML(q.secTitle)}</span>
+                <span class="status">${statusIcon}</span>
+            </header>
+            <p class="enunciado">${escHTML(escTxt(q.text))}</p>
+            <ol class="alternativas">${opts}</ol>
+            <footer>
+                <span>Tu respuesta: <strong class="${status === 'ok' ? 'ok' : (status === 'bad' ? 'bad' : 'mute')}">${v || '— (en blanco)'}</strong></span>
+                <span>Clave oficial: <strong class="ok">${q.correct}</strong></span>
+            </footer>
+        </article>`;
+    }).join('');
+
+    const css = `
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { font: 14px/1.55 system-ui, -apple-system, "Segoe UI", Inter, sans-serif; color: #0f172a; background: #f1f5f9; margin: 0; padding: 24px; }
+    main { max-width: 1080px; margin: 0 auto; }
+    h1 { font-size: 26px; margin: 0 0 8px; letter-spacing: -.02em; }
+    h2 { font-size: 18px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; letter-spacing: -.01em; }
+    h3 { font-size: 15px; margin: 18px 0 6px; }
+    .meta { color: #64748b; font-size: 12px; margin-bottom: 20px; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 10px; margin: 14px 0; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
+    .card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #64748b; }
+    .card .value { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    table { border-collapse: collapse; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    th { background: #f8fafc; font-size: 11px; text-transform: uppercase; color: #475569; letter-spacing: .04em; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    tr.hot td { background: #fef2f2; }
+    tr.cold td { background: #f0fdf4; }
+    .ok { color: #047857; } .bad { color: #b91c1c; } .mute { color: #94a3b8; }
+    ul.fb-list { padding-left: 18px; } ul.fb-list li { margin: 6px 0; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; margin-left: 4px; }
+    .tag.sec { background: #f1f5f9; color: #334155; }
+    .ia-prompt { background: #fff7ed; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 0 12px 12px 0; margin-top: 8px; font-size: 13px; }
+    .q { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin: 16px 0; }
+    .q.ok { border-left: 4px solid #10b981; } .q.bad { border-left: 4px solid #ef4444; } .q.blank { border-left: 4px solid #cbd5e1; }
+    .q header { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .qid { font-weight: 800; background: #0f172a; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+    .q .status { margin-left: auto; font-size: 18px; }
+    .enunciado { margin: 6px 0 10px; }
+    ol.alternativas { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+    ol.alternativas li { padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 13px; }
+    ol.alternativas li.correct { background: #ecfdf5; border-color: #10b981; }
+    ol.alternativas li.picked { background: #fef2f2; border-color: #ef4444; }
+    ol.alternativas .letter { font-weight: 700; color: #475569; margin-right: 6px; font-family: ui-monospace, monospace; }
+    .ok-mark { font-size: 11px; color: #047857; font-weight: 700; }
+    .q footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #475569; border-top: 1px dashed #e2e8f0; padding-top: 8px; }
+    `;
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Simulacro N°5 · UNICA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>${css}</style>
+</head>
+<body>
+<main>
+    <h1>Feedback Simulacro N°5 · UNICA</h1>
+    <div class="meta">Generado el ${escHTML(fecha)} · Carrera objetivo: <strong>${escHTML(career)}</strong></div>
+
+    <div class="summary">
+        <div class="card"><div class="label">Puntaje crudo</div><div class="value">${escHTML(score)} / 100</div></div>
+        <div class="card"><div class="label">Nota vigesimal</div><div class="value">${escHTML(nota)} / 20</div></div>
+        <div class="card"><div class="label">Veredicto</div><div class="value">${escHTML(cond)}</div></div>
+        <div class="card"><div class="label">Buenas / Malas / Blanco</div><div class="value"><span class="ok">${buenas}</span> · <span class="bad">${malas}</span> · <span class="mute">${blancas}</span></div></div>
+    </div>
+
+    <div class="ia-prompt"><strong>Fórmula UNICA</strong>: Puntaje = B + M/3·(−1) + V/16. Cada error resta lo mismo que ~5 vacías te aportan; si no descartas 3 opciones, deja en blanco.</div>
+
+    <h2>1) Rendimiento por bloque del examen</h2>
+    <table><thead><tr><th>Bloque</th><th class="num">Total</th><th class="num">✅</th><th class="num">❌</th><th class="num">⬜</th><th class="num">Aciertos</th></tr></thead><tbody>${secTableRows}</tbody></table>
+
+    <h2>2) Rendimiento por tema (ordenado por % de error)</h2>
+    <table><thead><tr><th>Tema</th><th>Sección</th><th class="num">Total</th><th class="num">✅</th><th class="num">❌</th><th class="num">⬜</th><th class="num">% (err · blanco)</th></tr></thead><tbody>${catTableRows}</tbody></table>
+
+    <h2>3) ¿Dónde te equivocaste? (${lost.length} fallos)</h2>
+    <ul class="fb-list">${lostItems}</ul>
+
+    <h2>4) ¿Dónde ni siquiera respondiste? (${untouched.length} en blanco)</h2>
+    <ul class="fb-list">${blankItems}</ul>
+
+    <h2>5) Plan de estudio sugerido (priorizado)</h2>
+    <ul class="fb-list">${studyPlanItems}</ul>
+
+    <h2>6) Mis respuestas vs clave (resumen)</h2>
+    <table><thead><tr><th class="num">#</th><th>Mi respuesta</th><th>Clave</th><th>Resultado</th><th>Tema</th></tr></thead><tbody>${respuestasRows}</tbody></table>
+
+    <h2>7) Examen completo (texto · alternativas · clave)</h2>
+    ${qBlocks}
+
+    <h2>8) Preguntas marcadas como "raras" (${rareOrdered.length})</h2>
+    <p>Preguntas que el postulante señaló como confusas, mal transcritas, con gráfico faltante o símbolos raros:</p>
+    <ul class="fb-list">${rareItems}</ul>
+
+    <div class="ia-prompt">
+        <strong>Indicaciones para la IA</strong><br>
+        Eres mi tutor del examen UNICA (Simulacro N°5, Área C: Ingeniería). Con este HTML:
+        <ol>
+            <li><strong>Diagnostica mis brechas</strong>: explica por qué fallé cada pregunta de la sección 3 y por qué dejé en blanco cada una de la sección 4 (qué concepto me faltaba).</li>
+            <li><strong>Plan de estudio semanal</strong>: usa la sección 2 y 5 para proponerme un cronograma de 2 semanas con teoría + práctica por tema.</li>
+            <li><strong>Microlecciones</strong>: por cada tema con ≥ 30% de error, explícame con un ejemplo resuelto paso a paso al estilo PRE-UNICA.</li>
+            <li><strong>Estrategia de examen</strong>: confirma si estoy aplicando bien el filtro semáforo (B +1 / M −0.333 / V +0.0625) y cuántas preguntas adicionales pasaría si convierto todas mis malas en blanco.</li>
+            <li><strong>Carrera objetivo</strong>: soy postulante a <strong>${escHTML(career)}</strong>. Adapta las recomendaciones al perfil de esta carrera.</li>
+            <li><strong>Preguntas raras</strong>: revisa la sección 8. Por cada pregunta marcada como rara: (a) reescríbela con notación LaTeX/Unicode correcta, (b) si falta gráfico, propón cómo se vería y la información que transmitiría, (c) si los datos/alternativas son insuficientes, sugiere la corrección basándote en el patrón del banco. Devuélveme la versión corregida y un JSON por pregunta con <code>{id, fix_md, missing_figure, alternatives_fixed}</code>.</li>
+        </ol>
+        Por favor responde en español, con foco en acción concreta, no en discurso motivacional.
+    </div>
+</main>
+</body>
+</html>`;
+}
+
+function downloadCurrentFeedback() {
+    if (!_lastFeedbackHTML) return;
+    downloadBlob('feedback-unica-ccc52.html', _lastFeedbackHTML, 'text/html;charset=utf-8');
+}
+
+function copyFeedbackHTML() {
+    if (!_lastFeedbackHTML) return;
+    const btn = document.getElementById('feedback-copy-btn');
+    const fallback = () => {
+        const ta = document.createElement('textarea');
+        ta.value = _lastFeedbackHTML;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); }
+        finally { ta.remove(); }
+    };
+    const ok = () => {
+        if (btn) { const t = btn.querySelector('span'); const prev = t.textContent; t.textContent = '¡Copiado!'; setTimeout(() => t.textContent = prev, 1500); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(_lastFeedbackHTML).then(ok, () => { fallback(); ok(); });
+    } else { fallback(); ok(); }
+}
+
+function openFeedbackPreview() {
+    _lastFeedbackHTML = buildFeedbackHTML();
+    const box = document.getElementById('feedback-preview');
+    if (box) {
+        box.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'width:100%;height:70vh;border:0;border-radius:12px;background:#fff;';
+        iframe.setAttribute('sandbox', 'allow-same-origin');
+        box.appendChild(iframe);
+        const idoc = iframe.contentDocument || iframe.contentWindow.document;
+        idoc.open(); idoc.write(_lastFeedbackHTML); idoc.close();
+    }
+    document.getElementById('feedback-modal').classList.remove('hidden');
+}
+
+function closeFeedbackModal() { document.getElementById('feedback-modal').classList.add('hidden'); }
+
+function openTimerModal() {
+    if (submitted) return;
+    let m = document.getElementById('timer-modal');
+    if (m) { m.classList.remove('hidden'); return; }
+    m = document.createElement('div');
+    m.id = 'timer-modal';
+    m.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4';
+    m.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-sm w-full p-6 text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Reiniciar temporizador</h3>
+            <p class="text-sm text-slate-500 mb-5">Esto pone el contador a 03:00:00 y borra todas tus respuestas y marcas. Si solo querés seguir donde quedaste, presiona Cancelar.</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('timer-modal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancelar</button>
+                <button type="button" onclick="resetTimer()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition-colors">Sí, reiniciar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(m);
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.add('hidden'); });
+}
+
+function resetTimer() {
+    try { localStorage.removeItem(TIMER_KEY); } catch {}
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    userAnswers = {};
+    flaggedQuestions = new Set();
+    rareQuestions = new Set();
+    location.reload();
+}
+</script>
+</body>
+</html>
